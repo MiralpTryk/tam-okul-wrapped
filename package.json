@@ -5,7 +5,9 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.5.2",
@@ -47,6 +49,7 @@
     "@vue/cli-service": "~5.0.0",
     "eslint": "8.57.0",
     "eslint-plugin-vue": "^9.31.0",
+    "gh-pages": "^6.2.0",
     "vue-cli-plugin-tailwind": "~3.0.0"
   },
   "eslintConfig": {
@@ -70,5 +73,6 @@
     "last 2 versions",
     "not dead",
     "not ie 11"
-  ]
+  ],
+  "homepage": "https://MiralpTryk.github.io/tam-okul-wrapped"
 }
