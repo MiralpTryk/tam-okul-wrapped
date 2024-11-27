@@ -1,0 +1,74 @@
+{
+  "name": "tam-okul-wrapped",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.5.2",
+    "@primevue/themes": "4.0.3",
+    "@vueuse/core": "^11.1.0",
+    "autoprefixer": "^10",
+    "axios": "^1.7.4",
+    "core-js": "^3.8.3",
+    "datatables.net": "^2.1.2",
+    "datatables.net-dt": "^2.1.2",
+    "datatables.net-fixedcolumns": "^5.0.0",
+    "datatables.net-vue3": "^3.0.2",
+    "echarts": "^5.5.1",
+    "fabric": "5.3.0",
+    "jquery": "^3.7.1",
+    "lucide-vue-next": "^0.461.0",
+    "postcss": "^8",
+    "primeflex": "^3.3.1",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.0.3",
+    "tailwind": "^4.0.0",
+    "tailwindcss": "^3",
+    "vue": "^3.2.13",
+    "vue-draggable-next": "^2.2.1",
+    "vue-router": "^4.0.3",
+    "vue-sweetalert2": "^5.0.11",
+    "vue3-carousel": "^0.3.3",
+    "vuedraggable": "^2.24.3",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@primevue/nuxt-module": "^4.0.3",
+    "@types/fabric": "^5.3.7",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "eslint": "8.57.0",
+    "eslint-plugin-vue": "^9.31.0",
+    "vue-cli-plugin-tailwind": "~3.0.0"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {
+      "vue/multi-word-component-names": 0
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
+}
