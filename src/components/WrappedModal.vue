@@ -34,7 +34,7 @@
                     v-if="currentSlide === 0"
                     class="text-3xl sm:text-5xl md:text-6xl font-bold text-center mb-6 sm:mb-12"
                   >
-                    Öğrenme Yolculuğun 2023
+                    Öğrenme Yolculuğun {{ new Date().getFullYear() }}
                   </h2>
 
                   <!-- Slide 1: Intro -->
@@ -334,7 +334,7 @@
             <button
               @click="rewindPresentation"
               v-if="currentSlide === totalSlides - 1"
-              class="px-6 sm:px-10 py-2 sm:py-4 rounded-full text-base sm:text-xl font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 flex items-center"
+              class="px-4 sm:px-8 py-2 sm:py-4 rounded-full text-base sm:text-xl font-semibold transition-all duration-300 active:scale-95 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 flex items-center"
             >
               <RefreshCwIcon class="w-5 h-5 mr-2" />
               Yeniden Başlat
@@ -342,13 +342,13 @@
             <button
               @click="prevSlide"
               :disabled="currentSlide === 0"
-              class="px-6 sm:px-10 py-2 sm:py-4 rounded-full text-base sm:text-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20"
+              class="px-4 sm:px-8 py-2 sm:py-4 rounded-full text-base sm:text-xl font-semibold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20"
             >
-              Önceki
+              Geri
             </button>
             <button
               @click="nextSlide"
-              class="px-6 sm:px-10 py-2 sm:py-4 rounded-full text-base sm:text-xl font-semibold transition-all duration-300 bg-white text-purple-600 hover:bg-gray-100"
+              class="px-4 sm:px-8 py-2 sm:py-4 rounded-full text-base sm:text-xl font-semibold transition-all duration-300 active:scale-95 bg-white text-purple-600 hover:bg-gray-200"
             >
               {{ buttonText }}
             </button>
@@ -399,7 +399,7 @@ const achievements = [
 const achievementEmojis = ["🏆", "🔥", "🧙‍♂️", "🚀", "🤝"];
 
 const buttonText = computed(() =>
-  currentSlide.value === totalSlides - 1 ? "Son" : "Sonraki"
+  currentSlide.value === totalSlides - 1 ? "Son" : "İleri"
 );
 
 const visibleSubjects = ref([]);

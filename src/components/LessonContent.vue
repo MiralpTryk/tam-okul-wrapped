@@ -7,17 +7,13 @@
           </div>
         </div>
       </div>
-      <div class="w-full md:w-1/3 p-6 overflow-y-auto max-h-[calc(100vh-56.25vw-4rem)] md:max-h-[calc(100vh-2rem)]">
+      <div class="w-full md:w-1/3 p-6 overflow-y-auto max-h-[calc(100vh-56.25vw-4rem)] md:max-h-[calc(100vh-14rem)]">
         <h1 class="text-2xl font-bold mb-2">{{ lesson.title }}</h1>
         <p class="text-sm text-gray-400 mb-4">{{ lesson.channelName }}</p>
         
         <div class="mb-6">
           <div class="text-gray-300 space-y-4" v-html="lesson.content"></div>
         </div>
-        
-        <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full">
-          Dersi Tamamla
-        </button>
       </div>
     </div>
     </template>
