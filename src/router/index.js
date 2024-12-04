@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from "vue-router";
-import LoginView from "@/views/LoginView.vue";
+/* import LoginView from "@/views/LoginView.vue";
 import QuestionView from "@/views/QuestionView.vue";
 import RecordView from "@/views/RecordView.vue";
 import StudentDashboardView from "@/views/StudentDashboardView.vue";
@@ -10,12 +10,12 @@ import StudentMessagesView from "@/views/StudentMessagesView.vue";
 import StudentQuestionDetails from "@/components/StudentQuestionDetails.vue";
 import StudentTrialsView from "@/views/StudentTrialsView.vue";
 import StudentTrialDetailsView from "@/views/StudentTrialDetailsView.vue";
-import SimpleTestView from "@/views/SimpleTestView.vue";
+import SimpleTestView from "@/views/SimpleTestView.vue"; */
 import WrappedView from "@/views/WrappedView.vue";
 import OpticFormView from "@/views/OpticFormView.vue";
 import AnalysisView from "@/views/AnalysisView.vue";
 const routes = [
-  {
+  /* {
     path: "/",
     name: "student-dashboard",
     component: StudentDashboardView,
@@ -79,9 +79,9 @@ const routes = [
     name: "StudentTrialDetails",
     component: StudentTrialDetailsView,
     props: true,
-  },
+  }, */
   {
-    path: "/wrapped",
+    path: "/",
     name: "Wrapped",
     component: WrappedView,
   },
