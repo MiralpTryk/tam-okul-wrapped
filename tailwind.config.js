@@ -161,6 +161,9 @@ module.exports = {
         wobble: "wobble 1s infinite",
         jello: "jello 2s infinite",
       },
+      screens: {
+        '2xl': '1920px',
+      },
     },
   },
   plugins: [],

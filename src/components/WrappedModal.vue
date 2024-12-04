@@ -9,7 +9,7 @@
         @click="closeModal"
       ></div>
       <div
-        class="relative bg-gradient-to-br from-slate-900 to-violet-600 w-full h-full overflow-hidden"
+        class="relative bg-gradient-to-br from-black via-zinc-900 to-red-900 w-full h-full overflow-hidden"
       >
         <div class="emoji-pattern"></div>
         <button
@@ -312,15 +312,30 @@
                   </div>
 
                   <!-- Slide 15: Conclusion -->
-                  <div v-if="currentSlide === 14" class="text-center">
+                  <div v-if="currentSlide === 14" class="text-center h-64">
                     <h3
                       class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8"
                     >
                       Harika bir öğrenme yılı için tebrikler!
                     </h3>
-                    <p class="text-lg sm:text-xl md:text-2xl">
+
+                    <p class="text-lg sm:text-xl md:text-2xl mt-4">
                       2024'te de harika işler yapmaya devam et!
                     </p>
+                  </div>
+
+                  <!-- Slide 16: Share -->
+                  <div v-if="currentSlide === 15" class="text-center">
+                    <div class="transform scale-[0.8]">
+                      <WrappedStatsCard
+                        class="wrapped-stats-card"
+                        :rank="`İlk %${100 - percentageAboveAverage}`"
+                        :longestStreak="longestStreak"
+                        :totalAnswers="totalQuestions"
+                        :minutesSpent="totalStudyHours * 60"
+                        :userName="name"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -329,26 +344,34 @@
 
           <!-- Navigation Buttons -->
           <div
-            class="relative z-50 p-4 sm:p-8 flex justify-center gap-4 sm:gap-6 bg-gradient-to-t from-black/20"
+            class="relative z-[55] p-4 flex justify-center gap-2 sm:gap-4 bg-gradient-to-t from-black/20"
           >
             <button
-              @click="rewindPresentation"
               v-if="currentSlide === totalSlides - 1"
-              class="px-4 sm:px-8 py-2 sm:py-4 rounded-full text-base sm:text-xl font-semibold transition-all duration-300 active:scale-95 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 flex items-center"
+              @click="rewindPresentation"
+              class="px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 flex items-center"
             >
-              <RefreshCwIcon class="w-5 h-5 mr-2" />
+              <RefreshCwIcon class="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
               Yeniden Başlat
+            </button>
+            <button
+              v-if="currentSlide === totalSlides - 1"
+              @click="handleShare"
+              class="px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 flex items-center"
+            >
+              <Share2Icon class="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
+              İstatistikleri Paylaş
             </button>
             <button
               @click="prevSlide"
               :disabled="currentSlide === 0"
-              class="px-4 sm:px-8 py-2 sm:py-4 rounded-full text-base sm:text-xl font-semibold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20"
+              class="px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-base font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20"
             >
               Geri
             </button>
             <button
               @click="nextSlide"
-              class="px-4 sm:px-8 py-2 sm:py-4 rounded-full text-base sm:text-xl font-semibold transition-all duration-300 active:scale-95 bg-white text-purple-600 hover:bg-gray-200"
+              class="px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-base font-semibold transition-all duration-300 bg-white text-red-600 hover:bg-gray-200"
             >
               {{ buttonText }}
             </button>
@@ -362,7 +385,9 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import Celebration from "@/components/Celebration.vue";
-import { RefreshCwIcon } from "lucide-vue-next";
+import WrappedStatsCard from "@/components/WrappedStatsCard.vue";
+import domtoimage from 'dom-to-image';
+import { RefreshCwIcon, Share2Icon } from "lucide-vue-next";
 
 const props = defineProps({
   show: Boolean,
@@ -371,9 +396,10 @@ const props = defineProps({
 const emit = defineEmits(["close"]);
 
 const currentSlide = ref(0);
-const totalSlides = 15;
+const totalSlides = 16;
 const transitionName = ref("slide-right");
 
+const longestStreak = ref(10);
 const name = ref("Miralp");
 
 const totalQuestions = 1384;
@@ -527,6 +553,75 @@ const resetAllStates = () => {
   subjectsOpacity.value = 0;
   topSubjectRevealed.value = false;
   showCelebration.value = false;
+};
+
+const handleShare = async () => {
+  try {
+    const card = document.querySelector('.wrapped-stats-card');
+    const originalTransform = card.style.transform;
+    
+    await document.fonts.ready;
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    card.style.transform = 'none';
+
+    const dataUrl = await domtoimage.toPng(card, {
+      quality: 1.0,
+      height: card.offsetHeight,
+      width: card.offsetWidth,
+      style: {
+        transform: 'none',
+        margin: '0',
+        padding: '0'
+      },
+      bgcolor: 'rgba(0,0,0,0)',
+      fontEmbedCss: true,
+      imagePlaceholder: undefined,
+      cacheBust: true,
+      filter: (node) => {
+        if (node.nodeType === 1) {
+          return node.classList?.contains('wrapped-stats-card') || 
+                 (node.closest && node.closest('.wrapped-stats-card'));
+        }
+        return true;
+      }
+    });
+
+    card.style.transform = originalTransform;
+
+    if (navigator.canShare && navigator.canShare({ files: [new File([], 'test.png')] })) {
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      
+      const file = new File([blob], "2023-degerlendirmesi.png", {
+        type: "image/png",
+      });
+      
+      try {
+        await navigator.share({
+          files: [file],
+          title: "2023 Yılı Değerlendirmesi",
+          text: "2023 yılındaki öğrenme istatistiklerime göz atın!",
+        });
+      } catch (shareError) {
+        console.error("Paylaşım hatası:", shareError);
+        downloadImage(dataUrl);
+      }
+    } else {
+      downloadImage(dataUrl);
+    }
+  } catch (error) {
+    console.error("Görüntü oluşturma hatası:", error);
+  }
+};
+
+const downloadImage = (dataUrl) => {
+  const link = document.createElement("a");
+  link.href = dataUrl;
+  link.download = "2023-degerlendirmesi.png";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
 watch(

@@ -2,7 +2,10 @@
   <div class="bg-black text-white min-h-screen">
     <!-- Header -->
     <header
-      class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black to-transparent"
+      :class="[
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+        isScrolled ? 'bg-black/50 backdrop-blur-sm' : 'bg-gradient-to-b from-black to-transparent'
+      ]"
     >
       <nav
         class="container mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-8"
@@ -13,9 +16,11 @@
           class="h-8"
         />
         <div class="flex items-center space-x-4">
-          <button class="bg-red-600 text-white px-4 py-2 rounded">
-            Optik İşaretle
-          </button>
+          <RouterLink to="/optic-form">
+            <button class="bg-red-600 text-white px-3 py-1.5">
+              Optik İşaretle
+            </button>
+          </RouterLink>
         </div>
       </nav>
     </header>
@@ -49,11 +54,11 @@
         <div>
           <div class="relative inline-flex group">
             <div
-              class="absolute transitiona-all duration-300 opacity-70 -inset-px bg-gradient-to-r from-red-500 to-red-700 rounded-lg blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 animate-tilt"
+              class="absolute transition-all duration-300 opacity-70 -inset-px bg-gradient-to-r from-red-500 to-red-700 rounded-lg blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-100"
             ></div>
             <button
               @click="openModal"
-              class="relative inline-flex items-center justify-center px-4 py-2 text-lg font-bold text-white transition-all duration-200 bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 hover:scale-105 active:scale-95"
+              class="relative inline-flex items-center justify-center px-4 py-2 text-lg text-white transition-all bg-red-600 focus:ring-red-500 active:scale-95"
               role="button"
             >
               <Play class="w-6 h-6 mr-2 fill-white" /> Öğrenme Yolculuğun
@@ -104,7 +109,7 @@
             v-for="item in section.items"
             :key="item.id"
             class="flex-shrink-0 w-64 sm:w-72 relative group cursor-pointer"
-            @click="openContentModal(item, section.type)"
+            @click="openContentModal(item, section.type, $event)"
           >
             <img
               v-if="section.type !== 'quote'"
@@ -115,7 +120,15 @@
             />
             <div
               v-if="section.type === 'quote'"
-              class="w-full h-40 bg-gradient-to-br from-purple-500 to-pink-500 rounded-md flex items-center justify-center p-4 relative overflow-hidden transition-transform duration-300"
+              class="w-full h-40 rounded-md flex items-center justify-center p-4 relative overflow-hidden transition-transform duration-300"
+              :style="{
+                backgroundImage: `url(${item.thumbnail.replace(
+                  '.mp4',
+                  '.jpg'
+                )})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }"
             >
               <div class="absolute inset-0 bg-black bg-opacity-30"></div>
               <div
@@ -155,7 +168,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-3 px-4 sm:px-6 lg:px-8">
+    <footer class="bg-zinc-900 text-zinc-400 py-3 px-4 sm:px-6 lg:px-8">
       <div class="container mx-auto">
         <p class="text-center text-sm">
           &copy; {{ new Date().getFullYear() }} Tam Okul. Tüm hakları saklıdır.
@@ -277,9 +290,54 @@ const movieImages = [
   "https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&h=450&q=80",
 ];
 
+const backgroundImages = [
+  'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05',
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e',
+  'https://images.unsplash.com/photo-1472214103451-9374bd1c798e',
+  'https://images.unsplash.com/photo-1469474968028-56623f02e42e',
+  'https://images.unsplash.com/photo-1426604966848-d7adac402bff',
+  'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d',
+  'https://images.unsplash.com/photo-1433086966358-54859d0ed716',
+  'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07',
+  'https://images.unsplash.com/photo-1439853949127-fa647821eba0',
+  'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1',
+  'https://images.unsplash.com/photo-1468276311594-df7cb65d8df6',
+  'https://images.unsplash.com/photo-1431794062232-2a99a5431c6c',
+  'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8',
+  'https://images.unsplash.com/photo-1501854140801-50d01698950b',
+  'https://images.unsplash.com/photo-1441716844725-09cedc13a4e7',
+  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b',
+  'https://images.unsplash.com/photo-1459213599465-03ab6a4d5931',
+  'https://images.unsplash.com/photo-1455156218388-5e61b526818b',
+  'https://images.unsplash.com/photo-1495312040802-a929cd14a6ab',
+  'https://images.unsplash.com/photo-1505765050516-f72dcac9c60e',
+  'https://images.unsplash.com/photo-1473773508845-188df298d2d1',
+  'https://images.unsplash.com/photo-1444464666168-49d633b86797',
+  'https://images.unsplash.com/photo-1535463731090-e34f4b5098c5',
+  'https://images.unsplash.com/photo-1495107334309-fcf20504a5ab',
+  'https://images.unsplash.com/photo-1439226091259-5d991a17d364',
+  'https://images.unsplash.com/photo-1434725039720-aaad6dd32dfe',
+  'https://images.unsplash.com/photo-1437482078695-73f5ca6c96e2',
+  'https://images.unsplash.com/photo-1452441205368-43c32531450a',
+  'https://images.unsplash.com/photo-1498429089284-41f8cf3ffd39',
+  'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429',
+  'https://images.unsplash.com/photo-1470770903676-69b98201ea1c',
+  'https://images.unsplash.com/photo-1497436072909-60f360e1d4b1',
+  'https://images.unsplash.com/photo-1493246507139-91e8fad9978e',
+  'https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e',
+  'https://images.unsplash.com/photo-1504567961542-e24d9439a724',
+  'https://images.unsplash.com/photo-1502082553048-f009c37129b9',
+  'https://images.unsplash.com/photo-1505028106030-e07ea1bd80c3',
+  'https://images.unsplash.com/photo-1499363536502-87642509e31b',
+  'https://images.unsplash.com/photo-1518021964703-4b2030f03085',
+  'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86'
+];
+
 const scrollContainers = ref([]);
 const isDragging = ref(false);
 const startX = ref(0);
+const startY = ref(0);
+const isDragged = ref(false);
 const scrollLeft = ref(0);
 const momentum = ref({ velocity: 0, timestamp: 0 });
 const animationFrame = ref(null);
@@ -409,14 +467,15 @@ const generateItems = (count, prefix, type = "video") => {
       };
     });
   } else if (type === "quote") {
-    return motivationalQuotes.slice(0, count).map((quote, i) => ({
-      id: `${prefix}-${i + 1}`,
-      subtitle: quote.author,
-      quote: quote.text,
-      author: quote.author,
-      type: "quote",
-    }));
-  }
+  return motivationalQuotes.slice(0, count).map((quote, i) => ({
+    id: `${prefix}-${i + 1}`,
+    subtitle: quote.author,
+    quote: quote.text,
+    author: quote.author,
+    type: "quote",
+    thumbnail: `${backgroundImages[i % backgroundImages.length]}?auto=format&fit=crop&w=800&q=80`,
+  }));
+}
 
   return Array.from({ length: count }, (_, i) => ({
     id: `${prefix}-${i + 1}`,
@@ -584,7 +643,8 @@ const generateStories = (count) => {
       id: 1,
       title: "Azimle Başarıya Ulaşan Öğrenci",
       subtitle: "Matematik Olimpiyat Şampiyonu",
-      image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=800&auto=format&fit=crop&q=60",
+      image:
+        "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=800&auto=format&fit=crop&q=60",
       content: `Mehmet, lise yıllarında matematik dersinde zorlanıyordu. Ancak vazgeçmek yerine, her gün düzenli olarak 2 saat matematik çalışmaya başladı. Öğretmenlerinden ek destek aldı ve online kaynaklardan faydalandı.
 
       Sistemli çalışması sonuç verdi ve önce sınıfının en başarılı matematik öğrencisi oldu. Ardından katıldığı matematik olimpiyatlarında Türkiye derecesi elde etti.
@@ -599,7 +659,8 @@ const generateStories = (count) => {
       id: 2,
       title: "Yabancı Dil Başarısı",
       subtitle: "Cambridge C2 Seviyesi",
-      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=60",
+      image:
+        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=60",
       content: `Ayşe, İngilizce öğrenmeye ortaokulda başladı. İlk başta kendini ifade etmekte zorlanıyordu. Ancak her gün İngilizce diziler izlemeye, podcast dinlemeye ve yabancı arkadaşlarıyla pratik yapmaya başladı.
 
       8 ay boyunca düzenli çalışması sonucunda Cambridge sınavında en yüksek seviye olan C2'yi elde etti. Şimdi bir teknoloji şirketinde tercüman olarak çalışıyor.
@@ -614,7 +675,8 @@ const generateStories = (count) => {
       id: 3,
       title: "Spor ve Eğitim Dengesi",
       subtitle: "Milli Yüzücü ve Başarılı Öğrenci",
-      image: "https://images.unsplash.com/photo-1521493959102-bdd6677fdd81?w=800&auto=format&fit=crop&q=60",
+      image:
+        "https://images.unsplash.com/photo-1521493959102-bdd6677fdd81?w=800&auto=format&fit=crop&q=60",
       content: `Ali, hem profesyonel yüzücü hem de başarılı bir öğrenci. Her sabah 05:00'te kalkıp antrenman yapıyor, ardından okula gidiyor. Akşamları ise derslerine çalışıyor.
 
       Bu disiplinli yaşam tarzı sayesinde hem ulusal yüzme yarışmalarında madalyalar kazandı hem de okulunda takdir belgesi almayı başardı.
@@ -629,7 +691,8 @@ const generateStories = (count) => {
       id: 4,
       title: "Kodlama Tutkusu",
       subtitle: "Genç Yazılımcı",
-      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop&q=60",
+      image:
+        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop&q=60",
       content: `Zeynep, lise ikinci sınıfta kodlamaya ilgi duymaya başladı. Online kurslar ve YouTube videoları ile self-learning yaparak Python ve JavaScript öğrendi.
 
       Bir yıl içinde kendi mobil uygulamasını geliştirdi ve App Store'da yayınladı. Şimdi üniversite eğitimine devam ederken, part-time olarak yazılım şirketinde çalışıyor.
@@ -644,7 +707,8 @@ const generateStories = (count) => {
       id: 5,
       title: "Sanat ve Bilim Bir Arada",
       subtitle: "Ressam ve Tıp Öğrencisi",
-      image: "https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?w=800&auto=format&fit=crop&q=60",
+      image:
+        "https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?w=800&auto=format&fit=crop&q=60",
       content: `Deniz, hem tıp fakültesinde okuyor hem de profesyonel resim yapıyor. Anatomi bilgisini resimlerine yansıtarak özgün eserler ortaya çıkarıyor.
 
       Geçen yıl ilk kişisel sergisini açtı ve aynı zamanda tıp fakültesinde dönem birincisi oldu. Sanatın, tıp eğitiminde ona farklı bir bakış açısı kazandırdığını söylüyor.
@@ -654,12 +718,12 @@ const generateStories = (count) => {
       • Pomodoro tekniği kullanımı
       • Sanat ve tıbbı birleştiren projeler
       • Stres yönetimi için sanat terapisi`,
-    }
+    },
   ];
 
-  return stories.slice(0, count).map(story => ({
+  return stories.slice(0, count).map((story) => ({
     ...story,
-    type: "story"
+    type: "story",
   }));
 };
 
@@ -1291,8 +1355,9 @@ const startDrag = (e) => {
   if (e.type.includes("mouse")) {
     isDragging.value = true;
     startX.value = e.clientX;
+    startY.value = e.clientY;
+    isDragged.value = false;
   } else {
-    // Touch event için yeni mantık
     touchStartX.value = e.touches[0].clientX;
     touchStartY.value = e.touches[0].clientY;
   }
@@ -1306,10 +1371,17 @@ const drag = (e) => {
     if (!isDragging.value) return;
     e.preventDefault();
     const x = e.clientX;
+    const y = e.clientY;
+
+    // Eğer belirli bir eşik değerinden fazla hareket varsa sürükleme olarak işaretle
+    if (Math.abs(x - startX.value) > 5 || Math.abs(y - startY.value) > 5) {
+      isDragged.value = true;
+    }
+
     const walk = (x - startX.value) * 2;
     e.currentTarget.scrollLeft = scrollLeft.value - walk;
   } else {
-    // Touch event için yeni mantık
+
     const touchX = e.touches[0].clientX;
     const touchY = e.touches[0].clientY;
     const deltaX = touchStartX.value - touchX;
@@ -1358,6 +1430,11 @@ const closeModal = () => {
 };
 
 const openContentModal = (item, sectionType) => {
+  // Eğer sürükleme yapıldıysa modal açılmasını engelle
+  if (isDragged.value) {
+    return;
+  }
+
   if (sectionType === "video") {
     selectedLesson.value = {
       title: item.title,
@@ -1396,6 +1473,21 @@ const openContentModal = (item, sectionType) => {
 
 const closeContentModal = () => {
   showContentModal.value = false;
+};
+
+const isScrolled = ref(false);
+
+// Add scroll event listener
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
+
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 70; // 50px scroll threshold
 };
 
 onMounted(() => {
@@ -1472,5 +1564,9 @@ img {
 }
 .animate-tilt {
   animation: tilt 10s infinite linear;
+}
+
+header {
+  transition: background-color 1s ease;
 }
 </style>

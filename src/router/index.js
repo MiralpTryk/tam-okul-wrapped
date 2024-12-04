@@ -12,7 +12,8 @@ import StudentTrialsView from "@/views/StudentTrialsView.vue";
 import StudentTrialDetailsView from "@/views/StudentTrialDetailsView.vue";
 import SimpleTestView from "@/views/SimpleTestView.vue";
 import WrappedView from "@/views/WrappedView.vue";
-
+import OpticFormView from "@/views/OpticFormView.vue";
+import AnalysisView from "@/views/AnalysisView.vue";
 const routes = [
   {
     path: "/",
@@ -83,6 +84,16 @@ const routes = [
     path: "/wrapped",
     name: "Wrapped",
     component: WrappedView,
+  },
+  {
+    path: "/optic-form",
+    name: "OpticForm",
+    component: OpticFormView,
+  },
+  {
+    path: "/analysis",
+    name: "Analysis",
+    component: AnalysisView,
   },
 ];
 
