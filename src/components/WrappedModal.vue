@@ -326,10 +326,10 @@
 
                   <!-- Slide 16: Share -->
                   <div v-if="currentSlide === 15" class="text-center">
-                    <div class="transform scale-[0.8]">
+                    <div>
                       <WrappedStatsCard
                         class="wrapped-stats-card"
-                        :rank="`İlk %${100 - percentageAboveAverage}`"
+                        :rank="`İlk %${percentageAboveAverage}`"
                         :longestStreak="longestStreak"
                         :totalAnswers="totalQuestions"
                         :minutesSpent="totalStudyHours * 60"
@@ -558,15 +558,29 @@ const resetAllStates = () => {
 const handleShare = async () => {
   try {
     const card = document.querySelector('.wrapped-stats-card');
-    const originalTransform = card.style.transform;
-    
-    await document.fonts.ready;
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    card.style.transform = 'none';
 
+    // Check if the device is mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    // Increase delay for mobile devices
+    const delay = isMobile ? 2000 : 1000;
+
+    // Ensure all images are loaded
+    const images = card.getElementsByTagName('img');
+    await Promise.all([...images].map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+    }));
+
+    // Additional delay for safety
+    await new Promise(resolve => setTimeout(resolve, delay));
+
+    // Capture the image with additional options
     const dataUrl = await domtoimage.toPng(card, {
-      quality: 1.0,
+      quality: 1,
       height: card.offsetHeight,
       width: card.offsetWidth,
       style: {
@@ -584,10 +598,12 @@ const handleShare = async () => {
                  (node.closest && node.closest('.wrapped-stats-card'));
         }
         return true;
-      }
+      },
+      // Force image loading
+      skipFonts: false,
+      useCredentials: true,
+      allowTaint: true,
     });
-
-    card.style.transform = originalTransform;
 
     if (navigator.canShare && navigator.canShare({ files: [new File([], 'test.png')] })) {
       const response = await fetch(dataUrl);
@@ -716,10 +732,10 @@ watch(
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.3;
+  opacity: 0.2;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E📚%3C/text%3E%3Ctext x='25%25' y='25%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🎓%3C/text%3E%3Ctext x='75%25' y='25%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E✏️%3C/text%3E%3Ctext x='25%25' y='75%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🧠%3C/text%3E%3Ctext x='75%25' y='75%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🔬%3C/text%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='18%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E📚%3C/text%3E%3Ctext x='0%25' y='20%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🎓%3C/text%3E%3Ctext x='100%25' y='20%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🎓%3C/text%3E%3Ctext x='25%25' y='50%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E✏️%3C/text%3E%3Ctext x='75%25' y='50%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🔖%3C/text%3E%3Ctext x='0%25' y='80%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🧠%3C/text%3E%3Ctext x='100%25' y='80%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🧠%3C/text%3E%3Ctext x='50%25' y='80%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🔬%3C/text%3E%3C/svg%3E");
   background-repeat: repeat;
-  background-size: 200px 200px;
+  background-size: 300px 300px;
 }
 </style>

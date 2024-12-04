@@ -8,7 +8,7 @@
       ]"
     >
       <nav
-        class="container mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-8"
+        class="container mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-8 2xl:px-24"
       >
         <img
           src="https://tamokul.com/new-landing/assets/images/logo/header-logo.webp"
@@ -37,7 +37,7 @@
       ></div>
       <div class="absolute inset-0 bg-black bg-opacity-40"></div>
       <div
-        class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col justify-center h-full"
+        class="container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-24 relative z-10 flex flex-col justify-center h-full"
       >
         <div class="max-w-[1024px] mb-8">
           <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-4">
