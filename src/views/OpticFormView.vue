@@ -1,10 +1,19 @@
 <template>
-  <div class="bg-black text-white min-h-screen p-4">
-    <div class="max-w-7xl mx-auto">
+  <div class="bg-black text-white min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-0.5 sm:pt-0">
       <div class="space-y-4">
         <!-- Header and Navigation -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 class="text-2xl md:text-3xl font-bold">Optik Form</h1>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4">
+          <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center">
+              <img 
+                src="@/assets/tam-okul-logo-dark.webp" 
+                alt="Tam Okul Logo" 
+                class="h-8 w-auto"
+              />
+            </a>
+            <h1 class="text-2xl md:text-3xl font-bold">Optik Form</h1>
+          </div>
           <select 
             v-model="currentPage"
             class="bg-zinc-800 text-white rounded px-2 py-1.5 text-sm w-full sm:w-auto min-w-[200px]"
@@ -87,12 +96,14 @@
         </div>
   
         <!-- Questions -->
-        <div v-if="activeTab === 'bookmarked' && !hasBookmarkedQuestions" class="text-center text-zinc-400 py-4 md:py-8">
+        <div v-if="activeTab === 'bookmarked' && !hasBookmarkedQuestions" 
+             class="text-center text-zinc-400 py-4 md:py-8 mb-36">
           İşaretlenmiş soru yok. İşaretlemek için sorulardaki
           <component :is="BookmarkPlusIcon" class="inline-block w-5 h-5 text-green-500" />
           butonuna basınız.
         </div>
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 mb-4 md:mb-6">
+        <div v-else 
+             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 pb-20 sm:pb-24">
           <div 
             v-for="question in currentPageQuestions"
             :key="question.id"
@@ -160,33 +171,36 @@
         </div>
   
         <!-- Navigation and Save Buttons -->
-        <div v-if="activeTab !== 'bookmarked'" class="flex justify-between items-center mt-4 md:mt-6">
-          <button 
-            @click="goToPreviousPage"
-            :disabled="!hasPreviousPage"
-            class="px-2 md:px-4 py-1 md:py-2 text-sm md:text-base bg-zinc-800 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Önceki
-          </button>
-          <button 
-            @click="showSaveConfirmation"
-            :disabled="!hasUnsavedAnswers || isPageSaved(currentPage)"
-            :class="[
-              'px-2 md:px-4 py-1 md:py-2 text-sm md:text-base rounded',
-              isPageSaved(currentPage) 
-                ? 'bg-zinc-800 text-white opacity-50 cursor-not-allowed' 
-                : 'bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed'
-            ]"
-          >
-            {{ isPageSaved(currentPage) ? 'Kaydedildi' : 'Kaydet' }}
-          </button>
-          <button 
-            @click="goToNextPage"
-            :disabled="!hasNextPage"
-            class="px-2 md:px-4 py-1 md:py-2 text-sm md:text-base bg-zinc-800 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Sonraki
-          </button>
+        <div v-if="activeTab !== 'bookmarked'" 
+             class="fixed bottom-0 left-0 right-0 bg-black border-t border-zinc-800 z-50">
+          <div class="max-w-7xl mx-auto flex justify-between items-center py-4 px-6">
+            <button 
+              @click="goToPreviousPage"
+              :disabled="!hasPreviousPage"
+              class="px-2 md:px-4 py-1 md:py-2 text-sm md:text-base bg-zinc-800 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Önceki
+            </button>
+            <button 
+              @click="showSaveConfirmation"
+              :disabled="!hasUnsavedAnswers || isPageSaved(currentPage)"
+              :class="[
+                'px-2 md:px-4 py-1 md:py-2 text-sm md:text-base rounded',
+                isPageSaved(currentPage) 
+                  ? 'bg-zinc-800 text-white opacity-50 cursor-not-allowed' 
+                  : 'bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed'
+              ]"
+            >
+              {{ isPageSaved(currentPage) ? 'Kaydedildi' : 'Kaydet' }}
+            </button>
+            <button 
+              @click="goToNextPage"
+              :disabled="!hasNextPage"
+              class="px-2 md:px-4 py-1 md:py-2 text-sm md:text-base bg-zinc-800 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Sonraki
+            </button>
+          </div>
         </div>
       </div>
   
