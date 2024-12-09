@@ -98,7 +98,7 @@
         <!-- Questions -->
         <div v-if="activeTab === 'bookmarked' && !hasBookmarkedQuestions" 
              class="text-center text-zinc-400 py-4 md:py-8 mb-36">
-          İşaretlenmiş soru yok. İşaretlemek için sorulardaki
+          Favori sorunuz yok. Favorilere eklemek için sorulardaki
           <component :is="BookmarkPlusIcon" class="inline-block w-5 h-5 text-green-500" />
           butonuna basınız.
         </div>
@@ -639,5 +639,4 @@
     left: 0;
   }
   </style>
-  
   
