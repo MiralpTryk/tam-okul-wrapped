@@ -39,7 +39,7 @@
               @click="activeTab = 'all'"
               :class="[
                 'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                activeTab === 'all' ? 'bg-zinc-800 text-white' : 'bg-zinc-700 text-zinc-300'
+                activeTab === 'all' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-300'
               ]"
             >
               Tüm Sorular
@@ -48,10 +48,10 @@
               @click="activeTab = 'bookmarked'"
               :class="[
                 'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                activeTab === 'bookmarked' ? 'bg-zinc-800 text-white' : 'bg-zinc-700 text-zinc-300'
+                activeTab === 'bookmarked' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-300'
               ]"
             >
-              İşaretlenmiş Sorular
+              Favori Sorular
             </button>
           </div>
           <div class="relative flex-1">
@@ -209,8 +209,8 @@
         <div class="bg-zinc-900 text-white p-4 md:p-6 rounded-lg max-w-md w-full border border-zinc-700">
           <h2 class="text-lg md:text-xl font-bold mb-3 md:mb-4">Cevapları Kaydet</h2>
           <p class="mb-3 md:mb-4 text-sm md:text-base text-zinc-300">
-            Cevapları kaydettikten sonra bu sayfa için tekrar işaretleme yapamayacaksınız. 
-            {{ currentPage }}. Sayfa için Cevapları kaydetmek istediğinize emin misiniz?
+            Cevapları kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını göreceğiniz için <span class="text-red-600 font-semibold">tekrar işaretleme yapamayacaksınız.</span> 
+            {{ currentPage }}. sayfa için cevapları kaydetmek istediğinize emin misiniz?
           </p>
           <div class="flex items-center mb-3 md:mb-4">
             <input 
@@ -219,7 +219,7 @@
               v-model="dontShowConfirmationAgain"
               class="mr-2 bg-zinc-700 border-zinc-600 text-red-600 focus:ring-red-500"
             >
-            <label for="dontShowAgain" class="text-sm md:text-base text-zinc-300">Bu uyarıyı tekrar gösterme</label>
+            <label for="dontShowAgain" class="text-sm md:text-base text-zinc-300 select-none">Bu uyarıyı tekrar gösterme</label>
           </div>
           <div class="flex justify-end space-x-2 md:space-x-4">
             <button 
