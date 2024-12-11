@@ -4,11 +4,11 @@
     <header
       :class="[
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        isScrolled ? 'bg-black/50 backdrop-blur-sm' : 'bg-gradient-to-b from-black to-transparent'
+        isScrolled ? 'bg-black backdrop-blur-sm' : 'bg-gradient-to-b from-black to-transparent'
       ]"
     >
       <nav
-        class="container mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-8 2xl:px-24"
+        class=" mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-16 2xl:px-24"
       >
         <img
           src="https://tamokul.com/new-landing/assets/images/logo/header-logo.webp"
@@ -17,7 +17,7 @@
         />
         <div class="flex items-center space-x-4">
           <RouterLink to="/optic-form">
-            <button class="bg-red-600 text-white px-3 py-1.5">
+            <button class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded text-sm">
               Optik İşaretle
             </button>
           </RouterLink>
@@ -33,14 +33,14 @@
         class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center"
       />
       <div
-        class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black to-transparent"
+        class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black to-transparent"
       ></div>
-      <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+      <div class="absolute inset-0"></div>
       <div
-        class="container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-24 relative z-10 flex flex-col justify-center h-full"
+        class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full "
       >
         <div class="max-w-[1024px] mb-8">
-          <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-4">
+          <h1 class="text-4xl sm:text-5xl font-bold mb-4">
             Merhaba
             <span class="inline-flex items-center -mr-2">
               <DecodeText :text="userName" :interval="15000" />
@@ -52,16 +52,13 @@
           </p>
         </div>
         <div>
-          <div class="relative inline-flex group">
-            <div
-              class="absolute transition-all duration-300 opacity-70 -inset-px bg-gradient-to-r from-red-500 to-red-700 rounded-lg blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-100"
-            ></div>
+          <div class="relative inline-flex">
             <button
               @click="openModal"
-              class="relative inline-flex items-center justify-center px-4 py-2 text-lg text-white transition-all bg-red-600 focus:ring-red-500 active:scale-95"
+              class="relative inline-flex items-center justify-center px-6 py-2 text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-500 active:scale-95 rounded"
               role="button"
             >
-              <Play class="w-6 h-6 mr-2 fill-white" /> Öğrenme Yolculuğun
+              <Play class="w-6 h-6 mr-2 fill-black" /> Öğrenme Yolculuğun
               {{ new Date().getFullYear() }}
             </button>
           </div>
@@ -73,19 +70,19 @@
     <section
       v-for="(section, index) in sections"
       :key="index"
-      class="py-6 px-4 sm:px-6 lg:px-8"
+      class="pb-6 px-4 sm:px-6 lg:px-16 2xl:px-24"
     >
-      <h2 class="text-2xl sm:text-3xl font-bold mb-6">{{ section.title }}</h2>
+      <h2 class="text-xl mb-2">{{ section.title }}</h2>
       <div class="relative">
         <button
           @click="scroll(index, 'left')"
-          class="left-chevron absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-[20] hidden sm:block"
+          class="left-chevron absolute -left-16 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 pl-16 rounded-full z-[20] hidden sm:block"
         >
           <ChevronLeftIcon class="w-6 h-6" />
         </button>
         <button
           @click="scroll(index, 'right')"
-          class="right-chevron absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-[20] hidden sm:block"
+          class="right-chevron absolute -right-16 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 pr-16 rounded-full z-[20] hidden sm:block"
         >
           <ChevronRightIcon class="w-6 h-6" />
         </button>
