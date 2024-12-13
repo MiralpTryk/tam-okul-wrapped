@@ -228,11 +228,11 @@
                     </h3>
                     <div class="h-64 sm:h-80 overflow-hidden">
                       <TransitionGroup name="list" tag="ul" class="space-y-2 sm:space-y-4">
-                        <li v-for="(achievement, index) in visibleAchievements" :key="achievement"
-                          class="flex items-center text-lg sm:text-xl md:text-2xl">
-                          <span class="mr-2 sm:mr-4 text-2xl sm:text-3xl md:text-4xl">{{ achievementEmojis[index]
-                            }}</span>
-                          <span>{{ achievement }}</span>
+                        <li v-for="(badge) in visibleAchievements" 
+                            :key="badge"
+                            class="flex items-center text-lg sm:text-xl md:text-2xl">
+                          <span class="mr-2 sm:mr-4 text-2xl sm:text-3xl md:text-4xl">{{ badge.emoji }}</span>
+                          <span>{{ badge.title }}</span>
                         </li>
                       </TransitionGroup>
                     </div>
@@ -322,14 +322,6 @@ const topTopics = [
 ];
 const totalStudyHours = 720;
 const moviesWatched = Math.floor(totalStudyHours / 2);
-const achievements = [
-  "50 dersi tamamladın",
-  "100 günlük çalışma döngüsünü başardın",
-  "Matematik Büyücüsü ödülünü kazandın",
-  "Fizik quiz'de %5'i geçtin",
-  "10 öğrenciyi mentorluyordun",
-];
-const achievementEmojis = ["🏆", "🔥", "🧙‍♂️", "🚀", "🤝"];
 
 const buttonText = computed(() =>
   currentSlide.value === totalSlides - 1 ? "Son" : "İleri"
@@ -436,9 +428,10 @@ watch(currentSlide, (newSlide, oldSlide) => {
     });
   } else if (newSlide === 15) {
     visibleAchievements.value = [];
-    achievements.forEach((achievement, index) => {
+    const badges = calculateBadges(totalQuestions, 80, totalStudyHours);
+    badges.forEach((badge, index) => {
       setTimeout(() => {
-        visibleAchievements.value.push(achievement);
+        visibleAchievements.value.push(badge);
       }, index * 500);
     });
   }
@@ -567,6 +560,40 @@ watch(
 );
 
 const statsCardRef = ref(null);
+
+// Başarıları hesaplama fonksiyonu (WrappedStatsCard'dan alındı)
+const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
+  const badges = [];
+
+  // Soru Çözüm Rozetleri
+  if (totalQuestions >= 1500) {
+    badges.push({ emoji: '📚', title: 'Soru Çözüm Ustası (1500+ Soru)' });
+  } else if (totalQuestions >= 1000) {
+    badges.push({ emoji: '📖', title: 'Soru Çözüm Uzmanı (1000+ Soru)' });
+  } else if (totalQuestions >= 500) {
+    badges.push({ emoji: '📝', title: 'Soru Çözüm Acemisi (500+ Soru)' });
+  }
+
+  // Başarı Yüzdesi Rozetleri
+  if (successRate >= 100) {
+    badges.push({ emoji: '🎯', title: 'Tam İsabet (%100)' });
+  } else if (successRate >= 85) {
+    badges.push({ emoji: '🎪', title: 'Başarı Yıldızı (%85+)' });
+  } else if (successRate >= 70) {
+    badges.push({ emoji: '✨', title: 'Yükselen Yıldız (%70+)' });
+  }
+
+  // Çalışma Saati Rozetleri
+  if (hoursSpent >= 300) {
+    badges.push({ emoji: '⏰', title: 'Azim Şampiyonu (300+ Saat)' });
+  } else if (hoursSpent >= 200) {
+    badges.push({ emoji: '⌚', title: 'Çalışkan Arı (200+ Saat)' });
+  } else if (hoursSpent >= 100) {
+    badges.push({ emoji: '⏱️', title: 'Öğrenme Aşığı (100+ Saat)' });
+  }
+
+  return badges;
+};
 
 </script>
 
