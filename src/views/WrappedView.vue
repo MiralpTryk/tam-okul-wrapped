@@ -1,20 +1,14 @@
 <template>
   <div class="bg-black text-white min-h-screen">
     <!-- Header -->
-    <header
-      :class="[
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        isScrolled ? 'bg-black backdrop-blur-sm' : 'bg-gradient-to-b from-black to-transparent'
-      ]"
-    >
-      <nav
-        class=" mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-16 2xl:px-24"
-      >
-        <img
-          src="https://tamokul.com/new-landing/assets/images/logo/header-logo.webp"
-          alt="Tam Okul"
-          class="h-8"
-        />
+    <header :class="[
+      'fixed top-0 left-0 right-0 z-20 transition-all duration-300',
+      isScrolled ? 'bg-black backdrop-blur-sm' : 'bg-gradient-to-b from-black to-transparent'
+    ]">
+      <nav class=" mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-16 2xl:px-24">
+        <a href="/">
+          <img src="https://tamokul.com/new-landing/assets/images/logo/header-logo.webp" alt="Tam Okul" class="h-8" />
+        </a>
         <div class="flex items-center space-x-4">
           <RouterLink to="/optic-form">
             <button class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded text-sm">
@@ -25,20 +19,179 @@
       </nav>
     </header>
 
+    <!-- Info Modal -->
+    <Transition name="modal">
+      <div v-if="showInfoModal" class="fixed inset-0 z-[60]">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+        <!-- Modal Content -->
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-0 sm:p-4" @click="showInfoModal = false">
+            <div
+              class="max-w-3xl relative transform sm:rounded-2xl bg-zinc-900 p-4 sm:p-6 text-left shadow-xl transition-all overflow-y-auto z-50 sm:max-h-[80vh] md:rounded-2xl sm:m-4 h-screen w-screen m-0 rounded-none sm:h-auto sm:w-auto">
+              <div class="absolute top-0 right-0">
+                <button v-if="isMobile" @click="showInfoModal = false"
+                  class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-gray-200 z-50 w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-xl sm:text-3xl">
+                  &times;
+                </button>
+              </div>
+              <h3 class="text-base sm:text-lg font-medium leading-6 text-white mb-4">
+                Neden bu videoları görüyorum?
+              </h3>
+              <div class="mt-2">
+                <p class="text-xs sm:text-sm text-zinc-300">
+                  Tam Okul'da yapılan detaylı analizler sonucunda, öğrenme stilinize ve akademik ihtiyaçlarınıza en
+                  uygun içerikler sizin için özel olarak seçildi. Bu içerikler, başarınızı artırmak ve öğrenme
+                  sürecinizi desteklemek için özenle hazırlandı.
+                </p>
+              </div>
+              <table class="table-auto w-full mt-1 mb-1 sm:mt-4 sm:mb-4 overflow-auto">
+                <thead>
+                  <tr class="border-b border-zinc-700">
+                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-left text-xs sm:text-sm font-medium text-zinc-400">Konu
+                    </th>
+                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">Doğru
+                    </th>
+                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">
+                      Yanlış</th>
+                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">Boş
+                    </th>
+                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">Net
+                    </th>
+                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">
+                      Başarı Oranı</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Çok İyi (>= 80%) -->
+                  <tr class="bg-green-500/5">
+                    <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-green-500">Çok
+                      İyi</td>
+                  </tr>
+                  <tr v-for="item in sortedData.excellent" :key="item.subject" class="border-b border-zinc-800">
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
+                      item.correct ?? '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-500">{{ item.wrong ??
+                      '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
+                      '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
+                      '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                      <span v-if="item.successRate != null"
+                        class="px-2 py-1 rounded-full text-xs bg-green-500/20 text-green-500">
+                        %{{ item.successRate }}
+                      </span>
+                      <span v-else class="text-zinc-400">—</span>
+                    </td>
+                  </tr>
+
+                  <!-- Daha İyi Olabilir (50-80%) -->
+                  <tr class="bg-yellow-500/5">
+                    <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-yellow-500">
+                      Daha İyi Olabilir</td>
+                  </tr>
+                  <tr v-for="item in sortedData.good" :key="item.subject" class="border-b border-zinc-800">
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
+                      item.correct ?? '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-500">{{ item.wrong ??
+                      '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
+                      '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
+                      '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                      <span v-if="item.successRate != null"
+                        class="px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-500">
+                        %{{ item.successRate }}
+                      </span>
+                      <span v-else class="text-zinc-400">—</span>
+                    </td>
+                  </tr>
+
+                  <!-- Geliştirilmeli (< 50%) -->
+                  <tr class="bg-red-500/5">
+                    <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-red-500">
+                      Geliştirilmeli</td>
+                  </tr>
+                  <tr v-for="item in sortedData.needsImprovement" :key="item.subject" class="border-b border-zinc-800">
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
+                      item.correct ?? '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-500">{{ item.wrong ??
+                      '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
+                      '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
+                      '—' }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                      <span v-if="item.successRate != null"
+                        class="px-2 py-1 rounded-full text-xs bg-red-500/20 text-red-500">
+                        %{{ item.successRate }}
+                      </span>
+                      <span v-else class="text-zinc-400">—</span>
+                    </td>
+                  </tr>
+
+                  <!-- Veri Yok -->
+                  <tr class="bg-zinc-500/5">
+                    <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-zinc-400">Veri
+                      Yok</td>
+                  </tr>
+                  <tr v-for="item in sortedData.noData" :key="item.subject" class="border-b border-zinc-800">
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                      <span class="text-zinc-400">—</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="mt-6">
+                <button type="button"
+                  class="inline-flex items-center justify-center rounded-md bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                  @click="showInfoModal = false">
+                  Anladım
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Hero Section -->
     <section class="relative h-screen flex items-center">
-      <img
-        :src="HeroImage"
-        alt="Hero"
-        class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center"
-      />
-      <div
-        class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black to-transparent"
-      ></div>
+      <img :src="HeroImage" alt="Hero"
+        class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center" />
+      <div class="absolute inset-0 bg-red-600 mix-blend-multiply opacity-60"></div>
+      <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-30% from-black via-black/70 to-transparent">
+        <div class="relative flex overflow-x-hidden italic">
+        <div class="py-12 animate-marquee whitespace-nowrap">
+          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
+          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
+          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
+          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
+          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
+        </div>
+
+        <div class="absolute top-0 py-12 animate-marquee2 whitespace-nowrap">
+          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
+          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
+          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
+          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
+          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
+        </div>
+      </div>
+      </div>
       <div class="absolute inset-0"></div>
-      <div
-        class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full "
-      >
+      <div class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full">
         <div class="max-w-[1024px] mb-8">
           <h1 class="text-4xl sm:text-5xl font-bold mb-4">
             Merhaba
@@ -53,11 +206,9 @@
         </div>
         <div>
           <div class="relative inline-flex">
-            <button
-              @click="openModal"
+            <button @click="openModal"
               class="relative inline-flex items-center justify-center px-6 py-2 text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-500 active:scale-95 rounded"
-              role="button"
-            >
+              role="button">
               <Play class="w-6 h-6 mr-2 fill-black" /> Öğrenme Yolculuğun
               {{ new Date().getFullYear() }}
             </button>
@@ -67,56 +218,61 @@
     </section>
 
     <!-- Content Sections -->
-    <section
-      v-for="(section, index) in sections"
-      :key="index"
-      class="pb-6 px-4 sm:px-6 lg:px-16 2xl:px-24"
-    >
-      <h2 class="text-xl mb-2">{{ section.title }}</h2>
+    <section v-for="(section, index) in sections" :key="index" class="pb-6 px-4 sm:px-6 lg:px-16 2xl:px-24">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <h2 class="text-xl">{{ section.title }}</h2>
+
+          <!-- Mobile Button -->
+          <button v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
+            class="sm:hidden bg-zinc-800 text-white rounded-full w-8 h-8 flex items-center justify-center z-10"
+            @click="showInfoModal = true">
+            <span class="text-sm">?</span>
+          </button>
+
+          <!-- Desktop Button -->
+          <button v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
+            class="hidden sm:flex bg-zinc-800 text-white rounded-full items-center justify-end transition-all duration-300 ease-in-out overflow-hidden z-10"
+            :class="{ 'w-8 h-8': !hoveredSection[index], 'w-[216px] h-8': hoveredSection[index] }"
+            @mouseenter="hoveredSection[index] = true" @mouseleave="hoveredSection[index] = false"
+            @click="showInfoModal = true">
+            <div class="flex items-center w-full h-full justify-end">
+              <span class="whitespace-nowrap text-xs transition-all duration-300 ease-in-out overflow-hidden mr-1"
+                :class="{ 'w-0 opacity-0': !hoveredSection[index], 'w-auto opacity-100': hoveredSection[index] }">
+                Neden bu videoları görüyorum
+              </span>
+              <span class="text-sm flex-shrink-0 mr-3 flex items-center justify-center">?</span>
+            </div>
+          </button>
+        </div>
+        <a href="/#/browse">
+          <button class="text-sm text-white hover:text-zinc-300">
+            Tümünü Gör
+          </button>
+        </a>
+      </div>
+
       <div class="relative">
-        <button
-          @click="scroll(index, 'left')"
-          class="left-chevron absolute -left-16 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 pl-16 rounded-full z-[20] hidden sm:block"
-        >
+        <button @click="scroll(index, 'left')"
+          class="left-chevron absolute -left-16 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 pl-16 rounded-full z-10 hidden sm:block">
           <ChevronLeftIcon class="w-6 h-6" />
         </button>
-        <button
-          @click="scroll(index, 'right')"
-          class="right-chevron absolute -right-16 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 pr-16 rounded-full z-[20] hidden sm:block"
-        >
+        <button @click="scroll(index, 'right')"
+          class="right-chevron absolute -right-16 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 pr-16 rounded-full z-10 hidden sm:block">
           <ChevronRightIcon class="w-6 h-6" />
         </button>
-        <div
-          :ref="
-            (el) => {
-              if (el) scrollContainers[index] = el;
-            }
-          "
-          class="flex space-x-4 overflow-x-auto scrollbar-hide select-none"
-          :class="{ dragging: isDragging }"
-          @mousedown="startDrag"
-          @mousemove="drag"
-          @mouseup="endDrag"
-          @mouseleave="endDrag"
-          @touchstart.passive="startDrag"
-          @touchmove.passive="drag"
-          @touchend="endDrag"
-        >
-          <div
-            v-for="item in section.items"
-            :key="item.id"
+        <div :ref="(el) => {
+          if (el) scrollContainers[index] = el;
+        }
+          " class="flex space-x-4 overflow-x-auto scrollbar-hide select-none" :class="{ dragging: isDragging }"
+          @mousedown="startDrag" @mousemove="drag" @mouseup="endDrag" @mouseleave="endDrag"
+          @touchstart.passive="startDrag" @touchmove.passive="drag" @touchend="endDrag">
+          <div v-for="item in section.items" :key="item.id"
             class="flex-shrink-0 w-64 sm:w-72 relative group cursor-pointer"
-            @click="openContentModal(item, section.type, $event)"
-          >
-            <img
-              v-if="section.type !== 'quote'"
-              :src="item.image"
-              :alt="item.title"
-              @dragstart.prevent
-              class="w-full h-40 object-cover rounded-md transition-opacity duration-300"
-            />
-            <div
-              v-if="section.type === 'quote'"
+            @click="openContentModal(item, section.type, $event)">
+            <img v-if="section.type !== 'quote'" :src="item.image" :alt="item.title" @dragstart.prevent
+              class="w-full h-40 object-cover rounded-md transition-opacity duration-300" />
+            <div v-if="section.type === 'quote'"
               class="w-full h-40 rounded-md flex items-center justify-center p-4 relative overflow-hidden transition-transform duration-300"
               :style="{
                 backgroundImage: `url(${item.thumbnail.replace(
@@ -125,18 +281,11 @@
                 )})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-              }"
-            >
+              }">
               <div class="absolute inset-0 bg-black bg-opacity-30"></div>
-              <div
-                class="absolute inset-0 bg-gradient-to-t from-black to-transparent"
-              ></div>
-              <div
-                class="relative z-[5] opacity-75 group-hover:opacity-100 transition-opacity duration-300"
-              >
-                <p
-                  class="text-white text-center text-lg font-semibold line-clamp-3"
-                >
+              <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+              <div class="relative z-[5] opacity-75 group-hover:opacity-100 transition-opacity duration-300">
+                <p class="text-white text-center text-lg font-semibold line-clamp-3">
                   {{ item.quote }}
                 </p>
                 <p class="text-white text-center text-sm mt-2">
@@ -144,18 +293,14 @@
                 </p>
               </div>
             </div>
-            <div
-              v-if="section.type !== 'quote'"
-              class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent"
-            >
+            <div v-if="section.type !== 'quote'"
+              class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
               <p
-                class="text-sm font-semibold truncate text-white opacity-75 group-hover:opacity-100 transition-opacity duration-300"
-              >
+                class="text-sm font-semibold truncate text-white opacity-75 group-hover:opacity-100 transition-opacity duration-300">
                 {{ item.title }}
               </p>
               <p
-                class="text-xs text-gray-300 truncate opacity-75 group-hover:opacity-100 transition-opacity duration-300"
-              >
+                class="text-xs text-gray-300 truncate opacity-75 group-hover:opacity-100 transition-opacity duration-300">
                 {{ item.subtitle }}
               </p>
             </div>
@@ -179,39 +324,24 @@
     <!-- Content Modal -->
     <ContentModal :show="showContentModal" @close="closeContentModal">
       <template v-if="selectedLesson">
-        <LessonContent
-          v-if="selectedLesson && !selectedLesson.type"
-          :lesson="selectedLesson"
-        />
-        <MusicContent
-          v-else-if="selectedLesson && selectedLesson.type === 'music'"
-          :music="selectedLesson"
-        />
-        <QuoteContent
-          v-else-if="selectedLesson && selectedLesson.type === 'quote'"
-          :quote="selectedLesson"
-        />
-        <BookContent
-          v-else-if="selectedLesson && selectedLesson.type === 'book'"
-          :book="selectedLesson"
-        />
-        <StoryContent
-          v-else-if="selectedLesson && selectedLesson.type === 'story'"
-          :story="selectedLesson"
-        />
+        <LessonContent v-if="selectedLesson && !selectedLesson.type" :lesson="selectedLesson" />
+        <MusicContent v-else-if="selectedLesson && selectedLesson.type === 'music'" :music="selectedLesson" />
+        <QuoteContent v-else-if="selectedLesson && selectedLesson.type === 'quote'" :quote="selectedLesson" />
+        <BookContent v-else-if="selectedLesson && selectedLesson.type === 'book'" :book="selectedLesson" />
+        <StoryContent v-else-if="selectedLesson && selectedLesson.type === 'story'" :story="selectedLesson" />
       </template>
     </ContentModal>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-vue-next";
 import WrappedModal from "@/components/WrappedModal.vue";
 import ContentModal from "@/components/ContentModal.vue";
 import LessonContent from "@/components/LessonContent.vue";
 import DecodeText from "@/components/DecodeText.vue";
-import HeroImage from "@/assets/hero-image.webp";
+import HeroImage from "@/assets/hero-img.webp";
 import { Play } from "lucide-vue-next";
 import MusicContent from "@/components/MusicContent.vue";
 import QuoteContent from "@/components/QuoteContent.vue";
@@ -343,6 +473,28 @@ const showContentModal = ref(false);
 const selectedLesson = ref(null);
 const userName = "Miralp";
 
+// isMobile'ı ref olarak tanımlayalım
+const isMobile = ref(false);
+
+// Ekran boyutunu kontrol eden fonksiyon
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 768;
+};
+
+// Component mount olduğunda
+onMounted(() => {
+  // İlk kontrol
+  checkMobile();
+  
+  // Pencere boyutu değiştiğinde kontrol et
+  window.addEventListener('resize', checkMobile);
+});
+
+// Component unmount olduğunda event listener'ı temizle
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile);
+});
+
 const generateItems = (count, prefix, type = "video") => {
   const playlists = [
     {
@@ -361,7 +513,7 @@ const generateItems = (count, prefix, type = "video") => {
       spotifyEmbed:
         "https://open.spotify.com/embed/playlist/37i9dQZF1DWZeKCadgRdKQ?utm_source=generator",
       studyTip:
-        "Elektronik ve ambient müzikler, uzun süreli odaklanma gerektiren çalışmalar için idealdir. Sözsüz müzikler, dil işleyen beyin bölgelerini meşgul etmeden çalışmanıza olanak sağlar. Özellikle yazı yazma ve okuma çalışmalarında tercih edilebilir.",
+        "Elektronik ve ambient müzikler, uzun süreli odaklanma gerektiren çalışmalar için idealdir. Sözsüz müzikler, dil işleyen beyin bölgelerini meşgul etmeden çalışmanıza olanak sa��lar. Özellikle yazı yazma ve okuma çalışmalarında tercih edilebilir.",
     },
     {
       id: 3,
@@ -464,15 +616,15 @@ const generateItems = (count, prefix, type = "video") => {
       };
     });
   } else if (type === "quote") {
-  return motivationalQuotes.slice(0, count).map((quote, i) => ({
-    id: `${prefix}-${i + 1}`,
-    subtitle: quote.author,
-    quote: quote.text,
-    author: quote.author,
-    type: "quote",
-    thumbnail: `${backgroundImages[i % backgroundImages.length]}?auto=format&fit=crop&w=800&q=80`,
-  }));
-}
+    return motivationalQuotes.slice(0, count).map((quote, i) => ({
+      id: `${prefix}-${i + 1}`,
+      subtitle: quote.author,
+      quote: quote.text,
+      author: quote.author,
+      type: "quote",
+      thumbnail: `${backgroundImages[i % backgroundImages.length]}?auto=format&fit=crop&w=800&q=80`,
+    }));
+  }
 
   return Array.from({ length: count }, (_, i) => ({
     id: `${prefix}-${i + 1}`,
@@ -713,7 +865,7 @@ const generateStories = (count) => {
       Deniz'in çalışma sistemi:
       • Haftalık detaylı program
       • Pomodoro tekniği kullanımı
-      • Sanat ve tıbbı birleştiren projeler
+      • Sanat ve t���bbı birleştiren projeler
       • Stres yönetimi için sanat terapisi`,
     },
   ];
@@ -743,7 +895,7 @@ const generateBooks = (count) => {
       subtitle: "Halikarnas Balıkçısı",
       image: AgantaCover,
       description:
-        "Ege denizinde geçen, balıkçıların yaşamını ve denizle olan mücadelelerini anlatan roman. Deniz kültürü ve insan-doğa ilişkisini ustalıkla işler.",
+        "Ege denizinde geçen, balkçıların yaşamını ve denizle olan mücadelelerini anlatan roman. Deniz kültürü ve insan-doğa ilişkisini ustalıkla işler.",
       category: ["Türk Edebiyatı", "Deniz Hikayeleri", "Toplumsal Roman"],
       readingTime: "10 saat",
       pages: "240 sayfa",
@@ -893,11 +1045,11 @@ const generateBooks = (count) => {
     },
     {
       id: 16,
-      title: "Drina'da Son Gün",
+      title: "Drina'da Son G��n",
       subtitle: "Faik Baysal",
       image: DrinadaCover,
       description:
-        "Balkan Savaşı sırasında yaşanan dramı anlatan roman. Savaşın insan psikolojisi üzerindeki etkilerini ve göçün trajik sonuçlarını işler.",
+        "Balkan Savaşı s��rasında yaşanan dramı anlatan roman. Savaşın insan psikolojisi üzerindeki etkilerini ve göçün trajik sonuçlarını işler.",
       category: ["Türk Edebiyatı", "Savaş Romanı", "Tarihi Roman"],
       readingTime: "13 saat",
       pages: "312 sayfa",
@@ -1106,7 +1258,7 @@ const generateBooks = (count) => {
       subtitle: "Halide Edib Adıvar",
       image: MorCover,
       description:
-        "Yazarın çocukluk ve gençlik yıllarını anlattığı otobiyografik eser. Osmanlı'nın son dönemini ve modernleşme sürecini bireysel bir hikaye üzerinden aktarır.",
+        "Yazarın çocukluk ve gençlik yıllarını anlattığı otobiyografik eser. Osmanlı'n��n son dönemini ve modernleşme sürecini bireysel bir hikaye üzerinden aktarır.",
       category: ["Türk Edebiyatı", "Anı", "Otobiyografi"],
       readingTime: "12 saat",
       pages: "288 sayfa",
@@ -1370,7 +1522,6 @@ const drag = (e) => {
     const x = e.clientX;
     const y = e.clientY;
 
-    // Eğer belirli bir eşik değerinden fazla hareket varsa sürükleme olarak işaretle
     if (Math.abs(x - startX.value) > 5 || Math.abs(y - startY.value) > 5) {
       isDragged.value = true;
     }
@@ -1385,7 +1536,6 @@ const drag = (e) => {
     const deltaY = touchStartY.value - touchY;
 
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      // Yatay kaydırma
       e.preventDefault();
       e.currentTarget.scrollLeft += deltaX * 2;
     }
@@ -1427,7 +1577,6 @@ const closeModal = () => {
 };
 
 const openContentModal = (item, sectionType) => {
-  // Eğer sürükleme yapıldıysa modal açılmasını engelle
   if (isDragged.value) {
     return;
   }
@@ -1474,7 +1623,6 @@ const closeContentModal = () => {
 
 const isScrolled = ref(false);
 
-// Add scroll event listener
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
 });
@@ -1504,6 +1652,127 @@ onMounted(() => {
 onUnmounted(() => {
   cancelAnimationFrame(animationFrame.value);
 });
+
+const hoveredSection = ref({});
+
+const showInfoModal = ref(false)
+
+const analysisData = [
+  {
+    subject: "Sözcükte Anlam",
+    correct: 18,
+    wrong: 4,
+    empty: 3,
+    net: 17,
+    successRate: 68
+  },
+  {
+    subject: "Paragrafta Ana Düşünce",
+    correct: 22,
+    wrong: 2,
+    empty: 1,
+    net: 21.5,
+    successRate: 86
+  },
+  {
+    subject: "Üçgenler ve Dörtgenler",
+    correct: 12,
+    wrong: 8,
+    empty: 5,
+    net: 10,
+    successRate: 40
+  },
+  {
+    subject: "İkinci Dereceden Denklemler",
+    correct: 25,
+    wrong: 5,
+    empty: 0,
+    net: 23.75,
+    successRate: 83
+  },
+  {
+    subject: "Kuvvet ve Hareket",
+    correct: 8,
+    wrong: 12,
+    empty: 5,
+    net: 5,
+    successRate: 20
+  },
+  {
+    subject: "Asitler ve Bazlar",
+    correct: 15,
+    wrong: 5,
+    empty: 5,
+    net: 13.75,
+    successRate: 55
+  },
+  {
+    subject: "Hücre ve Organeller",
+    correct: 20,
+    wrong: 3,
+    empty: 2,
+    net: 19.25,
+    successRate: 77
+  },
+  {
+    subject: "Dalgalar ve Ses",
+    correct: null,
+    wrong: null,
+    empty: null,
+    net: null,
+    successRate: null
+  },
+  {
+    subject: "Organik Kimya",
+    correct: null,
+    wrong: null,
+    empty: null,
+    net: null,
+    successRate: null
+  },
+  {
+    subject: "Logaritma",
+    correct: null,
+    wrong: null,
+    empty: null,
+    net: null,
+    successRate: null
+  }
+];
+
+const getColorClass = (item) => {
+  if (item.correct === null || item.correct === undefined ||
+    item.wrong === null || item.wrong === undefined ||
+    item.empty === null || item.empty === undefined) {
+    return 'text-zinc-400';
+  }
+
+  const totalQuestions = item.correct + item.wrong + item.empty;
+  const percentage = (item.correct / totalQuestions) * 100;
+
+  if (percentage >= 80) return 'text-green-500';
+  if (percentage >= 50) return 'text-yellow-500';
+  return 'text-red-500';
+};
+
+const sortedData = computed(() => {
+  const excellent = analysisData
+    .filter(item => item.successRate >= 80)
+    .sort((a, b) => b.successRate - a.successRate);
+
+  const good = analysisData
+    .filter(item => item.successRate >= 50 && item.successRate < 80)
+    .sort((a, b) => b.successRate - a.successRate);
+
+  const needsImprovement = analysisData
+    .filter(item => item.successRate !== null && item.successRate < 50)
+    .sort((a, b) => b.successRate - a.successRate);
+
+  const noData = analysisData
+    .filter(item => item.successRate === null);
+
+  return { excellent, good, needsImprovement, noData };
+});
 </script>
 
 <style scoped>
@@ -1514,56 +1783,103 @@ onUnmounted(() => {
   /* scroll-behavior: smooth; */
   /* scroll-snap-type: x mandatory; */
 }
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 .dragging {
   cursor: grabbing !important;
 }
+
 .group:hover img {
   opacity: 0.75;
 }
+
 .select-none {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
+
 img {
   pointer-events: none;
 }
+
 .h-screen {
   height: 100vh;
   height: calc(var(--vh, 1vh) * 100);
 }
+
 .decode-text {
   display: inline-block;
   font-size: inherit;
   line-height: inherit;
   word-spacing: normal;
 }
+
 /* .flex-shrink-0 {
     scroll-snap-align: start;
   } */
 
 @keyframes tilt {
+
   0%,
   50%,
   100% {
     transform: rotate(0deg);
   }
+
   25% {
     transform: rotate(0.5deg);
   }
+
   75% {
     transform: rotate(-0.5deg);
   }
 }
+
 .animate-tilt {
   animation: tilt 10s infinite linear;
 }
 
 header {
   transition: background-color 1s ease;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.modal-enter-to,
+.modal-leave-from {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (max-width: 640px) {
+  .mobile\:h-screen {
+    height: 100vh !important;
+  }
+
+  .mobile\:w-screen {
+    width: 100vw !important;
+  }
+
+  .mobile\:m-0 {
+    margin: 0 !important;
+  }
+
+  .mobile\:rounded-none {
+    border-radius: 0 !important;
+  }
 }
 </style>

@@ -148,6 +148,14 @@ module.exports = {
             transform: "skewX(-0.1953125deg) skewY(-0.1953125deg)",
           },
         },
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
+        marquee2: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0%)' },
+        },
       },
       animation: {
         wiggle: "wiggle 1s ease-in-out infinite",
@@ -160,7 +168,8 @@ module.exports = {
         headShake: "headShake 2s infinite",
         wobble: "wobble 1s infinite",
         jello: "jello 2s infinite",
-      },
+        marquee: 'marquee 25s linear infinite',
+        marquee2: 'marquee2 25s linear infinite',      },
       screens: {
         '2xl': '1920px',
       },

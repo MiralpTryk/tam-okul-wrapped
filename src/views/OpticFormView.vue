@@ -1,6 +1,6 @@
 <template>
   <div class="bg-black text-white min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-0.5 sm:pt-0">
+    <div class="mx-auto px-4 sm:px-6 lg:px-16 2xl:px-24">
       <div class="space-y-4">
         <!-- Header and Navigation -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4">
@@ -22,7 +22,7 @@
               <option disabled class="font-bold bg-zinc-700">{{ capitalizeFirstLetter(section) }}</option>
               <option 
                 v-for="page in pages" 
-                :key="page" 
+                :key="page"
                 :value="page"
                 :class="['pl-4', { 'text-green-500': isPageSaved(page) }]"
               >
@@ -38,7 +38,7 @@
             <button 
               @click="activeTab = 'all'"
               :class="[
-                'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                'px-4 py-2 rounded text-sm font-medium transition-colors',
                 activeTab === 'all' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-300'
               ]"
             >
@@ -47,14 +47,14 @@
             <button 
               @click="activeTab = 'bookmarked'"
               :class="[
-                'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                'px-4 py-2 rounded text-sm font-medium transition-colors',
                 activeTab === 'bookmarked' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-300'
               ]"
             >
               Favori Sorular
             </button>
           </div>
-          <div class="relative flex-1">
+          <div class="relative">
             <input 
               v-model="searchQuery" 
               type="text" 
@@ -108,7 +108,7 @@
             v-for="question in currentPageQuestions"
             :key="question.id"
             :data-question-id="question.id"
-            class="bg-zinc-900 rounded-lg p-3 md:p-4 shadow-lg border-transition"
+            class="bg-zinc-900 rounded p-3 md:p-4 shadow-lg border-transition"
           >
             <div class="flex justify-between items-center mb-2">
               <span class="font-bold text-sm md:text-base">Soru {{ question.orderNumber }}</span>
@@ -167,13 +167,33 @@
                 </svg>
               </button>
             </div>
+
+            <!-- Add this new section -->
+            <div v-if="question.saved" class="mt-3">
+              <button 
+                @click="watchSolutionVideo(question.id)"
+                class="w-full bg-zinc-800 hover:bg-zinc-700 text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200"
+              >
+                <svg 
+                  class="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
+                </svg>
+                <span class="text-sm">Çözüm Videosu</span>
+              </button>
+            </div>
           </div>
         </div>
   
         <!-- Navigation and Save Buttons -->
         <div v-if="activeTab !== 'bookmarked'" 
              class="fixed bottom-0 left-0 right-0 bg-black border-t border-zinc-800 z-50">
-          <div class="max-w-7xl mx-auto flex justify-between items-center py-4 px-6">
+          <div class="mx-auto flex justify-between items-center py-4 px-4 sm:px-6 lg:px-16 2xl:px-24">
             <button 
               @click="goToPreviousPage"
               :disabled="!hasPreviousPage"
@@ -206,7 +226,7 @@
   
       <!-- Save Confirmation Modal -->
       <div v-if="showConfirmation" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-        <div class="bg-zinc-900 text-white p-4 md:p-6 rounded-lg max-w-md w-full border border-zinc-700">
+        <div class="bg-zinc-900 text-white p-4 md:p-6 rounded max-w-md w-full border border-zinc-700">
           <h2 class="text-lg md:text-xl font-bold mb-3 md:mb-4">Cevapları Kaydet</h2>
           <p class="mb-3 md:mb-4 text-sm md:text-base text-zinc-300">
             Cevapları kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını göreceğiniz için <span class="text-red-600 font-semibold">tekrar işaretleme yapamayacaksınız.</span> 
@@ -275,6 +295,8 @@
   const showConfirmation = ref(false);
   const dontShowConfirmationAgain = ref(false);
   const imageLoadError = ref(false);
+  const showVideoModal = ref(false);
+  const currentVideoUrl = ref('');
   
   const loadQuestions = () => {
     try {
@@ -524,14 +546,35 @@
     }
   };
   
+  const watchSolutionVideo = (questionId) => {
+    const question = questions.value.find(q => q.id === questionId);
+    currentVideoUrl.value = question?.video_url || '';
+    showVideoModal.value = true;
+  };
+  
+  const closeVideoModal = () => {
+    showVideoModal.value = false;
+    currentVideoUrl.value = '';
+  };
+  
   onMounted(() => {
     loadQuestions();
     loadAnswers();
     window.addEventListener('keydown', handleKeyPress);
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && showVideoModal.value) {
+        closeVideoModal();
+      }
+    });
   });
   
   onUnmounted(() => {
     window.removeEventListener('keydown', handleKeyPress);
+    window.removeEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && showVideoModal.value) {
+        closeVideoModal();
+      }
+    });
   });
   
   watch(questions, saveAnswers, { deep: true });
@@ -630,6 +673,21 @@
   }
   
   .aspect-w-4 > * {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+  
+  .aspect-w-16 {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  }
+  
+  .aspect-w-16 > * {
     position: absolute;
     height: 100%;
     width: 100%;

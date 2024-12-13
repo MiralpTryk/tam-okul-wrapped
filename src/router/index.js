@@ -14,6 +14,9 @@ import SimpleTestView from "@/views/SimpleTestView.vue"; */
 import WrappedView from "@/views/WrappedView.vue";
 import OpticFormView from "@/views/OpticFormView.vue";
 import AnalysisView from "@/views/AnalysisView.vue";
+import BrowseView from "@/views/BrowseView.vue";
+
+
 const routes = [
   /* {
     path: "/",
@@ -94,6 +97,11 @@ const routes = [
     path: "/analysis",
     name: "Analysis",
     component: AnalysisView,
+  },
+  {
+    path: "/browse",
+    name: "Browse",
+    component: BrowseView,
   },
 ];
 
