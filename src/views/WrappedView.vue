@@ -201,17 +201,18 @@
             , dijital kişiye özel kitabına hoşgeldin.
           </h1>
           <p class="text-xl sm:text-2xl">
-            Senin için hazırladığımız bu içerikleri keşfet.
+            Senin için hazırladığımız içerikleri keşfet.
           </p>
         </div>
         <div>
           <div class="relative inline-flex">
-            <button @click="openModal"
+<!--             <button @click="openModal"
               class="relative inline-flex items-center justify-center px-6 py-2 text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-500 active:scale-95 rounded"
               role="button">
               <Play class="w-6 h-6 mr-2 fill-black" /> Öğrenme Yolculuğun
               {{ new Date().getFullYear() }}
-            </button>
+            </button> -->
+            <AnimatedCTAButton @click="openModal" />
           </div>
         </div>
       </div>
@@ -337,12 +338,13 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-vue-next";
+import AnimatedCTAButton from "@/components/AnimatedCTAButton.vue";
 import WrappedModal from "@/components/WrappedModal.vue";
 import ContentModal from "@/components/ContentModal.vue";
 import LessonContent from "@/components/LessonContent.vue";
 import DecodeText from "@/components/DecodeText.vue";
 import HeroImage from "@/assets/hero-img.webp";
-import { Play } from "lucide-vue-next";
+// import { Play } from "lucide-vue-next";
 import MusicContent from "@/components/MusicContent.vue";
 import QuoteContent from "@/components/QuoteContent.vue";
 import BookContent from "@/components/BookContent.vue";

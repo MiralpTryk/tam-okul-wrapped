@@ -4,6 +4,14 @@
       <div class="absolute inset-0 bg-black opacity-50" @click="closeModal"></div>
       <div class="relative bg-gradient-to-br from-black via-zinc-900 to-red-900 w-full h-full overflow-hidden">
         <div class="emoji-pattern"></div>
+        
+        <!-- Progress Bar -->
+        <div class="absolute top-0 sm:top-4 left-1/2 transform -translate-x-1/2 w-full h-1 bg-white/10 max-w-sm sm:max-w-4xl rounded-full">
+          <div class="h-full bg-orange-500 transition-all duration-500"
+            :style="{ width: `${(currentSlide / (totalSlides - 1)) * 100}%` }">
+          </div>
+        </div>
+
         <button @click="closeModal"
           class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-gray-200 z-50 w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-xl sm:text-3xl">
           &times;
@@ -16,26 +24,39 @@
             <Transition :name="transitionName">
               <div :key="currentSlide"
                 class="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-8 text-white">
+
                 <!-- Slide Content -->
+                <!-- Slide 1: Intro -->
                 <div class="w-full max-w-6xl mx-auto">
                   <h2 v-if="currentSlide === 0"
                     class="text-3xl sm:text-5xl md:text-6xl font-bold text-center mb-6 sm:mb-12">
-                    Öğrenme Yolculuğun {{ new Date().getFullYear() }}
+                    {{ new Date().getFullYear() }} Öğrenme Yolculuğun
                   </h2>
-
-                  <!-- Slide 1: Intro -->
                   <div v-if="currentSlide === 0" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                      Öğrenme Yolculuğunu Görmeye Hazır mısın
-                      <span class="font-bold">{{ name }}</span>? 🧠
+                      Öğrenme Yolculuğun hazır, peki ya sen görmeye hazır mısın
+                      <span class="font-bold text-orange-500">{{ name }}</span>?
                     </h3>
-                    <p class="text-lg sm:text-xl md:text-2xl">
-                      Hazırsan başlayalım!
+                    <p class="text-lg sm:text-xl md:text-2xl animate-pulse">
+                      Hadi başlayalım!
                     </p>
                   </div>
 
-                  <!-- Slide 2: Total Questions -->
+
+                  <!-- Slide 0: Initial -->
                   <div v-if="currentSlide === 1" class="text-center">
+                    <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
+                      Zaman hızla geçiyor...
+                    </h3>
+                    <Transition name="fade">
+                      <p v-if="showInitialSubtext" class="text-lg sm:text-xl md:text-2xl text-white/80">
+                        Neyse ki senin için her şeyi tarihe not düştük &#129323;
+                      </p>
+                    </Transition>
+                  </div>
+
+                  <!-- Slide 2: Total Questions -->
+                  <div v-if="currentSlide === 2" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
                       Bu yıl tam tamına
                     </h3>
@@ -47,45 +68,44 @@
                   </div>
 
                   <!-- Slide 3: Percentage Above Average -->
-                  <div v-if="currentSlide === 2" class="text-center">
+                  <div v-if="currentSlide === 3" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                      Ve bu kadar değil... Ortalama bir öğrenciden
+                      Bu neredeyse ortalama bir öğrenciden
                     </h3>
                     <Transition name="fade">
                       <div v-show="percentageOpacity > 0" :style="{ opacity: percentageOpacity }">
                         <div class="text-5xl sm:text-7xl md:text-9xl font-bold mb-3 sm:mb-6 text-orange-500">
-                          {{ percentageAboveAverage }}%
+                          %{{ percentageAboveAverage }}
                         </div>
                         <p class="text-lg sm:text-xl md:text-2xl">
-                          daha fazla!
+                          daha fazla! &#128079;
                         </p>
                       </div>
                     </Transition>
                   </div>
 
                   <!-- Slide 4: Top Subjects Teaser -->
-                  <div v-if="currentSlide === 3" class="text-center">
+                  <div v-if="currentSlide === 4" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
                       Çok sayıda farklı derste uzmanlaştın
                     </h3>
                     <p class="text-lg sm:text-xl md:text-2xl">
                       <span class="font-bold text-orange-500">En iyi 5'ini</span>
-                      tahmin edebilir misin?
+                      tahmin edebilir misin? &#129300;
                     </p>
                   </div>
 
                   <!-- Slide 5: Top Subjects -->
-                  <div v-if="currentSlide === 4">
+                  <div v-if="currentSlide === 5">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8 text-center">
-                      En iyi olduğun dersler şunlardı:
+                      <span class="text-orange-500">En iyi</span> olduğun dersler şunlardı:
                     </h3>
                     <Transition name="fade">
                       <div v-show="subjectsOpacity > 0" :style="{ opacity: subjectsOpacity }"
                         class="h-64 sm:h-80 overflow-hidden">
                         <TransitionGroup name="list" tag="ul" class="space-y-2 sm:space-y-4">
-                          <li v-for="(subject, index) in visibleSubjects" :key="subject"
+                          <li v-for="(subject) in visibleSubjects" :key="subject"
                             class="flex items-center text-xl sm:text-2xl md:text-3xl">
-                            <span class="mr-2 sm:mr-4 font-bold">{{ index + 1 }}.</span>
                             <span>{{ subject }}</span>
                           </li>
                         </TransitionGroup>
@@ -93,19 +113,16 @@
                     </Transition>
                   </div>
 
-                  <!-- Slide 6: Outstanding Subject Teaser -->
-                  <div v-if="currentSlide === 5" class="text-center">
+                  <!-- Slide 6: Outstanding Course Teaser -->
+                  <div v-if="currentSlide === 6" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                      Ama bir ders
-                      <span class="italic">diğerlerinden öne çıktı...</span>
+                      Ama bir derste o kadar iyiydin ki,
+                      <span class="italic text-orange-500">diğerlerinden öne çıktı... &#128077;</span>
                     </h3>
-                    <p class="text-lg sm:text-xl md:text-2xl">
-                      Hangisi olduğunu tahmin edebilir misin?
-                    </p>
                   </div>
 
-                  <!-- Slide 7: Outstanding Subject -->
-                  <div v-if="currentSlide === 6" class="text-center space-y-4 sm:space-y-8">
+                  <!-- Slide 7: Outstanding Course -->
+                  <div v-if="currentSlide === 7" class="text-center space-y-4 sm:space-y-8">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
                       Öne çıkan dersin...
                     </h3>
@@ -117,30 +134,30 @@
                     </div>
                     <Transition name="fade">
                       <div v-if="topSubjectRevealed">
-                        <div class="text-4xl sm:text-5xl md:text-7xl font-bold">
+                        <div class="text-4xl sm:text-5xl md:text-7xl font-bold text-orange-500">
                           {{ topSubject }}
                         </div>
                         <p class="text-xl sm:text-2xl md:text-3xl mt-4">
-                          Sen bir {{ topSubject }} uzmanısın!
+                          Sen bir {{ topSubject }} <span class="text-orange-500"> uzmanısın! &#129395;</span>
                         </p>
                       </div>
                     </Transition>
                   </div>
 
                   <!-- Slide 8: Top Topics Teaser -->
-                  <div v-if="currentSlide === 7" class="text-center">
+                  <div v-if="currentSlide === 8" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                      Çeşitli konuları keşfettin
+                      Öylesine maceracısın ki, konudan konuya atladın &#128521;
                     </h3>
                     <p class="text-lg sm:text-xl md:text-2xl">
-                      En iyi 5'ine bakalım!
+                      <span class="font-bold text-orange-500">En iyi 5'ine</span> bakalım!
                     </p>
                   </div>
 
                   <!-- Slide 9: Top Topics -->
-                  <div v-if="currentSlide === 8">
+                  <div v-if="currentSlide === 9">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8 text-center">
-                      En iyi olduğun konular şunlardı:
+                      &#128170; <span class="font-bold text-orange-500">En iyi</span> olduğun konular şunlardı:
                     </h3>
                     <div class="h-64 sm:h-80 overflow-hidden">
                       <TransitionGroup name="list" tag="ul" class="space-y-2 sm:space-y-4">
@@ -155,9 +172,9 @@
                   </div>
 
                   <!-- Slide 10: Study Time Teaser -->
-                  <div v-if="currentSlide === 9" class="text-center">
+                  <div v-if="currentSlide === 10" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                      Öğrenmeye çok zaman ayırdın
+                      Öğrenmeye <span class="font-bold text-orange-500">çoook</span> zaman ayırdın &#9200;
                     </h3>
                     <p class="text-lg sm:text-xl md:text-2xl">
                       Kaç saat olduğunu tahmin edebilir misin?
@@ -165,41 +182,47 @@
                   </div>
 
                   <!-- Slide 11: Study Time -->
-                  <div v-if="currentSlide === 10" class="text-center">
+                  <div v-if="currentSlide === 11" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
                       Toplam öğrenme süren...
                     </h3>
-                    <div class="text-5xl sm:text-7xl md:text-9xl font-bold mb-3 sm:mb-6">
+                    <div class="text-5xl sm:text-7xl md:text-9xl font-bold mb-3 sm:mb-6 text-orange-500">
                       {{ totalStudyHours }}
                     </div>
                     <p class="text-lg sm:text-xl md:text-2xl">saat!</p>
                   </div>
 
                   <!-- Slide 12: Study Time Comparison -->
-                  <div v-if="currentSlide === 11" class="text-center">
+                  <div v-if="currentSlide === 12" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
                       Bu, yaklaşık olarak
                     </h3>
-                    <div class="text-5xl sm:text-7xl md:text-9xl font-bold mb-3 sm:mb-6">
+                    <div class="text-5xl sm:text-7xl md:text-9xl font-bold mb-3 sm:mb-6 text-orange-500">
                       {{ moviesWatched }}
                     </div>
                     <p class="text-lg sm:text-xl md:text-2xl">
-                      saat film izlemek demektir!
+                      saat film izlemek demektir! &#127909;
                     </p>
                   </div>
 
+                  <div v-if="currentSlide === 13" class="text-center">
+                    <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
+                      Bu kadar zamanı nereden buluyorsun? 🫢
+                    </h3>
+                  </div>
+
                   <!-- Slide 13: Achievements Teaser -->
-                  <div v-if="currentSlide === 12" class="text-center">
+                  <div v-if="currentSlide === 14" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
                       Çok şey başardın
                     </h3>
                     <p class="text-lg sm:text-xl md:text-2xl">
-                      Başarılarını kutlayalım!
+                      Başarılarını kutlayalım! 🎉🎉🎉
                     </p>
                   </div>
 
                   <!-- Slide 14: Achievements -->
-                  <div v-if="currentSlide === 13">
+                  <div v-if="currentSlide === 15">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8 text-center">
                       Başarıların:
                     </h3>
@@ -216,28 +239,22 @@
                   </div>
 
                   <!-- Slide 15: Conclusion -->
-                  <div v-if="currentSlide === 14" class="text-center h-64">
+                  <div v-if="currentSlide === 16" class="text-center h-64">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
                       Harika bir öğrenme yılı için tebrikler!
                     </h3>
 
                     <p class="text-lg sm:text-xl md:text-2xl mt-4">
-                      2024'te de harika işler yapmaya devam et!
+                      2025'te de harika işler yapmaya devam et!
                     </p>
                   </div>
 
                   <!-- Slide 16: Share -->
-                  <div v-if="currentSlide === 15" class="text-center">
+                  <div v-if="currentSlide === 17" class="text-center">
                     <div class="relative">
-                      <WrappedStatsCard 
-                        class="wrapped-stats-card" 
-                        :rank="`İlk %${percentageAboveAverage}`"
-                        :longestStreak="longestStreak" 
-                        :totalAnswers="totalQuestions"
-                        :minutesSpent="totalStudyHours * 60" 
-                        :userName="name" 
-                        ref="statsCardRef"
-                      />
+                      <WrappedStatsCard class="wrapped-stats-card"
+                        :longestStreak="longestStreak" :totalAnswers="totalQuestions"
+                        :minutesSpent="totalStudyHours * 60" :userName="name" ref="statsCardRef" />
                     </div>
                   </div>
                 </div>
@@ -248,21 +265,21 @@
           <!-- Navigation Buttons -->
           <div class="relative z-[55] p-4 flex justify-center gap-2 sm:gap-4 bg-gradient-to-t from-black/20">
             <button v-if="currentSlide === totalSlides - 1" @click="rewindPresentation"
-              class="px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 flex items-center">
-              <RefreshCwIcon class="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
-              Yeniden Başlat
+              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 flex items-center">
+              <RefreshCwIcon class="w-3 h-3 sm:w-3 sm:h-3" />
+              <span class="hidden sm:inline sm:ml-1">Yeniden Başlat</span>
             </button>
             <button v-if="currentSlide === totalSlides - 1" @click="handleShare"
-              class="px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 flex items-center">
-              <Share2Icon class="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
-              İstatistikleri Paylaş
+              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 flex items-center">
+              <Share2Icon class="w-3 h-3 sm:w-3 sm:h-3" />
+              <span class="hidden sm:inline sm:ml-1">İstatistikleri Paylaş</span>
             </button>
             <button @click="prevSlide" :disabled="currentSlide === 0"
-              class="px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-base font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20">
+              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20">
               Geri
             </button>
             <button @click="nextSlide"
-              class="px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-base font-semibold transition-all duration-300 bg-white text-red-600 hover:bg-gray-200">
+              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white text-red-600 hover:bg-gray-200">
               {{ buttonText }}
             </button>
           </div>
@@ -286,9 +303,9 @@ const props = defineProps({
 const emit = defineEmits(["close"]);
 
 const currentSlide = ref(0);
-const totalSlides = 16;
+const totalSlides = 18;
 const transitionName = ref("slide-right");
-
+const showInitialSubtext = ref(false);
 const longestStreak = ref(10);
 const name = ref("Miralp");
 
@@ -329,6 +346,7 @@ const percentageOpacity = ref(0);
 const subjectsOpacity = ref(0);
 const topSubjectRevealed = ref(false);
 const showCelebration = ref(false);
+const subjectTimeouts = ref([]);
 
 const startCounting = () => {
   countedQuestions.value = 0;
@@ -337,7 +355,7 @@ const startCounting = () => {
   countingInterval.value = setInterval(() => {
     if (countedQuestions.value < totalQuestions) {
       countedQuestions.value += Math.ceil(
-        (totalQuestions - countedQuestions.value) / 200
+        (totalQuestions - countedQuestions.value) / 100
       );
       if (countedQuestions.value >= totalQuestions) {
         countedQuestions.value = totalQuestions;
@@ -370,30 +388,53 @@ const revealSubjects = () => {
   }, 100);
 };
 
-watch(currentSlide, (newSlide) => {
+const shuffleArray = (array) => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+watch(currentSlide, (newSlide, oldSlide) => {
   if (newSlide === 1) {
+    showInitialSubtext.value = false;
+    setTimeout(() => {
+      showInitialSubtext.value = true;
+    }, 2000);
+  }
+  if (oldSlide === 5) {
+    subjectTimeouts.value.forEach(timeout => clearTimeout(timeout));
+    subjectTimeouts.value = [];
+    visibleSubjects.value = [];
+  }
+
+  if (newSlide === 2) {
     startCounting();
-  } else if (newSlide === 2) {
+  } else if (newSlide === 3) {
     revealPercentage();
-  } else if (newSlide === 4) {
+  } else if (newSlide === 5) {
     revealSubjects();
     visibleSubjects.value = [];
-    topSubjects.forEach((subject, index) => {
-      setTimeout(() => {
+    const shuffledSubjects = shuffleArray(topSubjects);
+    shuffledSubjects.forEach((subject, index) => {
+      const timeout = setTimeout(() => {
         visibleSubjects.value.push(subject);
       }, index * 1000);
+      subjectTimeouts.value.push(timeout);
     });
-  } else if (newSlide === 6) {
+  } else if (newSlide === 7) {
     showSlide6Content.value = false;
     topSubjectRevealed.value = false;
-  } else if (newSlide === 8) {
+  } else if (newSlide === 9) {
     visibleTopics.value = [];
     topTopics.forEach((topic, index) => {
       setTimeout(() => {
         visibleTopics.value.push(topic);
       }, index * 500);
     });
-  } else if (newSlide === 13) {
+  } else if (newSlide === 15) {
     visibleAchievements.value = [];
     achievements.forEach((achievement, index) => {
       setTimeout(() => {
@@ -443,6 +484,8 @@ const resetAllStates = () => {
   subjectsOpacity.value = 0;
   topSubjectRevealed.value = false;
   showCelebration.value = false;
+  subjectTimeouts.value.forEach(timeout => clearTimeout(timeout));
+  subjectTimeouts.value = [];
 };
 
 const handleShare = async () => {
@@ -482,15 +525,15 @@ const handleShare = async () => {
       const response = await fetch(dataUrl);
       const blob = await response.blob();
 
-      const file = new File([blob], "2023-degerlendirmesi.png", {
+      const file = new File([blob], "2024-degerlendirmesi.png", {
         type: "image/png",
       });
 
       try {
         await navigator.share({
           files: [file],
-          title: "2023 Yılı Değerlendirmesi",
-          text: "2023 yılındaki öğrenme istatistiklerime göz atın!",
+          title: "2024 Yılı Değerlendirmesi",
+          text: "2024 yılındaki öğrenme istatistiklerime göz atın!",
         });
       } catch (shareError) {
         console.error("Paylaşım hatası:", shareError);
@@ -507,7 +550,7 @@ const handleShare = async () => {
 const downloadImage = (dataUrl) => {
   const link = document.createElement("a");
   link.href = dataUrl;
-  link.download = "2023-degerlendirmesi.png";
+  link.download = "2024-degerlendirmesi.png";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
