@@ -170,35 +170,8 @@
     <section class="relative h-screen flex items-center">
       <img :src="HeroImage" alt="Hero"
         class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center" />
-      <div class="absolute inset-0"></div>
+      <div class="absolute inset-0 bg-black/30 mix-blend-color"></div>
       <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-30% from-black via-black/70 to-transparent">
-        <div class="relative flex overflow-x-hidden italic">
-          <div class="py-12 animate-marquee whitespace-nowrap">
-            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
-              hazırlandı <span class="not-italic text-3xl">↓</span></span>
-            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
-              hazırlandı <span class="not-italic text-3xl">↓</span></span>
-            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
-              hazırlandı <span class="not-italic text-3xl">↓</span></span>
-            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
-              hazırlandı <span class="not-italic text-3xl">↓</span></span>
-            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
-              hazırlandı <span class="not-italic text-3xl">↓</span></span>
-          </div>
-
-          <div class="absolute top-0 py-12 animate-marquee2 whitespace-nowrap">
-            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
-              hazırlandı <span class="not-italic text-3xl">↓</span></span>
-            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
-              hazırlandı <span class="not-italic text-3xl">↓</span></span>
-            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
-              hazırlandı <span class="not-italic text-3xl">↓</span></span>
-            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
-              hazırlandı <span class="not-italic text-3xl">↓</span></span>
-            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
-              hazırlandı <span class="not-italic text-3xl">↓</span></span>
-          </div>
-        </div>
       </div>
       <div class="absolute inset-0"></div>
       <div class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full">
