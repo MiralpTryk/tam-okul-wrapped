@@ -27,13 +27,13 @@
           <div class="flex gap-2">
             <button @click="activeTab = 'all'" :class="[
               'px-4 py-2 rounded text-sm font-medium transition-colors',
-              activeTab === 'all' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-300'
+              activeTab === 'all' ? 'bg-[#1A93BD] text-white' : 'bg-zinc-800 text-zinc-300'
             ]">
               Tüm Sorular
             </button>
             <button @click="activeTab = 'bookmarked'" :class="[
               'px-4 py-2 rounded text-sm font-medium transition-colors',
-              activeTab === 'bookmarked' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-300'
+              activeTab === 'bookmarked' ? 'bg-[#1A93BD] text-white' : 'bg-zinc-800 text-zinc-300'
             ]">
               Favori Sorular
             </button>
@@ -54,7 +54,7 @@
                 <span>{{ answeredOrSavedCount }} / {{ totalQuestions }}</span>
               </div>
               <div class="bg-zinc-700 rounded-full h-2">
-                <div class="bg-red-600 h-full rounded-full transition-all duration-300"
+                <div class="bg-[#1A93BD] h-full rounded-full transition-all duration-300"
                   :style="{ width: `${progress}%` }">
                 </div>
               </div>
@@ -65,7 +65,7 @@
                 <span>{{ currentPageAnsweredOrSavedCount }} / {{ currentPageQuestions.length }}</span>
               </div>
               <div class="bg-zinc-700 rounded-full h-2">
-                <div class="bg-blue-600 h-full rounded-full transition-all duration-300"
+                <div class="bg-violet-700 h-full rounded-full transition-all duration-300"
                   :style="{ width: `${currentPageProgress}%` }"></div>
               </div>
             </div>
@@ -129,8 +129,6 @@
                 </svg>
               </button>
             </div>
-
-            <!-- Add this new section -->
             <div v-if="question.saved" class="mt-3">
               <button @click="watchSolutionVideo(question.id)"
                 class="w-full bg-zinc-800 hover:bg-zinc-700 text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200">
@@ -156,7 +154,7 @@
               'px-2 md:px-4 py-1 md:py-2 text-sm md:text-base rounded',
               isPageSaved(currentPage)
                 ? 'bg-zinc-800 text-white opacity-50 cursor-not-allowed'
-                : 'bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed'
+                : 'bg-[#1A93BD] text-white hover:bg-[#0284c7] disabled:opacity-50 disabled:cursor-not-allowed'
             ]">
               {{ isPageSaved(currentPage) ? 'Kaydedildi' : 'Kaydet' }}
             </button>
@@ -175,12 +173,12 @@
           <h2 class="text-lg md:text-xl font-bold mb-3 md:mb-4">Cevapları Kaydet</h2>
           <p class="mb-3 md:mb-4 text-sm md:text-base text-zinc-300">
             Cevapları kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını göreceğiniz için <span
-              class="text-red-600 font-semibold">tekrar işaretleme yapamayacaksınız.</span>
+              class="text-[#1A93BD] font-semibold">tekrar işaretleme yapamayacaksınız.</span>
             {{ currentPage }}. sayfa için cevapları kaydetmek istediğinize emin misiniz?
           </p>
           <div class="flex items-center mb-3 md:mb-4">
             <input type="checkbox" id="dontShowAgain" v-model="dontShowConfirmationAgain"
-              class="mr-2 bg-zinc-700 border-zinc-600 text-red-600 focus:ring-red-500">
+              class="mr-2 bg-zinc-700 border-zinc-600 text-[#1A93BD] focus:ring-red-500">
             <label for="dontShowAgain" class="text-sm md:text-base text-zinc-300 select-none">Bu uyarıyı tekrar
               gösterme</label>
           </div>
@@ -190,7 +188,7 @@
               Hayır
             </button>
             <button @click="confirmSave"
-              class="px-3 md:px-4 py-1 md:py-2 text-sm md:text-base bg-red-600 text-white rounded hover:bg-red-700 transition-colors duration-200">
+              class="px-3 md:px-4 py-1 md:py-2 text-sm md:text-base bg-[#1A93BD] text-white rounded hover:bg-[#0284c7] transition-colors duration-200">
               Evet
             </button>
           </div>

@@ -18,7 +18,7 @@
         <span 
           v-for="(cat, index) in book?.category" 
           :key="index"
-          class="px-3 py-1 bg-red-600 rounded-full"
+          class="px-3 py-1 bg-[#1A93BD] rounded-full"
         >
           {{ cat }}
         </span>

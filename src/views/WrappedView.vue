@@ -11,7 +11,7 @@
         </a>
         <div class="flex items-center space-x-4">
           <RouterLink to="/optic-form">
-            <button class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded text-sm">
+            <button class="bg-[#1A93BD] hover:bg-[#0284c7] text-white px-6 py-2 rounded text-sm">
               Optik İşaretle
             </button>
           </RouterLink>
@@ -155,7 +155,7 @@
               </table>
               <div class="mt-6">
                 <button type="button"
-                  class="inline-flex items-center justify-center rounded-md bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                  class="inline-flex items-center justify-center rounded-md bg-[#1A93BD] px-6 py-2 text-sm font-medium text-white hover:bg-[#0284c7] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                   @click="showInfoModal = false">
                   Anladım
                 </button>
@@ -170,25 +170,35 @@
     <section class="relative h-screen flex items-center">
       <img :src="HeroImage" alt="Hero"
         class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center" />
-      <div class="absolute inset-0 bg-red-600 mix-blend-multiply opacity-60"></div>
+      <div class="absolute inset-0"></div>
       <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-30% from-black via-black/70 to-transparent">
         <div class="relative flex overflow-x-hidden italic">
-        <div class="py-12 animate-marquee whitespace-nowrap">
-          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
-          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
-          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
-          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
-          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
-        </div>
+          <div class="py-12 animate-marquee whitespace-nowrap">
+            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
+              hazırlandı <span class="not-italic text-3xl">↓</span></span>
+            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
+              hazırlandı <span class="not-italic text-3xl">↓</span></span>
+            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
+              hazırlandı <span class="not-italic text-3xl">↓</span></span>
+            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
+              hazırlandı <span class="not-italic text-3xl">↓</span></span>
+            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
+              hazırlandı <span class="not-italic text-3xl">↓</span></span>
+          </div>
 
-        <div class="absolute top-0 py-12 animate-marquee2 whitespace-nowrap">
-          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
-          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
-          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
-          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
-          <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle hazırlandı <span class="not-italic text-3xl">↓</span></span>
+          <div class="absolute top-0 py-12 animate-marquee2 whitespace-nowrap">
+            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
+              hazırlandı <span class="not-italic text-3xl">↓</span></span>
+            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
+              hazırlandı <span class="not-italic text-3xl">↓</span></span>
+            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
+              hazırlandı <span class="not-italic text-3xl">↓</span></span>
+            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
+              hazırlandı <span class="not-italic text-3xl">↓</span></span>
+            <span class="text-4xl mx-4 text-white/15">Bu içerikler <span class="font-bold">senin için</span> özenle
+              hazırlandı <span class="not-italic text-3xl">↓</span></span>
+          </div>
         </div>
-      </div>
       </div>
       <div class="absolute inset-0"></div>
       <div class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full">
@@ -207,10 +217,10 @@
         <div>
           <div class="relative inline-flex">
             <button @click="openModal"
-              class="relative inline-flex items-center justify-center px-6 py-2 text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-500 active:scale-95 rounded"
+              class="relative inline-flex items-center justify-center px-6 py-2 text-lg text-white transition-all bg-[#1A93BD] hover:bg-[#1A93BD]/70 focus:ring-violet-600 active:scale-95 rounded"
               role="button">
-              <Play class="w-6 h-6 mr-2 fill-black" /> Öğrenme Yolculuğun
-              {{ new Date().getFullYear() }}
+              <Play class="w-6 h-6 mr-2 fill-white" /> {{ new Date().getFullYear() }} Öğrenme Yolculuğun
+
             </button>
             <!-- <AnimatedCTAButton @click="openModal" /> -->
             <!-- <GlowingCTAButton @click="openModal" /> -->
@@ -345,7 +355,7 @@ import WrappedModal from "@/components/WrappedModal.vue";
 import ContentModal from "@/components/ContentModal.vue";
 import LessonContent from "@/components/LessonContent.vue";
 import DecodeText from "@/components/DecodeText.vue";
-import HeroImage from "@/assets/hero-img.webp";
+import HeroImage from "@/assets/hero-img_3.webp";
 import { Play } from "lucide-vue-next";
 import MusicContent from "@/components/MusicContent.vue";
 import QuoteContent from "@/components/QuoteContent.vue";
@@ -485,7 +495,7 @@ const checkMobile = () => {
 
 onMounted(() => {
   checkMobile();
-  
+
   window.addEventListener('resize', checkMobile);
 });
 

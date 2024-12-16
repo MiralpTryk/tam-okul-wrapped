@@ -17,7 +17,7 @@
         </a>
         <div class="flex items-center space-x-4">
           <RouterLink to="/optic-form">
-            <button class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded text-sm">
+            <button class="bg-[#1A93BD] hover:bg-[#0284c7] text-white px-6 py-2 rounded text-sm">
               Optik İşaretle
             </button>
           </RouterLink>
@@ -50,7 +50,7 @@
                     <a
                       href="#"
                       @click.prevent="scrollToSection(category.id, subcategory)"
-                      class="block py-1.5 px-4 truncate hover:bg-zinc-900 hover:border-l-2 hover:border-red-600 rounded-r transition-colors text-sm text-zinc-400 hover:text-zinc-300 border-l border-zinc-800"
+                      class="block py-1.5 px-4 truncate hover:bg-zinc-900 hover:border-l-2 hover:border-[#1A93BD] rounded-r transition-colors text-sm text-zinc-400 hover:text-zinc-300 border-l border-zinc-800"
                     >
                       {{ subcategory }}
                     </a>

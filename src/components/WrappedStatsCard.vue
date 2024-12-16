@@ -34,7 +34,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 hover:bg-zinc-700/60 hover:border-zinc-600 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-xl">🎯</span>
-                <span class="text-2xl font-bold text-red-600">%{{ successRate }}</span>
+                <span class="text-2xl font-bold text-[#1A93BD]">%{{ successRate }}</span>
               </div>
               <div class="text-[10px] sm:text-sm text-zinc-400 [margin-top:4px]">
                 Başarı Oranı
@@ -51,7 +51,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 hover:bg-zinc-700/60 hover:border-zinc-600 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-xl">🏆</span>
-                <span class="text-xl font-bold text-red-600">{{ bestCourse }}</span>
+                <span class="text-xl font-bold text-[#1A93BD]">{{ bestCourse }}</span>
               </div>
               <div class="text-[10px] sm:text-sm text-zinc-400 [margin-top:4px]">
                 En İyi Ders
@@ -61,7 +61,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 hover:bg-zinc-700/60 hover:border-zinc-600 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-xl">⭐</span>
-                <span class="text-xl font-bold text-red-600">{{ bestTopic }}</span>
+                <span class="text-xl font-bold text-[#1A93BD]">{{ bestTopic }}</span>
               </div>
               <div class="text-[10px] sm:text-sm text-zinc-400 [margin-top:4px]">
                 En İyi Konu
@@ -71,7 +71,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 hover:bg-zinc-700/60 hover:border-zinc-600 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-xl">✍️</span>
-                <span class="text-2xl font-bold text-red-600">{{ totalQuestions }}</span>
+                <span class="text-2xl font-bold text-[#1A93BD]">{{ totalQuestions }}</span>
               </div>
               <div class="text-[10px] sm:text-sm text-zinc-400 [margin-top:4px]">
                 Çözülen Soru
@@ -81,7 +81,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 hover:bg-zinc-700/60 hover:border-zinc-600 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-xl">⏱️</span>
-                <span class="text-2xl font-bold text-red-600">{{ hoursSpent }}</span>
+                <span class="text-2xl font-bold text-[#1A93BD]">{{ hoursSpent }}</span>
               </div>
               <div class="text-[10px] sm:text-sm text-zinc-400 [margin-top:4px]">
                 Çalışma Saati

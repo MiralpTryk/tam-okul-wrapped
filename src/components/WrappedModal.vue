@@ -279,7 +279,7 @@
               Geri
             </button>
             <button @click="nextSlide"
-              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white text-red-600 hover:bg-gray-200">
+              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white text-[#1A93BD] hover:bg-gray-200">
               {{ buttonText }}
             </button>
           </div>
