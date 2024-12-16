@@ -189,8 +189,9 @@
             müzik dinle, kitap önerilerini keşfet ve motivasyon sözleriyle ilham al.
             <br />
             <br />
-              Videolar hakkında daha fazla bilgi almak için konu başlığının yanındaki "Neden bu videoları görüyorum?"
-              bölümüne tıklayabilirsin.
+            Videolar hakkında daha fazla bilgi almak için konu başlığının yanındaki
+            <Info class="w-5 h-5 inline" />
+            butonuna tıklayabilirsin.
           </p>
         </div>
         <div>
@@ -218,21 +219,24 @@
           <button v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
             class="sm:hidden bg-zinc-800 text-white rounded-full w-8 h-8 flex items-center justify-center z-10"
             @click="showInfoModal = true">
-            <span class="text-sm">?</span>
-          </button>
+            <span class="text-sm flex-shrink-0 flex items-center justify-center">
+              <Info class="w-4 h-4" />
+            </span> </button>
 
           <!-- Desktop Button -->
           <button v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
             class="hidden sm:flex bg-zinc-800 text-white rounded-full items-center justify-end transition-all duration-300 ease-in-out overflow-hidden z-10"
-            :class="{ 'w-8 h-8': !hoveredSection[index], 'w-[216px] h-8': hoveredSection[index] }"
+            :class="{ 'w-8 h-8': !hoveredSection[index], 'w-[228px] h-8': hoveredSection[index] }"
             @mouseenter="hoveredSection[index] = true" @mouseleave="hoveredSection[index] = false"
             @click="showInfoModal = true">
             <div class="flex items-center w-full h-full justify-end">
               <span class="whitespace-nowrap text-xs transition-all duration-300 ease-in-out overflow-hidden mr-1"
                 :class="{ 'w-0 opacity-0': !hoveredSection[index], 'w-auto opacity-100': hoveredSection[index] }">
-                Neden bu videoları görüyorum
+                Neden bu videoları görüyorum?
               </span>
-              <span class="text-sm flex-shrink-0 mr-3 flex items-center justify-center">?</span>
+              <span class="text-sm flex-shrink-0 mr-2 flex items-center justify-center">
+                <Info class="w-4 h-4" />
+              </span>
             </div>
           </button>
         </div>
@@ -327,7 +331,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from "vue";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-vue-next";
+import { ChevronLeftIcon, ChevronRightIcon, Info } from "lucide-vue-next";
 // import AnimatedCTAButton from "@/components/AnimatedCTAButton.vue";
 // import GlowingCTAButton from "@/components/GlowingCTAButton.vue";
 import WrappedModal from "@/components/WrappedModal.vue";
@@ -1485,22 +1489,22 @@ const lessonSections = [
 
 const otherSections = [
   {
-    title: "Çalışırken Dinle",
+    title: "Çalışırken Dinle 🎶",
     type: "music",
     items: generateItems(10, "Music", "music")
   },
   {
-    title: "Motivasyon Sözleri",
+    title: "Motivasyon Sözleri 💬",
     type: "quote",
     items: generateItems(10, "Quote", "quote")
   },
   {
-    title: "İlham Veren Hikayeler",
+    title: "İlham Veren Hikayeler ✍️",
     type: "story",
     items: generateStories(5)
   },
   {
-    title: "Kitap Önerileri",
+    title: "Kitap Önerileri 📚",
     type: "book",
     items: generateBooks(10)
   }
