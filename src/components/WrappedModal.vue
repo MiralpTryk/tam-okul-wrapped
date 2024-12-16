@@ -129,11 +129,13 @@
                         <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
                           Öne çıkan dersin...
                         </h3>
-                        <div v-if="!topSubjectRevealed" @click="revealTopSubject" class="cursor-pointer">
-                          <div
-                            class="text-4xl sm:text-5xl md:text-7xl font-bold bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                            Açmak için tıkla
-                          </div>
+                        <div v-if="!topSubjectRevealed" 
+                             @click="revealTopSubject" 
+                             class="cursor-pointer flex flex-col items-center justify-center gap-4 relative animate-pulse">
+                          <img :src="FingerPrint" 
+                               alt="Fingerprint" 
+                               class="w-20 h-20 sm:w-24 sm:h-24 md:w-48 md:h-48 opacity-80 hover:opacity-100 transition-all duration-300" />
+                          <span class="text-xl sm:text-2xl md:text-3xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">Açmak için tıkla</span>
                         </div>
                         <Transition name="fade">
                           <div v-if="topSubjectRevealed">
@@ -375,6 +377,7 @@ import WrappedStatsCard from "@/components/WrappedStatsCard.vue";
 import domtoimage from 'dom-to-image';
 import { RefreshCwIcon, Share2Icon } from "lucide-vue-next";
 import CircularProgress from '@/components/CircularProgress.vue';
+import FingerPrint from '@/assets/fingerprint.svg';
 
 const props = defineProps({
   show: Boolean,
