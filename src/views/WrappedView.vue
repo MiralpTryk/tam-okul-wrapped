@@ -175,7 +175,7 @@
       </div>
       <div class="absolute inset-0"></div>
       <div class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full">
-        <div class="max-w-[800px] mb-8">
+        <div class="max-w-[720px] mb-8">
           <h1 class="text-3xl sm:text-4xl font-bold mb-4">
             Merhaba
             <span class="inline-flex items-center -mr-2">
@@ -1445,38 +1445,68 @@ const generateBooks = (count) => {
   }));
 };
 
-const sections = [
-  { title: "Fizik", items: generateItems(20, "Fizik"), type: "video" },
-  { title: "Kimya", items: generateItems(20, "Kimya"), type: "video" },
+const lessonSections = [
   {
-    title: "Motivasyon Müzikleri",
-    items: generateItems(10, "Motivasyon", "music"),
-    type: "music",
-  },
-  { title: "Biyoloji", items: generateItems(20, "Biyoloji"), type: "video" },
-  { title: "Matematik", items: generateItems(20, "Matematik"), type: "video" },
-  {
-    title: "İlham Veren Sözler",
-    items: generateItems(20, "Motivasyon", "quote"),
-    type: "quote",
-  },
-  { title: "Tarih", items: generateItems(20, "Tarih"), type: "video" },
-  { title: "Felsefe", items: generateItems(20, "Felsefe"), type: "video" },
-  { title: "Başarı Hikayeleri", items: generateStories(10), type: "story" },
-  { title: "Coğrafya", items: generateItems(20, "Coğrafya"), type: "video" },
-  { title: "Türkçe", items: generateItems(20, "Türkçe"), type: "video" },
-  { title: "Kitap Önerileri", items: generateBooks(52), type: "book" },
-  {
-    title: "Din Kültürü",
-    items: generateItems(20, "Din Kültürü"),
-    type: "video",
+    title: "Matematik",
+    type: "lesson",
+    items: generateItems(10, "Matematik")
   },
   {
-    title: "Sosyal Bilgiler",
-    items: generateItems(20, "Sosyal Bilgiler"),
-    type: "video",
+    title: "Fizik",
+    type: "lesson",
+    items: generateItems(10, "Fizik")
   },
+  {
+    title: "Kimya",
+    type: "lesson",
+    items: generateItems(10, "Kimya")
+  },
+  {
+    title: "Biyoloji",
+    type: "lesson",
+    items: generateItems(10, "Biyoloji")
+  },
+  {
+    title: "Türkçe",
+    type: "lesson",
+    items: generateItems(10, "Türkçe")
+  },
+  {
+    title: "Tarih",
+    type: "lesson",
+    items: generateItems(10, "Tarih")
+  },
+  {
+    title: "Coğrafya",
+    type: "lesson",
+    items: generateItems(10, "Coğrafya")
+  }
 ];
+
+const otherSections = [
+  {
+    title: "Çalışırken Dinle",
+    type: "music",
+    items: generateItems(10, "Music", "music")
+  },
+  {
+    title: "Motivasyon Sözleri",
+    type: "quote",
+    items: generateItems(10, "Quote", "quote")
+  },
+  {
+    title: "İlham Veren Hikayeler",
+    type: "story",
+    items: generateStories(5)
+  },
+  {
+    title: "Kitap Önerileri",
+    type: "book",
+    items: generateBooks(10)
+  }
+];
+
+const sections = [...lessonSections, ...otherSections];
 
 const scroll = (index, direction) => {
   const container = scrollContainers.value[index];
