@@ -202,16 +202,22 @@
       </div>
       <div class="absolute inset-0"></div>
       <div class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full">
-        <div class="max-w-[1024px] mb-8">
-          <h1 class="text-4xl sm:text-5xl font-bold mb-4">
+        <div class="max-w-[800px] mb-8">
+          <h1 class="text-3xl sm:text-4xl font-bold mb-4">
             Merhaba
             <span class="inline-flex items-center -mr-2">
               <DecodeText :text="userName" :interval="15000" />
             </span>
-            , dijital kişiye özel kitabına hoşgeldin.
+            , senin için tasarlanan eşsiz öğrenme deneyimine hoş geldin!
           </h1>
-          <p class="text-xl sm:text-2xl">
-            Senin için hazırladığımız içerikleri keşfet.
+          <p class="text-sm sm:text-base">
+            Tam Okul ile öğrenme yolculuğun tamamen sana özel.
+            Başarı durumuna göre YouTube'dan seçilen konu anlatım videoları ile eksiklerini tamamla, kişisel duvarında
+            müzik dinle, kitap önerilerini keşfet ve motivasyon sözleriyle ilham al.
+            <br />
+            <br />
+              Videolar hakkında daha fazla bilgi almak için konu başlığının yanındaki "Neden bu videoları görüyorum?"
+              bölümüne tıklayabilirsin.
           </p>
         </div>
         <div>
