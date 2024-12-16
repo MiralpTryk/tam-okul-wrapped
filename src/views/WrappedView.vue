@@ -179,7 +179,7 @@
           <h1 class="text-3xl sm:text-4xl font-bold mb-4">
             Merhaba
             <span class="inline-flex items-center -mr-2">
-              <DecodeText :text="userName" :interval="15000" />
+              <DecodeText :text="userName" :interval="5000" />
             </span>
             , senin için tasarlanan eşsiz öğrenme deneyimine hoş geldin!
           </h1>
