@@ -67,7 +67,13 @@ const s=({size:t,strokeWidth:e=2,absoluteStrokeWidth:n,color:s,iconNode:c,name:a
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
- */const o=(0,r.A)("ChevronRightIcon",[["path",{d:"m9 18 6-6-6-6",key:"mthhwq"}]])},9615:function(t,e,n){"use strict";n.d(e,{A:function(){return o}});var r=n(5525);
+ */const o=(0,r.A)("ChevronRightIcon",[["path",{d:"m9 18 6-6-6-6",key:"mthhwq"}]])},2089:function(t,e,n){"use strict";n.d(e,{A:function(){return o}});var r=n(5525);
+/**
+ * @license lucide-vue-next v0.461.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const o=(0,r.A)("InfoIcon",[["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}],["path",{d:"M12 16v-4",key:"1dtifu"}],["path",{d:"M12 8h.01",key:"e9boi3"}]])},9615:function(t,e,n){"use strict";n.d(e,{A:function(){return o}});var r=n(5525);
 /**
  * @license lucide-vue-next v0.461.0 - ISC
  *
