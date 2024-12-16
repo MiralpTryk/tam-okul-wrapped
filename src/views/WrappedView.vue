@@ -183,7 +183,7 @@
             </span>
             , senin için tasarlanan eşsiz öğrenme deneyimine hoş geldin!
           </h1>
-          <p class="text-sm sm:text-base">
+          <p class="text-sm sm:text-base bg-black/50 rounded-lg px-4 py-2">
             Tam Okul ile öğrenme yolculuğun tamamen sana özel.
             Başarı durumuna göre YouTube'dan seçilen konu anlatım videoları ile eksiklerini tamamla, kişisel duvarında
             müzik dinle, kitap önerilerini keşfet ve motivasyon sözleriyle ilham al.
@@ -1793,6 +1793,11 @@ const sortedData = computed(() => {
     .filter(item => item.successRate === null);
 
   return { excellent, good, needsImprovement, noData };
+});
+
+onMounted(() => {
+  // Sayfa yüklendiğinde modalı otomatik aç
+  openModal();
 });
 </script>
 
