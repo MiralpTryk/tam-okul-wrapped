@@ -206,13 +206,14 @@
         </div>
         <div>
           <div class="relative inline-flex">
-<!--             <button @click="openModal"
+            <button @click="openModal"
               class="relative inline-flex items-center justify-center px-6 py-2 text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-500 active:scale-95 rounded"
               role="button">
               <Play class="w-6 h-6 mr-2 fill-black" /> Öğrenme Yolculuğun
               {{ new Date().getFullYear() }}
-            </button> -->
-            <AnimatedCTAButton @click="openModal" />
+            </button>
+            <!-- <AnimatedCTAButton @click="openModal" /> -->
+            <!-- <GlowingCTAButton @click="openModal" /> -->
           </div>
         </div>
       </div>
@@ -338,13 +339,14 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-vue-next";
-import AnimatedCTAButton from "@/components/AnimatedCTAButton.vue";
+// import AnimatedCTAButton from "@/components/AnimatedCTAButton.vue";
+// import GlowingCTAButton from "@/components/GlowingCTAButton.vue";
 import WrappedModal from "@/components/WrappedModal.vue";
 import ContentModal from "@/components/ContentModal.vue";
 import LessonContent from "@/components/LessonContent.vue";
 import DecodeText from "@/components/DecodeText.vue";
 import HeroImage from "@/assets/hero-img.webp";
-// import { Play } from "lucide-vue-next";
+import { Play } from "lucide-vue-next";
 import MusicContent from "@/components/MusicContent.vue";
 import QuoteContent from "@/components/QuoteContent.vue";
 import BookContent from "@/components/BookContent.vue";
@@ -475,24 +477,18 @@ const showContentModal = ref(false);
 const selectedLesson = ref(null);
 const userName = "Miralp";
 
-// isMobile'ı ref olarak tanımlayalım
 const isMobile = ref(false);
 
-// Ekran boyutunu kontrol eden fonksiyon
 const checkMobile = () => {
   isMobile.value = window.innerWidth < 768;
 };
 
-// Component mount olduğunda
 onMounted(() => {
-  // İlk kontrol
   checkMobile();
   
-  // Pencere boyutu değiştiğinde kontrol et
   window.addEventListener('resize', checkMobile);
 });
 
-// Component unmount olduğunda event listener'ı temizle
 onUnmounted(() => {
   window.removeEventListener('resize', checkMobile);
 });

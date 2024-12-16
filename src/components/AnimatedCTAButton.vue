@@ -62,7 +62,7 @@ button {
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff, #ff00ff, #ffff00, #00ffff);
+    background: linear-gradient(45deg, #ffffff, #ff0000, #ffffff, #ff0000);
     background-size: 400% 400%;
     z-index: -1;
     filter: blur(5px);

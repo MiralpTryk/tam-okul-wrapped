@@ -585,7 +585,7 @@ const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
 
   // Çalışma Saati Rozetleri
   if (hoursSpent >= 300) {
-    badges.push({ emoji: '⏰', title: 'Azim Şampiyonu (300+ Saat)' });
+    badges.push({ emoji: '⏰', title: 'Azimli Şampiyon (300+ Saat)' });
   } else if (hoursSpent >= 200) {
     badges.push({ emoji: '⌚', title: 'Çalışkan Arı (200+ Saat)' });
   } else if (hoursSpent >= 100) {
