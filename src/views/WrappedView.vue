@@ -11,7 +11,7 @@
         </a>
         <div class="flex items-center space-x-4">
           <RouterLink to="/optic-form">
-            <button class="bg-[#1A93BD] hover:bg-[#0284c7] text-white px-6 py-2 rounded text-sm">
+            <button class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded text-sm">
               Optik İşaretle
             </button>
           </RouterLink>
@@ -73,7 +73,7 @@
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
                       item.correct ?? '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-500">{{ item.wrong ??
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
                       '—' }}</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
                       '—' }}</td>
@@ -97,7 +97,7 @@
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
                       item.correct ?? '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-500">{{ item.wrong ??
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
                       '—' }}</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
                       '—' }}</td>
@@ -113,15 +113,15 @@
                   </tr>
 
                   <!-- Geliştirilmeli (< 50%) -->
-                  <tr class="bg-red-500/5">
-                    <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-red-500">
+                  <tr class="bg-red-600/5">
+                    <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-red-600">
                       Geliştirilmeli</td>
                   </tr>
                   <tr v-for="item in sortedData.needsImprovement" :key="item.subject" class="border-b border-zinc-800">
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
                       item.correct ?? '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-500">{{ item.wrong ??
+                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
                       '—' }}</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
                       '—' }}</td>
@@ -129,7 +129,7 @@
                       '—' }}</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
                       <span v-if="item.successRate != null"
-                        class="px-2 py-1 rounded-full text-xs bg-red-500/20 text-red-500">
+                        class="px-2 py-1 rounded-full text-xs bg-red-600/20 text-red-600">
                         %{{ item.successRate }}
                       </span>
                       <span v-else class="text-zinc-400">—</span>
@@ -155,7 +155,7 @@
               </table>
               <div class="mt-6">
                 <button type="button"
-                  class="inline-flex items-center justify-center rounded-md bg-[#1A93BD] px-6 py-2 text-sm font-medium text-white hover:bg-[#0284c7] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                  class="inline-flex items-center justify-center rounded-md bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
                   @click="showInfoModal = false">
                   Anladım
                 </button>
@@ -170,7 +170,8 @@
     <section class="relative h-screen flex items-center">
       <img :src="HeroImage" alt="Hero"
         class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center" />
-      <div class="absolute inset-0 bg-black/30 mix-blend-color"></div>
+      <!-- Changed from bg-black/30 to bg-red-600 -->
+      <div class="absolute inset-0 bg-red-600/50 mix-blend-color"></div>
       <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-30% from-black via-black/70 to-transparent overflow-hidden">
         <div class="flex gap-4 pr-4 w-[200%] h-full animate-marquee" style="--marquee-duration: 5000ms;">
           <div class="flex flex-1 h-full">
@@ -209,9 +210,9 @@
         <div>
           <div class="relative inline-flex">
             <button @click="openModal"
-              class="relative inline-flex items-center justify-center px-6 py-2 text-lg text-white transition-all bg-[#1A93BD] hover:bg-[#1A93BD]/70 focus:ring-violet-600 active:scale-95 rounded"
+              class="relative inline-flex items-center justify-center px-6 py-2 text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-600 active:scale-95 rounded"
               role="button">
-              <Play class="w-6 h-6 mr-2 fill-white" /> {{ new Date().getFullYear() }} Öğrenme Yolculuğun
+              <Play class="w-6 h-6 mr-2 fill-black" /> {{ new Date().getFullYear() }} Öğrenme Yolculuğun
 
             </button>
             <!-- <AnimatedCTAButton @click="openModal" /> -->
@@ -350,7 +351,7 @@ import WrappedModal from "@/components/WrappedModal.vue";
 import ContentModal from "@/components/ContentModal.vue";
 import LessonContent from "@/components/LessonContent.vue";
 import DecodeText from "@/components/DecodeText.vue";
-import HeroImage from "@/assets/hero-img_3.webp";
+import HeroImage from "@/assets/hero-img.webp";
 import { Play } from "lucide-vue-next";
 import MusicContent from "@/components/MusicContent.vue";
 import QuoteContent from "@/components/QuoteContent.vue";
@@ -1545,7 +1546,7 @@ const startDrag = (e) => {
   }
   const container = e.currentTarget;
   scrollLeft.value = container.scrollLeft;
-  momentum.value = { velocity: 0, timestamp: Date.now() };
+  momentum.value = { velocity: 0, timestamp: 0 };
 };
 
 const drag = (e) => {
@@ -1785,7 +1786,7 @@ const getColorClass = (item) => {
 
   if (percentage >= 80) return 'text-green-500';
   if (percentage >= 50) return 'text-yellow-500';
-  return 'text-red-500';
+  return 'text-red-600';
 };
 
 const sortedData = computed(() => {
