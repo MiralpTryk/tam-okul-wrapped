@@ -2,8 +2,9 @@
   <Transition name="modal">
     <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="absolute inset-0 bg-black opacity-50" @click="closeModal"></div>
-      <div class="relative bg-gradient-to-br from-black via-zinc-800 to-violet-600 w-full h-full overflow-hidden">
+      <div class="relative bg-gradient-to-br to-black from-[#3d2770] w-full h-full overflow-hidden">
         <div class="emoji-pattern"></div>
+        <img :src="Logo" alt="Tam Okul AI Logo" class="w-16 sm:w-24 md:w-36 h-auto absolute bottom-4 right-4 hover:drop-shadow-[0_0_20px_rgba(255,255,255,1)] transition-all duration-300" crossorigin="anonymous" loading="eager" />
 
         <!-- Progress Bar -->
         <div
@@ -28,7 +29,7 @@
 
                 <!-- Slide Content -->
                 <!-- Slide 0: Intro -->
-                <div class="w-full max-w-6xl mx-auto">
+                <div>
                   <h2 v-if="currentSlide === 0"
                     class="text-3xl sm:text-5xl md:text-6xl font-bold text-center mb-6 sm:mb-12">
                     <span class="text-sky-500">{{ new Date().getFullYear() }}</span> Öğrenme Yolculuğun
@@ -129,13 +130,13 @@
                         <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
                           Öne çıkan dersin...
                         </h3>
-                        <div v-if="!topSubjectRevealed" 
-                             @click="revealTopSubject" 
-                             class="cursor-pointer flex flex-col items-center justify-center gap-4 relative animate-pulse">
-                          <img :src="FingerPrint" 
-                               alt="Fingerprint" 
-                               class="w-20 h-20 sm:w-24 sm:h-24 md:w-48 md:h-48 opacity-80 hover:opacity-100 transition-all duration-300" />
-                          <span class="text-xl sm:text-2xl md:text-3xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">Açmak için tıkla</span>
+                        <div v-if="!topSubjectRevealed" @click="revealTopSubject"
+                          class="cursor-pointer flex flex-col items-center justify-center gap-4 relative group w-fit justify-self-center">
+                          <img :src="FingerPrint" alt="Fingerprint"
+                            class="w-20 h-20 sm:w-24 sm:h-24 md:w-48 md:h-48 opacity-50 group-hover:opacity-100 transition-all duration-300" />
+                          <span
+                            class="text-xl sm:text-2xl md:text-3xl opacity-50 group-hover:opacity-100 transition-all duration-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-nowrap">Açmak
+                            için tıkla</span>
                         </div>
                         <Transition name="fade">
                           <div v-if="topSubjectRevealed">
@@ -260,13 +261,13 @@
                       <div v-if="achievementPhase === 'list' || achievementPhase === 'conclusion'"
                         class="overflow-hidden">
                         <TransitionGroup name="list" tag="ul" class="space-y-2 sm:space-y-4">
-                          <li v-for="badge in visibleAchievements" :key="badge.id"
+                          <li v-for="(badge, index) in visibleAchievements" :key="`badge-${badge.id || index}`"
                             class="flex items-center text-lg sm:text-xl md:text-2xl bg-white/5 rounded-lg p-4 backdrop-blur-sm"
                             :class="[
                               'transition-all duration-500',
                               badge.isHighlighted ? 'scale-105 bg-white/10' : 'scale-100'
                             ]">
-                            <div class="flex items-center space-x-4 w-full">
+                            <div class="flex items-center space-x-4 w-full sm:mx-12 md:mx-24">
                               <span class="text-3xl sm:text-4xl md:text-5xl"
                                 :class="{ 'animate-bounce': badge.isHighlighted }">
                                 {{ badge.emoji }}
@@ -278,31 +279,6 @@
                                 ]">
                                   {{ badge.title }}
                                 </div>
-                              </div>
-                            </div>
-                          </li>
-                          <!-- Streak'i ayrı bir koşulla gösterelim -->
-                          <li v-if="visibleAchievements.some(b => b.type === 'streak')" :key="'streak'"
-                            class="flex items-center text-lg sm:text-xl md:text-2xl bg-white/5 rounded-lg p-4 backdrop-blur-sm">
-                            <div class="flex items-center space-x-4 w-full">
-                              <span class="text-3xl sm:text-4xl md:text-5xl animate-bounce">🔥</span>
-                              <div class="flex-1">
-                                <div class="font-medium mb-1">En uzun başarı serin</div>
-                                <div class="flex items-baseline space-x-2">
-                                  <span :class="[
-                                    'text-3xl sm:text-4xl md:text-5xl font-bold transition-all duration-300',
-                                    streakHighlight ? 'text-yellow-400 scale-110 transform rotate-2' : 'text-sky-500 scale-100 rotate-0'
-                                  ]">
-                                    {{ animatedStreak }}
-                                  </span>
-                                  <span class="text-white/60">gün</span>
-                                </div>
-                              </div>
-                              <div :class="[
-                                'transition-transform duration-500',
-                                streakHighlight ? 'scale-125' : 'scale-100'
-                              ]">
-                                🏆
                               </div>
                             </div>
                           </li>
@@ -320,7 +296,6 @@
                         <p class="text-lg sm:text-xl md:text-2xl mt-4">
                           2025'te de harika işler yapmaya devam et!
                         </p>
-
                         <Celebration v-if="showCelebration" />
                       </div>
                     </Transition>
@@ -374,10 +349,11 @@
 import { ref, computed, watch, onUnmounted } from "vue";
 import Celebration from "@/components/Celebration.vue";
 import WrappedStatsCard from "@/components/WrappedStatsCard.vue";
-import domtoimage from 'dom-to-image';
+import html2canvas from 'html2canvas';
 import { RefreshCwIcon, Share2Icon } from "lucide-vue-next";
 import CircularProgress from '@/components/CircularProgress.vue';
 import FingerPrint from '@/assets/fingerprint.svg';
+import Logo from '@/assets/tam-okul-ai-logo.svg';
 
 const props = defineProps({
   show: Boolean,
@@ -452,7 +428,6 @@ const shuffleArray = (array) => {
 const nextSlide = () => {
   if (currentSlide.value >= totalSlides - 1) return;
 
-  // Önce mevcut slaytı temizle
   clearAllTimeouts();
   switch (currentSlide.value) {
     case 1: resetSlide1(); break;
@@ -470,7 +445,6 @@ const nextSlide = () => {
 const prevSlide = () => {
   if (currentSlide.value <= 0) return;
 
-  // Önce mevcut slaytı temizle
   clearAllTimeouts();
   switch (currentSlide.value) {
     case 1: resetSlide1(); break;
@@ -519,7 +493,6 @@ const resetSlide6 = () => {
   showCelebration.value = false;
 };
 
-// Basit debounce fonksiyonu
 const debounce = (fn, delay) => {
   let timeoutId;
   return (...args) => {
@@ -532,9 +505,7 @@ const debounce = (fn, delay) => {
   };
 };
 
-// Slide içeriğini başlatma fonksiyonu
 const initializeSlide = (slideNumber) => {
-  // Önce tüm timeout'ları temizle
   clearAllTimeouts();
 
   let shuffledSubjects;
@@ -556,7 +527,7 @@ const initializeSlide = (slideNumber) => {
       safeSetTimeout(() => {
         // Önce "Çok sayıda farklı derste uzmanlaştın" mesajını göster
         subjectsOpacity.value = 1;
-        
+
         // 2 saniye sonra dersleri sırayla göstermeye başla
         safeSetTimeout(() => {
           shuffledSubjects = shuffleArray(topSubjects);
@@ -565,7 +536,7 @@ const initializeSlide = (slideNumber) => {
               visibleSubjects.value.push(subject);
             }, index * 1000);
           });
-        }, 2000);
+        }, 1000);
       }, 1000);
       break;
 
@@ -609,18 +580,18 @@ const initializeSlide = (slideNumber) => {
         achievementPhase.value = 'teaser';
         safeSetTimeout(() => {
           achievementPhase.value = 'list';
-          
+
           const badges = calculateBadges(totalQuestions, 80, totalStudyHours);
-          
+
           badges.forEach((badge, index) => {
             safeSetTimeout(() => {
               visibleAchievements.value.push({
                 ...badge,
                 isHighlighted: true
               });
-              
+
               highlightedBadgeId.value = badge.id;
-              
+
               safeSetTimeout(() => {
                 highlightedBadgeId.value = null;
               }, 1000);
@@ -682,49 +653,49 @@ const resetAllStates = () => {
 const handleShare = async () => {
   try {
     const card = document.querySelector('.wrapped-stats-card');
-
-    const scale = 4;
-    await document.fonts.ready;
-
-    const dataUrl = await domtoimage.toPng(card, {
-      quality: 1,
-      height: card.offsetHeight * scale,
-      width: card.offsetWidth * scale,
-      style: {
-        transform: `scale(${scale})`,
-        transformOrigin: 'top left',
-        margin: '0',
-        padding: '0'
-      },
-      bgcolor: 'rgba(0,0,0,0)',
-      imagePlaceholder: undefined,
-      cacheBust: true,
-      filter: (node) => {
-        if (node.tagName === 'IMG') {
-          return true;
-        }
-        if (node.nodeType === 1) {
-          return node.classList?.contains('wrapped-stats-card') ||
-            (node.closest && node.closest('.wrapped-stats-card'));
-        }
-        return true;
-      },
-      skipFonts: true,
+    
+    // 1. Animasyonları devre dışı bırak
+    const elements = card.querySelectorAll('*');
+    const originalStyles = new Map();
+    
+    elements.forEach(el => {
+      originalStyles.set(el, el.style.cssText);
+      el.style.transition = 'none';
+      el.style.animation = 'none';
     });
+
+    // 2. Fontların yüklenmesini bekle
+    await document.fonts.ready;
+    // Ek güvence için biraz daha bekle
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const canvas = await html2canvas(card, {
+      scale: 4,
+      backgroundColor: null,
+      logging: false,
+      useCORS: true,
+      allowTaint: true
+    });
+
+    // Orijinal stilleri geri yükle
+    elements.forEach(el => {
+      el.style.cssText = originalStyles.get(el);
+    });
+
+    const dataUrl = canvas.toDataURL('image/png');
 
     if (navigator.canShare && navigator.canShare({ files: [new File([], 'test.png')] })) {
       const response = await fetch(dataUrl);
       const blob = await response.blob();
-
-      const file = new File([blob], "2024-degerlendirmesi.png", {
+      const file = new File([blob], "2023-degerlendirmesi.png", {
         type: "image/png",
       });
-
+      
       try {
         await navigator.share({
           files: [file],
-          title: "2024 Yılı Değerlendirmesi",
-          text: "2024 yılındaki öğrenme istatistiklerime göz atın!",
+          title: "2023 Yılı Değerlendirmesi",
+          text: "2023 yılındaki öğrenme istatistiklerime göz atın!",
         });
       } catch (shareError) {
         console.error("Paylaşım hatası:", shareError);
@@ -737,11 +708,10 @@ const handleShare = async () => {
     console.error("Görüntü oluşturma hatası:", error);
   }
 };
-
 const downloadImage = (dataUrl) => {
   const link = document.createElement("a");
   link.href = dataUrl;
-  link.download = "2024-degerlendirmesi.png";
+  link.download = "2023-degerlendirmesi.png";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -762,32 +732,33 @@ const statsCardRef = ref(null);
 // Başarıları hesaplama fonksiyonu (WrappedStatsCard'dan alındı)
 const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
   const badges = [];
+  let id = 1;
 
   // Soru Çözüm Rozetleri
   if (totalQuestions >= 1500) {
-    badges.push({ emoji: '📚', title: 'Soru Çözüm Ustası (1500+ Soru)' });
+    badges.push({ id: id++, emoji: '📚', title: 'Soru Çözüm Ustası (1500+ Soru)' });
   } else if (totalQuestions >= 1000) {
-    badges.push({ emoji: '📖', title: 'Soru Çözüm Uzmanı (1000+ Soru)' });
+    badges.push({ id: id++, emoji: '📖', title: 'Soru Çözüm Uzmanı (1000+ Soru)' });
   } else if (totalQuestions >= 500) {
-    badges.push({ emoji: '📝', title: 'Soru Çözüm Acemisi (500+ Soru)' });
+    badges.push({ id: id++, emoji: '📝', title: 'Soru Çözüm Acemisi (500+ Soru)' });
   }
 
   // Başarı Yüzdesi Rozetleri
   if (successRate >= 100) {
-    badges.push({ emoji: '🎯', title: 'Tam İsabet (%100)' });
+    badges.push({ id: id++, emoji: '🎯', title: 'Tam İsabet (%100)' });
   } else if (successRate >= 85) {
-    badges.push({ emoji: '🎪', title: 'Başarı Yıldızı (%85+)' });
+    badges.push({ id: id++, emoji: '🎪', title: 'Başarı Yıldızı (%85+)' });
   } else if (successRate >= 70) {
-    badges.push({ emoji: '✨', title: 'Yükselen Yıldız (%70+)' });
+    badges.push({ id: id++, emoji: '✨', title: 'Yükselen Yıldız (%70+)' });
   }
 
   // Çalışma Saati Rozetleri
   if (hoursSpent >= 300) {
-    badges.push({ emoji: '⏰', title: 'Azimli Şampiyon (300+ Saat)' });
+    badges.push({ id: id++, emoji: '⏰', title: 'Azimli Şampiyon (300+ Saat)' });
   } else if (hoursSpent >= 200) {
-    badges.push({ emoji: '⌚', title: 'Çalışkan Arı (200+ Saat)' });
+    badges.push({ id: id++, emoji: '⌚', title: 'Çalışkan Arı (200+ Saat)' });
   } else if (hoursSpent >= 100) {
-    badges.push({ emoji: '⏱️', title: 'Öğrenme Aşığı (100+ Saat)' });
+    badges.push({ id: id++, emoji: '⏱️', title: 'Öğrenme Aşığı (100+ Saat)' });
   }
 
   return badges;
@@ -796,8 +767,6 @@ const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
 // Ref'leri ekleyelim
 const animatedHours = ref(0);
 const animatedMovieCount = ref(0);
-const animatedStreak = ref(0);
-const streakHighlight = ref(false);
 
 // Animasyon fonksiyonu
 const animateStudyHours = () => {
@@ -847,13 +816,13 @@ const animateMovieCount = () => {
 
 // startSlide1Animations fonksiyonunu burada tutuyoruz
 const startSlide1Animations = () => {
-  const duration = 2000;
+  const duration = 3000;
   const startTime = Date.now();
-  
+
   const animate = () => {
     const currentTime = Date.now();
     const elapsed = currentTime - startTime;
-    
+
     if (elapsed >= duration) {
       countedQuestions.value = totalQuestions;
       percentageOpacity.value = 1;
@@ -862,13 +831,13 @@ const startSlide1Animations = () => {
 
     const easeOutQuart = t => 1 - (--t) * t * t * t;
     const progress = easeOutQuart(elapsed / duration);
-    
+
     countedQuestions.value = Math.round(progress * totalQuestions);
     percentageOpacity.value = progress;
-    
+
     requestAnimationFrame(animate);
   };
-  
+
   animate();
 };
 

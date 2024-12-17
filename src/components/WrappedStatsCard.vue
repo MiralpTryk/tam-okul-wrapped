@@ -1,89 +1,78 @@
 <template>
-  <div class="w-fit max-w-sm mx-auto">
+  <div class="w-[300px] mx-auto">
     <div ref="cardRef"
-      class="relative w-full aspect-[9/16] overflow-hidden bg-gradient-to-tl from-black via-zinc-900 to-red-950 shadow-2xl [padding:24px]">
+      class="relative w-full aspect-[9/16] overflow-hidden bg-gradient-to-tl to-black via-zinc-800 from-violet-[#3d2770] shadow-xl [padding:24px]">
       <!-- Content -->
-      <div class="relative h-full flex flex-col">
+      <div class="relative flex flex-col">
         <!-- Header -->
         <div class="text-zinc-300 text-left flex justify-between items-center">
-          <h2 class="text-2xl sm:text-3xl font-bold max-w-6 [margin-right:10px]">
-            {{ userName }}'in Öğrenme Yolculuğu
+          <h2 class="text-lg font-bold max-w-64 leading-5 [margin-right:10px]">
+            {{ userName }}'in <br /> Öğrenme Yolculuğu
           </h2>
-          
-          <!-- Badges -->
-          <div class="flex gap-2 absolute top-0 right-0">
-            <div v-for="(badge, index) in badges" 
-                 :key="index"
-                 class="w-8 h-8 rounded-full bg-zinc-800/60 backdrop-blur-md border border-zinc-700 flex items-center justify-center"
-                 :title="badge.title">
-              <span class="text-lg">{{ badge.emoji }}</span>
-            </div>
-          </div>
-
-          <img :src="koksisLogo" alt="KÖKSİS Logo" class="w-28 absolute top-4 -right-6 h-auto" crossorigin="anonymous"
+          <img :src="koksisLogo" alt="KÖKSİS Logo" class="w-16 absolute -top-7 -right-6 h-auto" crossorigin="anonymous"
             loading="eager" :class="{ 'opacity-0': !logoLoaded }" />
         </div>
 
         <!-- Main Stats -->
-        <div class="flex flex-col justify-center items-center text-center text-white z-10 gap-[30px] mt-[80px]">
+        <div class="flex flex-col justify-center items-center text-center text-white z-10 gap-[30px] mt-[48px]">
 
           <!-- Stats Grid -->
           <div class="grid grid-cols-2 w-full max-w-sm [gap:8px]">
 
             <div
-              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 hover:bg-zinc-700/60 hover:border-zinc-600 [padding:12px]">
+              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
-                <span class="text-xl">🎯</span>
-                <span class="text-2xl font-bold text-[#1A93BD]">%{{ successRate }}</span>
+                <span class="text-lg">🎯</span>
+                <span class="text-sm font-bold text-[#1A93BD]">%{{ successRate }}</span>
               </div>
-              <div class="text-[10px] sm:text-sm text-zinc-400 [margin-top:4px]">
+              <div class="text-[10px] text-zinc-400 [margin-top:4px]">
                 Başarı Oranı
               </div>
             </div>
             <div
-              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 hover:bg-zinc-700/60 hover:border-zinc-600 [padding:12px]">
+              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
-                <img :src="dahi" alt="Dahi Logo" class="w-16 h-auto" crossorigin="anonymous" loading="eager"
+                <img :src="dahi" alt="Dahi Logo" class="w-12 h-auto" crossorigin="anonymous" loading="eager"
                   :class="{ 'opacity-0': !logoLoaded }" />
               </div>
             </div>
             <div
-              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 hover:bg-zinc-700/60 hover:border-zinc-600 [padding:12px]">
+              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
-                <span class="text-xl">🏆</span>
-                <span class="text-xl font-bold text-[#1A93BD]">{{ bestCourse }}</span>
+                <span class="text-lg">🏆</span>
+                <span class="text-sm font-bold text-[#1A93BD]">{{ bestCourse }}</span>
               </div>
-              <div class="text-[10px] sm:text-sm text-zinc-400 [margin-top:4px]">
+              <div class="text-[10px] text-zinc-400 [margin-top:4px]">
                 En İyi Ders
               </div>
             </div>
             <div
-              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 hover:bg-zinc-700/60 hover:border-zinc-600 [padding:12px]">
+              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
-                <span class="text-xl">⭐</span>
-                <span class="text-xl font-bold text-[#1A93BD]">{{ bestTopic }}</span>
+                <span class="text-lg">⭐</span>
+                <span class="text-sm font-bold text-[#1A93BD]">{{ bestTopic }}</span>
               </div>
-              <div class="text-[10px] sm:text-sm text-zinc-400 [margin-top:4px]">
+              <div class="text-[10px] text-zinc-400 [margin-top:4px]">
                 En İyi Konu
               </div>
             </div>
             <div
-              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 hover:bg-zinc-700/60 hover:border-zinc-600 [padding:12px]">
+              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
-                <span class="text-xl">✍️</span>
-                <span class="text-2xl font-bold text-[#1A93BD]">{{ totalQuestions }}</span>
+                <span class="text-lg">✍️</span>
+                <span class="text-sm font-bold text-[#1A93BD]">{{ totalQuestions }}</span>
               </div>
-              <div class="text-[10px] sm:text-sm text-zinc-400 [margin-top:4px]">
+              <div class="text-[10px] text-zinc-400 [margin-top:4px]">
                 Çözülen Soru
               </div>
             </div>
             <div
-              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 hover:bg-zinc-700/60 hover:border-zinc-600 [padding:12px]">
+              class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
-                <span class="text-xl">⏱️</span>
-                <span class="text-2xl font-bold text-[#1A93BD]">{{ hoursSpent }}</span>
+                <span class="text-lg">⏱️</span>
+                <span class="text-sm font-bold text-[#1A93BD]">{{ hoursSpent }}</span>
               </div>
-              <div class="text-[10px] sm:text-sm text-zinc-400 [margin-top:4px]">
+              <div class="text-[10px] text-zinc-400 [margin-top:4px]">
                 Çalışma Saati
               </div>
             </div>
@@ -92,21 +81,15 @@
           <!-- Rozet Açıklamaları -->
           <div class="text-[10px] text-zinc-400 flex flex-col gap-1 text-left w-full px-2">
             <div v-if="badges.length > 0" class="text-zinc-300 mb-1">Rozetlerin:</div>
-            <div v-for="(badge, index) in badges" 
-                 :key="index" 
-                 class="flex items-center gap-1">
+            <div v-for="(badge, index) in badges" :key="index" class="flex items-center gap-1">
               <span class="text-sm">{{ badge.emoji }}</span>
               <span>{{ badge.title }}</span>
             </div>
           </div>
 
           <!-- Footer -->
-          <div
-            class="text-center text-zinc-300 text-xs italic flex items-center justify-center [gap:8px] -mt-[16px] sm:-mt-0">
-            <img :src="tamOkulLogo" alt="Tam Okul Logo" class="w-16 h-auto" crossorigin="anonymous" loading="eager"
-              :class="{ 'opacity-0': !logoLoaded }" />
-            KÖKSİS tarafından oluşturuldu.
-          </div>
+          <img :src="tamOkulLogo" alt="Tam Okul Logo" class="w-16 h-auto" crossorigin="anonymous" loading="eager"
+            :class="{ 'opacity-0': !logoLoaded }" />
         </div>
       </div>
     </div>
@@ -207,7 +190,24 @@ const props = defineProps({
 });
 
 // Rozetleri hesapla
-const badges = computed(() => 
+const badges = computed(() =>
   calculateBadges(props.totalQuestions, props.successRate, props.hoursSpent)
 );
 </script>
+
+<style scoped>
+/* Normal durumda margin yok */
+.badge-emoji {
+  font-size: 1.125rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Sadece paylaşım sırasında margin ekleniyor */
+.h2c-badge-emoji {
+  margin-bottom: 1rem;
+  /* mb-4 */
+}
+</style>
