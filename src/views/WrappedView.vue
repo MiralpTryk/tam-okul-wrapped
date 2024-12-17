@@ -171,7 +171,19 @@
       <img :src="HeroImage" alt="Hero"
         class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center" />
       <div class="absolute inset-0 bg-black/30 mix-blend-color"></div>
-      <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-30% from-black via-black/70 to-transparent">
+      <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-30% from-black via-black/70 to-transparent overflow-hidden">
+        <div class="flex gap-4 pr-4 w-[200%] h-full animate-marquee" style="--marquee-duration: 5000ms;">
+          <div class="flex flex-1 h-full">
+            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
+            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
+            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
+          </div>
+          <div class="flex flex-1 h-full">
+            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
+            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
+            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
+          </div>
+        </div>
       </div>
       <div class="absolute inset-0"></div>
       <div class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full">

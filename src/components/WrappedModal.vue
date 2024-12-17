@@ -2,14 +2,14 @@
   <Transition name="modal">
     <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="absolute inset-0 bg-black opacity-50" @click="closeModal"></div>
-      <div class="relative bg-gradient-to-br to-black from-[#3d2770] w-full h-full overflow-hidden">
+      <div class="relative bg-gradient-to-br to-black from-violet-600 w-full h-full overflow-hidden">
         <div class="emoji-pattern"></div>
         <img :src="Logo" alt="Tam Okul AI Logo" class="w-16 sm:w-24 md:w-36 h-auto absolute bottom-4 right-4 hover:drop-shadow-[0_0_20px_rgba(255,255,255,1)] transition-all duration-300" crossorigin="anonymous" loading="eager" />
 
         <!-- Progress Bar -->
         <div
-          class="absolute top-0 sm:top-4 left-1/2 transform -translate-x-1/2 w-full h-1 bg-white/10 max-w-sm sm:max-w-4xl rounded-full">
-          <div class="h-full bg-sky-500 transition-all duration-500"
+          class="absolute top-0 sm:top-4 left-1/2 transform -translate-x-1/2 w-full h-2 bg-white/10 max-w-sm sm:max-w-4xl rounded-full">
+          <div class="h-full bg-sky-500 transition-all duration-500 rounded-full"
             :style="{ width: `${(currentSlide / (totalSlides - 1)) * 100}%` }">
           </div>
         </div>
@@ -193,7 +193,9 @@
                     <!-- Initial Teaser -->
                     <div>
                       <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                        Öğrenmeye <span class="font-bold text-sky-500">çoook</span> zaman ayırdın &#9200;
+                        Öğrenmeye <span class="text-sky-500">
+                          ç{{ expandedText }}k
+                        </span> zaman ayırdın &#9200;
                       </h3>
                       <p class="text-lg sm:text-xl md:text-2xl">
                         Kaç saat olduğunu tahmin edebilir misin?
@@ -485,6 +487,11 @@ const resetSlide4 = () => {
 
 const resetSlide5 = () => {
   studyTimePhase.value = 'teaser';
+  if (expansionInterval) {
+    clearInterval(expansionInterval);
+    expansionInterval = null;
+  }
+  expandedText.value = 'o';
 };
 
 const resetSlide6 = () => {
@@ -562,16 +569,22 @@ const initializeSlide = (slideNumber) => {
     case 5:
       resetSlide5();
       safeSetTimeout(() => {
-        studyTimePhase.value = 'hours';
-        animateStudyHours();
+        // Start the "çok" animation
+        animateExpansion();
+        
+        // Continue with the rest of slide 5 animations after expansion
         safeSetTimeout(() => {
-          studyTimePhase.value = 'comparison';
-          animateMovieCount();
+          studyTimePhase.value = 'hours';
+          animateStudyHours();
           safeSetTimeout(() => {
-            studyTimePhase.value = 'question';
+            studyTimePhase.value = 'comparison';
+            animateMovieCount();
+            safeSetTimeout(() => {
+              studyTimePhase.value = 'question';
+            }, 3000);
           }, 3000);
-        }, 3000);
-      }, 2000);
+        }, 2000);
+      }, 500);
       break;
 
     case 6:
@@ -615,11 +628,21 @@ const initializeSlide = (slideNumber) => {
 // Debounced slayt başlatma fonksiyonu
 const debouncedInitializeSlide = debounce((newSlide) => {
   initializeSlide(newSlide);
-}, 300);
+  
+  // Reset expandedText when leaving slide 5
+  if (newSlide !== 5) {
+    expandedText.value = 'o';
+  }
+});
 
 // Watch fonksiyonunu güncelle
 watch(currentSlide, (newSlide) => {
   debouncedInitializeSlide(newSlide);
+  
+  // Reset expandedText when leaving slide 5
+  if (newSlide !== 5) {
+    expandedText.value = 'o';
+  }
 });
 
 // Component unmount olduğunda timeout'ları temizle
@@ -841,6 +864,36 @@ const startSlide1Animations = () => {
   animate();
 };
 
+const expandedText = ref('o');
+let expansionInterval = null;
+
+// Genişleme animasyonunu yönetecek fonksiyon
+const animateExpansion = () => {
+  let expanding = true;
+  let count = 1;
+  
+  if (expansionInterval) clearInterval(expansionInterval);
+  
+  expansionInterval = setInterval(() => {
+    if (expanding) {
+      count++;
+      if (count >= 5) expanding = false;
+    } else {
+      count--;
+      if (count <= 1) {
+        clearInterval(expansionInterval);
+        expansionInterval = null;
+      }
+    }
+    expandedText.value = 'o'.repeat(count);
+  }, 100); // Her 150ms'de bir harf ekle/çıkar
+};
+
+// Component unmounted olduğunda interval'i temizle
+onUnmounted(() => {
+  if (expansionInterval) clearInterval(expansionInterval);
+});
+
 </script>
 
 <style scoped>
@@ -929,5 +982,46 @@ const startSlide1Animations = () => {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='18%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E📚%3C/text%3E%3Ctext x='0%25' y='20%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🎓%3C/text%3E%3Ctext x='100%25' y='20%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🎓%3C/text%3E%3Ctext x='25%25' y='50%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E✏️%3C/text%3E%3Ctext x='75%25' y='50%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🔖%3C/text%3E%3Ctext x='0%25' y='80%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🧠%3C/text%3E%3Ctext x='100%25' y='80%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🧠%3C/text%3E%3Ctext x='50%25' y='80%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🔬%3C/text%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 300px 300px;
+}
+
+.expanding-text {
+  display: inline-block;
+  animation: expandText 5s ease-in-out forwards;
+}
+
+@keyframes expandText {
+  0% {
+    content: "çok";
+  }
+  10% {
+    content: "çook";
+  }
+  20% {
+    content: "çoook";
+  }
+  30% {
+    content: "çooook";
+  }
+  40% {
+    content: "çoooook";
+  }
+  50% {
+    content: "çooooook";
+  }
+  60% {
+    content: "çoooook";
+  }
+  70% {
+    content: "çooook";
+  }
+  80% {
+    content: "çoook";
+  }
+  90% {
+    content: "çook";
+  }
+  100% {
+    content: "çok";
+  }
 }
 </style>

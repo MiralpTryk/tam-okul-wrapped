@@ -149,12 +149,10 @@ module.exports = {
           },
         },
         marquee: {
-          '0%': { transform: 'translateX(0%)' },
-          '100%': { transform: 'translateX(-100%)' },
+          "100%": { transform: "translateX(-50%)" },
         },
-        marquee2: {
-          '0%': { transform: 'translateX(100%)' },
-          '100%': { transform: 'translateX(0%)' },
+        "marquee-vertical": {
+          "100%": { transform: "translateY(-50%)" },
         },
       },
       animation: {
@@ -168,10 +166,12 @@ module.exports = {
         headShake: "headShake 2s infinite",
         wobble: "wobble 1s infinite",
         jello: "jello 2s infinite",
-        marquee: 'marquee 25s linear infinite',
-        marquee2: 'marquee2 25s linear infinite',      },
+        marquee: "marquee var(--marquee-duration) linear infinite",
+        "marquee-vertical":
+          "marquee-vertical var(--marquee-duration) linear infinite",
+      },
       screens: {
-        '2xl': '1920px',
+        "2xl": "1920px",
       },
     },
   },

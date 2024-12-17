@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-black text-white min-h-screen">
+  <div class=" text-white min-h-screen">
     <div class="mx-auto px-4 sm:px-6 lg:px-16 2xl:px-24">
       <div class="space-y-4">
         <!-- Header and Navigation -->
@@ -10,91 +10,89 @@
             </a>
             <h1 class="text-2xl md:text-3xl font-bold">Optik Form</h1>
           </div>
+        </div>
+
+        <!-- Tabs and Search -->
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex gap-4">
+            <button @click="activeTab = 'all'" :class="[
+              'px-4 py-2 rounded text-sm font-medium transition-colors',
+              activeTab === 'all' ? 'bg-red-600 text-white' : 'bg-[#2F2F2F] text-zinc-300 hover:bg-[#3F3F3F]'
+            ]">
+              Tüm Sorular
+            </button>
+            <button @click="activeTab = 'bookmarked'" :class="[
+              'px-4 py-2 rounded text-sm font-medium transition-colors',
+              activeTab === 'bookmarked' ? 'bg-red-600 text-white' : 'bg-[#2F2F2F] text-zinc-300 hover:bg-[#3F3F3F]'
+            ]">
+              Favori Sorular
+            </button>
+          </div>
+          <div class="relative flex-1">
+            <input v-model="searchQuery" type="text" placeholder="Soru ara..."
+              class="w-full bg-[#2F2F2F] text-white rounded pl-10 pr-3 py-2 text-sm min-w-0 border border-transparent focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors">
+            <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+          </div>
           <select v-model="currentPage"
-            class="bg-zinc-800 text-white rounded px-2 py-1.5 text-sm w-full sm:w-auto min-w-[200px]">
+            class="bg-[#2F2F2F] text-white rounded px-2 py-2 text-sm w-full sm:w-auto min-w-[200px] border border-transparent focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors">
             <template v-for="(pages, section) in groupedPages" :key="section">
-              <option disabled class="font-semibold bg-zinc-900">{{ capitalizeFirstLetter(section) }}</option>
+              <option disabled class="font-semibold bg-[#1F1F1F]">{{ capitalizeFirstLetter(section) }}</option>
               <option v-for="page in pages" :key="page" :value="page"
-                :class="['pl-4', { 'text-green-500': isPageSaved(page) }]">
+                :class="['pl-4', { 'text-red-600': isPageSaved(page) }]">
                 Sayfa {{ page }} {{ isPageSaved(page) ? '✓ (kaydedildi)' : '' }}
               </option>
             </template>
           </select>
         </div>
 
-        <!-- Tabs and Search -->
-        <div class="flex flex-col sm:flex-row gap-4">
-          <div class="flex gap-2">
-            <button @click="activeTab = 'all'" :class="[
-              'px-4 py-2 rounded text-sm font-medium transition-colors',
-              activeTab === 'all' ? 'bg-[#1A93BD] text-white' : 'bg-zinc-800 text-zinc-300'
-            ]">
-              Tüm Sorular
-            </button>
-            <button @click="activeTab = 'bookmarked'" :class="[
-              'px-4 py-2 rounded text-sm font-medium transition-colors',
-              activeTab === 'bookmarked' ? 'bg-[#1A93BD] text-white' : 'bg-zinc-800 text-zinc-300'
-            ]">
-              Favori Sorular
-            </button>
-          </div>
-          <div class="relative">
-            <input v-model="searchQuery" type="text" placeholder="Soru ara..."
-              class="w-full bg-zinc-800 text-white rounded pl-10 pr-3 py-2 text-sm min-w-0">
-            <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
-          </div>
-        </div>
-
         <!-- Progress Bars -->
-        <div class="sticky top-0 bg-black z-50 py-4">
+        <div class="sticky top-0 bg-black backdrop-blur-sm z-50 py-4 border-b border-[#2F2F2F]">
           <div class="grid gap-2">
             <div>
-              <div class="flex justify-between text-sm mb-1">
+              <div class="flex justify-between text-sm mb-1 sm:max-w-[49%]">
                 <span>Toplam İlerleme</span>
                 <span>{{ answeredOrSavedCount }} / {{ totalQuestions }}</span>
               </div>
-              <div class="bg-zinc-700 rounded-full h-2">
-                <div class="bg-[#1A93BD] h-full rounded-full transition-all duration-300"
+              <div class="bg-[#2F2F2F] rounded-full h-2 sm:max-w-[49%]">
+                <div class="bg-red-600 h-full rounded-full transition-all duration-300"
                   :style="{ width: `${progress}%` }">
                 </div>
               </div>
             </div>
             <div>
-              <div class="flex justify-between text-sm mb-1">
+              <div class="flex justify-between text-sm mb-1 sm:max-w-[49%]">
                 <span>Sayfa {{ currentPage }}</span>
                 <span>{{ currentPageAnsweredOrSavedCount }} / {{ currentPageQuestions.length }}</span>
               </div>
-              <div class="bg-zinc-700 rounded-full h-2">
-                <div class="bg-violet-700 h-full rounded-full transition-all duration-300"
+              <div class="bg-[#2F2F2F] rounded-full h-2 sm:max-w-[49%]">
+                <div class="bg-red-600 h-full rounded-full transition-all duration-300"
                   :style="{ width: `${currentPageProgress}%` }"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Questions -->
+        <!-- Questions Grid -->
         <div v-if="activeTab === 'bookmarked' && !hasBookmarkedQuestions"
-          class="text-center text-zinc-400 py-4 md:py-8 mb-36">
-          Favori sorunuz yok. Favorilere eklemek için sorulardaki
-          <component :is="BookmarkPlusIcon" class="inline-block w-5 h-5 text-green-500" />
-          butonuna basınız.
+          class="text-center text-zinc-400 py-12 mb-36">
+          <component :is="BookmarkPlusIcon" class="mx-auto w-12 h-12 mb-4 text-red-600" />
+          <p class="text-lg">Favori sorunuz yok. Favorilere eklemek için sorulardaki işarete tıklayın.</p>
         </div>
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 pb-20 sm:pb-24">
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20 sm:pb-24">
+          <!-- Question Card -->
           <div v-for="question in currentPageQuestions" :key="question.id" :data-question-id="question.id"
-            class="bg-zinc-900 rounded p-3 md:p-4 shadow-lg border-transition">
+            class="bg-[#1f1f1f] rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#3F3F3F]">
             <div class="flex justify-between items-center mb-2">
-              <span class="font-bold text-sm md:text-base">Soru {{ question.orderNumber }}</span>
-              <div class="flex items-center space-x-1 md:space-x-2">
-                <button @click="toggleBookmark(question.id)" :class="[
-                  'hover:text-opacity-80 transition-colors duration-200',
-                  question.bookmarked ? 'text-red-500' : 'text-green-500'
-                ]">
-                  <component :is="question.bookmarked ? BookmarkMinusIcon : BookmarkPlusIcon"
-                    class="w-4 h-4 md:w-5 md:h-5" />
-                </button>
-              </div>
+              <span class="font-bold text-base">Soru {{ question.orderNumber }}</span>
+              <button @click="toggleBookmark(question.id)" :class="[
+                'hover:scale-110 transition-transform duration-200',
+                question.bookmarked ? 'text-red-600' : 'text-green-500'
+              ]">
+                <component :is="question.bookmarked ? BookmarkMinusIcon : BookmarkPlusIcon"
+                  class="w-5 h-5 md:w-6 md:h-6" />
+              </button>
             </div>
-            <p class="text-xs md:text-sm text-zinc-400 mb-2 truncate">{{ question.subject_names }}</p>
+            <p class="text-sm text-zinc-400 mb-6 truncate">{{ question.subject_names }}</p>
 
             <!-- Question Image -->
             <div v-if="showQuestionImages" class="mb-4 relative">
@@ -108,30 +106,29 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-5 gap-1 md:gap-2">
+            <!-- Answer Options -->
+            <div class="grid grid-cols-5 gap-4 md:gap-6">
               <button v-for="(option, index) in ['A', 'B', 'C', 'D', 'E']" :key="option"
                 @click="selectAnswer(question.id, option)" :class="[
-                  'w-8 h-8 md:w-10 md:h-10 text-xs md:text-sm rounded-full flex items-center justify-center transition-colors duration-200 relative z-0',
+                  'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border',
                   {
-                    'text-white': question.answer === index.toString() || (question.saved && question.correct_answer === index.toString()),
-                    'text-zinc-300': !question.saved && question.answer !== index.toString(),
-                    'cursor-not-allowed': question.saved || isPageSaved(question.page)
+                    'border-red-600 bg-red-600 text-white': !question.saved && question.answer === index.toString(),
+                    'border-[#3F3F3F] hover:border-red-600 text-zinc-300': !question.saved && question.answer !== index.toString(),
+                    'border-green-500 bg-green-500 text-white': question.saved && question.correct_answer === index.toString(),
+                    'border-red-600 bg-red-600 text-white': question.saved && question.answer === index.toString() && question.answer !== question.correct_answer,
+                    'border-[#3F3F3F] text-zinc-300': question.saved && question.answer !== index.toString() && question.correct_answer !== index.toString(),
+                    'opacity-50 cursor-not-allowed': question.saved || isPageSaved(question.page)
                   }
-                ]" :disabled="question.saved || isPageSaved(question.page)">
-                <span class="relative z-10">{{ option }}</span>
-                <svg
-                  v-if="question.answer === index.toString() || (question.saved && question.correct_answer === index.toString())"
-                  class="absolute inset-0 w-full h-full z-0" :class="{
-                    'text-green-500': question.saved && question.correct_answer === index.toString(),
-                    'text-red-500': (question.saved && question.answer === index.toString() && question.answer !== question.correct_answer) || (!question.saved && question.answer === index.toString())
-                  }">
-                  <use href="#pencil-circle" />
-                </svg>
+                ]">
+                {{ option }}
               </button>
             </div>
-            <div v-if="question.saved" class="mt-3">
+
+
+            <!-- Solution Video Button -->
+            <div v-if="question.saved" class="mt-6">
               <button @click="watchSolutionVideo(question.id)"
-                class="w-full bg-zinc-800 hover:bg-zinc-700 text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200">
+                class="w-full bg-[#2F2F2F] hover:bg-[#3F3F3F] text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200 border border-[#3F3F3F]">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10" />
                   <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
@@ -142,24 +139,24 @@
           </div>
         </div>
 
-        <!-- Navigation and Save Buttons -->
+        <!-- Bottom Navigation Bar -->
         <div v-if="activeTab !== 'bookmarked'"
-          class="fixed bottom-0 left-0 right-0 bg-black border-t border-zinc-800 z-50">
-          <div class="mx-auto flex justify-between items-center py-4 px-4 sm:px-6 lg:px-16 2xl:px-24">
+          class="fixed bottom-0 left-0 right-0 bg-[#141414]/95 backdrop-blur-sm border-t border-[#2F2F2F] z-50">
+          <div class="mx-auto flex justify-between items-center py-3 px-4 sm:px-6 lg:px-16 2xl:px-24">
             <button @click="goToPreviousPage" :disabled="!hasPreviousPage"
-              class="px-2 md:px-4 py-1 md:py-2 text-sm md:text-base bg-zinc-800 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed">
+              class="px-4 py-2 text-sm bg-[#2F2F2F] text-white rounded hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
               Önceki
             </button>
             <button @click="showSaveConfirmation" :disabled="!hasUnsavedAnswers || isPageSaved(currentPage)" :class="[
-              'px-2 md:px-4 py-1 md:py-2 text-sm md:text-base rounded',
+              'px-4 py-2 text-sm rounded transition-colors',
               isPageSaved(currentPage)
-                ? 'bg-zinc-800 text-white opacity-50 cursor-not-allowed'
-                : 'bg-[#1A93BD] text-white hover:bg-[#0284c7] disabled:opacity-50 disabled:cursor-not-allowed'
+                ? 'bg-[#2F2F2F] text-white opacity-50 cursor-not-allowed'
+                : 'bg-red-600 text-white hover:bg-red-600/90 disabled:opacity-50 disabled:cursor-not-allowed'
             ]">
               {{ isPageSaved(currentPage) ? 'Kaydedildi' : 'Kaydet' }}
             </button>
             <button @click="goToNextPage" :disabled="!hasNextPage"
-              class="px-2 md:px-4 py-1 md:py-2 text-sm md:text-base bg-zinc-800 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed">
+              class="px-4 py-2 text-sm bg-[#2F2F2F] text-white rounded hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
               Sonraki
             </button>
           </div>
@@ -168,27 +165,29 @@
 
       <!-- Save Confirmation Modal -->
       <div v-if="showConfirmation"
-        class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-        <div class="bg-zinc-900 text-white p-4 md:p-6 rounded max-w-md w-full border border-zinc-700">
-          <h2 class="text-lg md:text-xl font-bold mb-3 md:mb-4">Cevapları Kaydet</h2>
-          <p class="mb-3 md:mb-4 text-sm md:text-base text-zinc-300">
-            Cevapları kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını göreceğiniz için <span
-              class="text-[#1A93BD] font-semibold">tekrar işaretleme yapamayacaksınız.</span>
+        class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+        <div class="bg-[#141414] text-white p-6 md:p-8 rounded-md max-w-xl w-full border border-zinc-800 shadow-2xl">
+          <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-red-600">Cevapları Kaydet</h2>
+          <p class="mb-6 md:mb-8 text-sm md:text-base text-gray-200 leading-relaxed">
+            Cevapları kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını göreceğiniz için 
+            <span class="font-bold text-red-600">tekrar işaretleme yapamayacaksınız.</span>
+            <br><br>
             {{ currentPage }}. sayfa için cevapları kaydetmek istediğinize emin misiniz?
           </p>
-          <div class="flex items-center mb-3 md:mb-4">
+          <div class="flex items-center mb-6 md:mb-8">
             <input type="checkbox" id="dontShowAgain" v-model="dontShowConfirmationAgain"
-              class="mr-2 bg-zinc-700 border-zinc-600 text-[#1A93BD] focus:ring-red-500">
-            <label for="dontShowAgain" class="text-sm md:text-base text-zinc-300 select-none">Bu uyarıyı tekrar
-              gösterme</label>
+              class="mr-3 w-4 h-4 bg-[#141414] border-2 border-gray-600 text-red-600 rounded focus:ring-red-600 focus:ring-offset-[#141414]">
+            <label for="dontShowAgain" class="text-sm md:text-base text-gray-300 select-none hover:text-white transition-colors">
+              Bu uyarıyı tekrar gösterme
+            </label>
           </div>
-          <div class="flex justify-end space-x-2 md:space-x-4">
+          <div class="flex justify-end space-x-4">
             <button @click="cancelSave"
-              class="px-3 md:px-4 py-1 md:py-2 text-sm md:text-base bg-zinc-700 text-white rounded hover:bg-zinc-600 transition-colors duration-200">
+              class="px-8 py-3 text-base md:text-lg font-medium bg-zinc-800 text-white rounded hover:bg-zinc-700 transition-colors duration-300">
               Hayır
             </button>
             <button @click="confirmSave"
-              class="px-3 md:px-4 py-1 md:py-2 text-sm md:text-base bg-[#1A93BD] text-white rounded hover:bg-[#0284c7] transition-colors duration-200">
+              class="px-8 py-3 text-base md:text-lg font-medium bg-red-600 text-white rounded hover:bg-red-600/90 transition-colors duration-300 shadow-xl shadow-red-600/20">
               Evet
             </button>
           </div>
@@ -231,6 +230,35 @@
       </div>
     </div>
   </div>
+  <!-- Welcome Modal -->
+  <div v-if="showWelcomeModal"
+    class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+  <div class="bg-[#141414] text-white p-6 md:p-8 rounded-md max-w-xl w-full border border-zinc-800 shadow-2xl">
+    <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-red-600">Kişiye Özel Kitap Optik Form</h2>
+    <p class="mb-6 md:mb-8 text-sm md:text-base text-gray-200 leading-relaxed">
+      Bu ekran ile Kişiye Özel Kitap'ınızdan çözdüğünüz soruları cevaplandırabilir, favori sorularınızı işaretleyebilir ve cevaplarınızı kaydedebilirsiniz.
+      <br>
+      <br>
+      Cevaplarınızı kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını görüp kendi cevaplanırızla karşılaştırabilir, soru çözüm videolarını izleyebilirsiniz.
+      <br>
+      <br>
+      <span class="font-bold text-xs bg-red-600/10 text-red-600 py-1 px-2 rounded">Not: Klavyenizdeki A, B, C, D, E tuşlarını kullanarak hızlıca cevap verebilirsiniz.</span>
+    </p>
+    <div class="flex items-center mb-6 md:mb-8">
+      <input type="checkbox" id="dontShowWelcomeAgain" v-model="dontShowWelcomeAgain"
+        class="mr-3 w-4 h-4 bg-[#141414] border-2 border-gray-600 text-red-600 rounded focus:ring-red-600 focus:ring-offset-[#141414]">
+      <label for="dontShowWelcomeAgain" class="text-sm md:text-base text-gray-300 select-none hover:text-white transition-colors">
+        Bu bilgilendirmeyi tekrar gösterme
+      </label>
+    </div>
+    <div class="flex justify-end">
+      <button @click="closeWelcomeModal"
+        class="px-8 py-3 text-base md:text-lg font-medium bg-red-600 text-white rounded hover:bg-red-600/90 transition-colors duration-300 shadow-xl shadow-red-600/20">
+        Tamam
+      </button>
+    </div>
+  </div>
+</div>
 </template>
 
 <script setup>
@@ -252,6 +280,8 @@ const dontShowConfirmationAgain = ref(false);
 const imageLoadError = ref(false);
 const showVideoModal = ref(false);
 const currentVideoUrl = ref('');
+const showWelcomeModal = ref(true);
+const dontShowWelcomeAgain = ref(false);
 
 const loadQuestions = () => {
   try {
@@ -525,6 +555,13 @@ const closeVideoModal = () => {
   currentVideoUrl.value = '';
 };
 
+const closeWelcomeModal = () => {
+  showWelcomeModal.value = false;
+  if (dontShowWelcomeAgain.value) {
+    localStorage.setItem('welcomeModalShown', 'true');
+  }
+};
+
 onMounted(() => {
   loadQuestions();
   loadAnswers();
@@ -534,6 +571,11 @@ onMounted(() => {
       closeVideoModal();
     }
   });
+  
+  // Check if welcome modal has been shown before
+  if (localStorage.getItem('welcomeModalShown')) {
+    showWelcomeModal.value = false;
+  }
 });
 
 onUnmounted(() => {
@@ -619,10 +661,6 @@ svg {
   stroke: none;
 }
 
-.sticky {
-  position: sticky;
-  top: 0;
-}
 
 .z-0 {
   z-index: 0;
@@ -666,5 +704,38 @@ svg {
   right: 0;
   bottom: 0;
   left: 0;
+}
+
+/* Smooth fade-in animation for modal */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+[v-if="showWelcomeModal"] > div {
+  animation: fadeIn 0.3s ease-out;
+}
+
+:root {
+  --netflix-red: #E50914;
+}
+
+.text-netflix-red {
+  color: var(--netflix-red);
+}
+
+.bg-netflix-red {
+  background-color: var(--netflix-red);
+}
+
+/* Smooth fade-in animation for modals */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+[v-if="showConfirmation"] > div,
+[v-if="showWelcomeModal"] > div {
+  animation: fadeIn 0.3s ease-out;
 }
 </style>

@@ -1,11 +1,11 @@
 <template>
   <div class="w-[300px] mx-auto">
     <div ref="cardRef"
-      class="relative w-full aspect-[9/16] overflow-hidden bg-gradient-to-tl to-black via-zinc-800 from-violet-[#3d2770] shadow-xl [padding:24px]">
+      class="relative w-full aspect-[9/16] overflow-hidden bg-gradient-to-tl to-black via-zinc-800 from-violet-600 shadow-xl [padding:24px]">
       <!-- Content -->
       <div class="relative flex flex-col">
         <!-- Header -->
-        <div class="text-zinc-300 text-left flex justify-between items-center">
+        <div class="text-zinc-200 text-left flex justify-between items-center">
           <h2 class="text-lg font-bold max-w-64 leading-5 [margin-right:10px]">
             {{ userName }}'in <br /> Öğrenme Yolculuğu
           </h2>
@@ -14,7 +14,7 @@
         </div>
 
         <!-- Main Stats -->
-        <div class="flex flex-col justify-center items-center text-center text-white z-10 gap-[30px] mt-[48px]">
+        <div class="flex flex-col justify-center items-center text-center text-zinc-200 z-10 gap-[30px] mt-[48px]">
 
           <!-- Stats Grid -->
           <div class="grid grid-cols-2 w-full max-w-sm [gap:8px]">
@@ -25,7 +25,7 @@
                 <span class="text-lg">🎯</span>
                 <span class="text-sm font-bold text-[#1A93BD]">%{{ successRate }}</span>
               </div>
-              <div class="text-[10px] text-zinc-400 [margin-top:4px]">
+              <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 Başarı Oranı
               </div>
             </div>
@@ -42,7 +42,7 @@
                 <span class="text-lg">🏆</span>
                 <span class="text-sm font-bold text-[#1A93BD]">{{ bestCourse }}</span>
               </div>
-              <div class="text-[10px] text-zinc-400 [margin-top:4px]">
+              <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 En İyi Ders
               </div>
             </div>
@@ -52,7 +52,7 @@
                 <span class="text-lg">⭐</span>
                 <span class="text-sm font-bold text-[#1A93BD]">{{ bestTopic }}</span>
               </div>
-              <div class="text-[10px] text-zinc-400 [margin-top:4px]">
+              <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 En İyi Konu
               </div>
             </div>
@@ -62,7 +62,7 @@
                 <span class="text-lg">✍️</span>
                 <span class="text-sm font-bold text-[#1A93BD]">{{ totalQuestions }}</span>
               </div>
-              <div class="text-[10px] text-zinc-400 [margin-top:4px]">
+              <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 Çözülen Soru
               </div>
             </div>
@@ -72,15 +72,15 @@
                 <span class="text-lg">⏱️</span>
                 <span class="text-sm font-bold text-[#1A93BD]">{{ hoursSpent }}</span>
               </div>
-              <div class="text-[10px] text-zinc-400 [margin-top:4px]">
+              <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 Çalışma Saati
               </div>
             </div>
           </div>
 
           <!-- Rozet Açıklamaları -->
-          <div class="text-[10px] text-zinc-400 flex flex-col gap-1 text-left w-full px-2">
-            <div v-if="badges.length > 0" class="text-zinc-300 mb-1">Rozetlerin:</div>
+          <div class="text-[10px] text-zinc-200 flex flex-col gap-1 text-left w-full px-2">
+            <div v-if="badges.length > 0" class="text-zinc-200 mb-1">Rozetlerin:</div>
             <div v-for="(badge, index) in badges" :key="index" class="flex items-center gap-1">
               <span class="text-sm">{{ badge.emoji }}</span>
               <span>{{ badge.title }}</span>
