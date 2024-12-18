@@ -168,10 +168,9 @@
 
     <!-- Hero Section -->
     <section class="relative h-screen flex items-center">
-      <img :src="HeroImage" alt="Hero"
+<img :src="HeroImage" alt="Hero"
         class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center" />
-      <!-- Changed from bg-black/30 to bg-red-600 -->
-      <div class="absolute inset-0 bg-red-600/50 mix-blend-color"></div>
+      <div class="absolute inset-0 bg-red-600 mix-blend-multiply opacity-60"></div>
       <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-30% from-black via-black/70 to-transparent overflow-hidden">
         <div class="flex gap-4 pr-4 w-[200%] h-full animate-marquee" style="--marquee-duration: 5000ms;">
           <div class="flex flex-1 h-full">
@@ -332,7 +331,7 @@
     <!-- Content Modal -->
     <ContentModal :show="showContentModal" @close="closeContentModal">
       <template v-if="selectedLesson">
-        <LessonContent v-if="selectedLesson && !selectedLesson.type" :lesson="selectedLesson" />
+        <LessonContent v-if="selectedLesson && selectedLesson.type === 'lesson'" :lesson="selectedLesson" />
         <MusicContent v-else-if="selectedLesson && selectedLesson.type === 'music'" :music="selectedLesson" />
         <QuoteContent v-else-if="selectedLesson && selectedLesson.type === 'quote'" :quote="selectedLesson" />
         <BookContent v-else-if="selectedLesson && selectedLesson.type === 'book'" :book="selectedLesson" />
@@ -619,10 +618,11 @@ const generateItems = (count, prefix, type = "video") => {
         type: "music",
       };
     });
-  } else if (type === "quote") {
+  } 
+  
+  else if (type === "quote") {
     return motivationalQuotes.slice(0, count).map((quote, i) => ({
       id: `${prefix}-${i + 1}`,
-      subtitle: quote.author,
       quote: quote.text,
       author: quote.author,
       type: "quote",
@@ -1610,45 +1610,36 @@ const closeModal = () => {
   showModal.value = false;
 };
 
-const openContentModal = (item, sectionType) => {
-  if (isDragged.value) {
-    return;
+const openContentModal = (item, type, event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
   }
 
-  if (sectionType === "video") {
+  if (type === "video") {
     selectedLesson.value = {
       title: item.title,
       channelName: item.subtitle,
       videoUrl: item.videoUrl,
       content: item.content,
+      type: "video"
     };
-  } else if (sectionType === "music") {
+  } else if (type === "quote") {
     selectedLesson.value = {
-      type: "music",
-      title: item.title,
-      artist: item.subtitle,
-      spotifyEmbed: item.spotifyEmbed,
-      studyTip: item.studyTip,
-    };
-  } else if (sectionType === "quote") {
-    selectedLesson.value = {
-      type: "quote",
-      text: item.quote,
-      author: item.author,
-    };
-  } else if (sectionType === "book") {
-    selectedLesson.value = {
-      type: "book",
       ...item,
+      text: item.quote,  // quote değerini text olarak aktarıyoruz
+      type: type
     };
-  } else if (sectionType === "story") {
+  } else {
+    // Diğer tipler için (music, book, story)
     selectedLesson.value = {
-      type: "story",
       ...item,
-      content: item.content || null,
+      type: type
     };
   }
+  
   showContentModal.value = true;
+  console.log('Selected Lesson:', selectedLesson.value);
 };
 
 const closeContentModal = () => {
@@ -1809,7 +1800,6 @@ const sortedData = computed(() => {
 });
 
 onMounted(() => {
-  // Sayfa yüklendiğinde modalı otomatik aç
   openModal();
 });
 </script>
