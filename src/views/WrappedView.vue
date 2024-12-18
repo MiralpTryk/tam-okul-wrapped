@@ -11,7 +11,7 @@
         </a>
         <div class="flex items-center space-x-4">
           <RouterLink to="/optic-form">
-            <button class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded text-sm">
+            <button class="bg-[#E50914] hover:bg-[#E50914]/90 text-white px-6 py-2 rounded text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-[#E50914]/20 hover:scale-105 active:scale-100">
               Optik İşaretle
             </button>
           </RouterLink>
@@ -196,7 +196,7 @@
             </span>
             , senin için tasarlanan eşsiz öğrenme deneyimine hoş geldin!
           </h1>
-          <p class="text-sm sm:text-base bg-black/50 rounded-lg px-4 py-2">
+          <p class="text-sm sm:text-base bg-black/50 sm:bg-transparent rounded-lg px-4 py-2">
             Tam Okul ile öğrenme yolculuğun tamamen sana özel.
             Başarı durumuna göre YouTube'dan seçilen konu anlatım videoları ile eksiklerini tamamla, kişisel duvarında
             müzik dinle, kitap önerilerini keşfet ve motivasyon sözleriyle ilham al.

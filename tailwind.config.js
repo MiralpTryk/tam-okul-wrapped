@@ -154,6 +154,10 @@ module.exports = {
         "marquee-vertical": {
           "100%": { transform: "translateY(-50%)" },
         },
+        "spin-slow": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
       },
       animation: {
         wiggle: "wiggle 1s ease-in-out infinite",
@@ -166,6 +170,7 @@ module.exports = {
         headShake: "headShake 2s infinite",
         wobble: "wobble 1s infinite",
         jello: "jello 2s infinite",
+        "spin-slow": "spin 10s linear infinite",
         marquee: "marquee var(--marquee-duration) linear infinite",
         "marquee-vertical":
           "marquee-vertical var(--marquee-duration) linear infinite",

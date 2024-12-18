@@ -1,7 +1,7 @@
 <template>
   <div class="w-[300px] mx-auto">
     <div ref="cardRef"
-      class="relative w-full aspect-[9/16] overflow-hidden bg-gradient-to-tl to-black via-zinc-800 from-violet-600 shadow-xl [padding:24px]">
+      class="relative w-full aspect-[9/16] overflow-hidden bg-gradient-to-tl to-black via-black from-red-600 shadow-xl [padding:24px]">
       <!-- Content -->
       <div class="relative flex flex-col">
         <!-- Header -->
@@ -23,7 +23,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-lg">🎯</span>
-                <span class="text-sm font-bold text-[#1A93BD]">%{{ successRate }}</span>
+                <span class="text-sm font-bold text-red-600">%{{ successRate }}</span>
               </div>
               <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 Başarı Oranı
@@ -40,7 +40,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-lg">🏆</span>
-                <span class="text-sm font-bold text-[#1A93BD]">{{ bestCourse }}</span>
+                <span class="text-sm font-bold text-red-600">{{ bestCourse }}</span>
               </div>
               <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 En İyi Ders
@@ -50,7 +50,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-lg">⭐</span>
-                <span class="text-sm font-bold text-[#1A93BD]">{{ bestTopic }}</span>
+                <span class="text-sm font-bold text-red-600">{{ bestTopic }}</span>
               </div>
               <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 En İyi Konu
@@ -60,7 +60,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-lg">✍️</span>
-                <span class="text-sm font-bold text-[#1A93BD]">{{ totalQuestions }}</span>
+                <span class="text-sm font-bold text-red-600">{{ totalQuestions }}</span>
               </div>
               <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 Çözülen Soru
@@ -70,7 +70,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-lg">⏱️</span>
-                <span class="text-sm font-bold text-[#1A93BD]">{{ hoursSpent }}</span>
+                <span class="text-sm font-bold text-red-600">{{ hoursSpent }}</span>
               </div>
               <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 Çalışma Saati

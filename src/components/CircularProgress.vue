@@ -2,7 +2,7 @@
   <div class="relative w-32 h-32">
     <svg class="transform -rotate-90 w-32 h-32">
       <circle
-        class="text-white/10"
+        class="text-white/25"
         stroke-width="8"
         stroke="currentColor"
         fill="transparent"
@@ -11,7 +11,7 @@
         cy="64"
       />
       <circle
-        class="text-sky-500 transition-all duration-1000"
+        class="text-red-600 transition-all duration-1000"
         stroke-width="8"
         :stroke-dasharray="circumference"
         :stroke-dashoffset="dashOffset"
@@ -23,7 +23,7 @@
       />
     </svg>
     <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold">
-      {{ percentage }}%
+      %{{ percentage }}
     </span>
   </div>
 </template>

@@ -2,14 +2,17 @@
   <Transition name="modal">
     <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="absolute inset-0 bg-black opacity-50" @click="closeModal"></div>
-      <div class="relative bg-gradient-to-br to-black from-violet-600 w-full h-full overflow-hidden">
+      <div class="relative bg-gradient-to-tr to-black via-black from-red-700 w-full h-full overflow-hidden">
         <div class="emoji-pattern"></div>
-        <img :src="Logo" alt="Tam Okul AI Logo" class="w-16 sm:w-24 md:w-36 h-auto absolute bottom-4 right-4 hover:drop-shadow-[0_0_20px_rgba(255,255,255,1)] transition-all duration-300" crossorigin="anonymous" loading="eager" />
-
+        <!-- Logo Container -->
+        <div class="absolute bottom-4 right-4 w-16 sm:w-24 md:w-24 h-16 sm:h-24 md:h-24">
+          <img :src="LogoBack" alt="Tam Okul AI Logo" class="w-full h-full animate-spin-slow absolute inset-0" crossorigin="anonymous" loading="eager" />
+          <img :src="LogoFront" alt="Tam Okul AI Logo" class="w-1/2 h-1/2 absolute top-1/4 left-1/4" crossorigin="anonymous" loading="eager" />
+        </div>
         <!-- Progress Bar -->
         <div
-          class="absolute top-0 sm:top-4 left-1/2 transform -translate-x-1/2 w-full h-2 bg-white/10 max-w-sm sm:max-w-4xl rounded-full">
-          <div class="h-full bg-sky-500 transition-all duration-500 rounded-full"
+          class="absolute top-0 sm:top-4 left-1/2 transform -translate-x-1/2 w-full h-2 bg-white/25 max-w-sm sm:max-w-3xl rounded-full">
+          <div class="h-full bg-red-600 transition-all duration-500 rounded-full"
             :style="{ width: `${(currentSlide / (totalSlides - 1)) * 100}%` }">
           </div>
         </div>
@@ -32,15 +35,15 @@
                 <div>
                   <h2 v-if="currentSlide === 0"
                     class="text-3xl sm:text-5xl md:text-6xl font-bold text-center mb-6 sm:mb-12">
-                    <span class="text-sky-500">{{ new Date().getFullYear() }}</span> Öğrenme Yolculuğun
+                    <span class="text-red-600">{{ new Date().getFullYear() }}</span> Öğrenme Yolculuğun
                   </h2>
                   <div v-if="currentSlide === 0" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                      Öğrenme Yolculuğun hazır, peki ya sen görmeye hazır mısın
-                      <span class="font-bold text-sky-500">{{ name }}</span>?
+                     hazır, peki sen görmeye hazır mısın
+                      <span class="font-bold text-red-600">{{ name }}</span>?
                     </h3>
                     <button @click="nextSlide"
-                      class="text-lg sm:text-xl md:text-2xl px-6 py-3 rounded-full bg-white text-[#1A93BD] font-semibold animate-pulse">
+                      class="text-lg sm:text-xl md:text-2xl px-6 py-3 rounded-full bg-white text-red-600 font-semibold animate-pulse hover:animate-none">
                       Hadi başlayalım!
                     </button>
                   </div>
@@ -68,7 +71,7 @@
                           <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
                             Bu yıl tam tamına
                           </h3>
-                          <div class="text-5xl sm:text-7xl md:text-9xl font-bold text-sky-500">
+                          <div class="text-5xl sm:text-7xl md:text-9xl font-bold text-red-600">
                             {{ countedQuestions }}
                           </div>
                           <p class="text-lg sm:text-xl md:text-2xl">soru çözdün!</p>
@@ -99,7 +102,7 @@
                         Çok sayıda farklı derste uzmanlaştın
                       </h3>
                       <p class="text-lg sm:text-xl md:text-2xl mb-8">
-                        <span class="font-bold text-sky-500">En iyi 5'ini</span>
+                        <span class="font-bold text-red-600">En iyi 5'ini</span>
                         görelim! &#129300;
                       </p>
                     </div>
@@ -122,8 +125,9 @@
                     <Transition name="fade" mode="out-in">
                       <div v-if="!showOutstandingCourse" key="teaser">
                         <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                          Ama bir derste o kadar iyiydin ki,
-                          <span class="italic text-sky-500">diğerlerinden öne çıktı... &#128077;</span>
+                          Ama bir derste o kadar iyiydin ki 
+                          <br>
+                          <span class="italic text-red-600">diğerlerinden öne çıktı... &#128077;</span>
                         </h3>
                       </div>
                       <div v-else key="content" class="space-y-4 sm:space-y-8">
@@ -131,20 +135,20 @@
                           Öne çıkan dersin...
                         </h3>
                         <div v-if="!topSubjectRevealed" @click="revealTopSubject"
-                          class="cursor-pointer flex flex-col items-center justify-center gap-4 relative group w-fit justify-self-center">
+                          class="cursor-pointer flex flex-col items-center justify-center gap-4 relative mx-auto animate-pulse hover:animate-none">
                           <img :src="FingerPrint" alt="Fingerprint"
-                            class="w-20 h-20 sm:w-24 sm:h-24 md:w-48 md:h-48 opacity-50 group-hover:opacity-100 transition-all duration-300" />
+                            class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 transition-all duration-300" />
                           <span
-                            class="text-xl sm:text-2xl md:text-3xl opacity-50 group-hover:opacity-100 transition-all duration-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-nowrap">Açmak
+                            class="text-xl sm:text-2xl md:text-3xl transition-all duration-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-nowrap">Açmak
                             için tıkla</span>
                         </div>
                         <Transition name="fade">
                           <div v-if="topSubjectRevealed">
-                            <div class="text-4xl sm:text-5xl md:text-7xl font-bold text-sky-500">
+                            <div class="text-4xl sm:text-5xl md:text-7xl font-bold text-red-600">
                               {{ topSubject }}
                             </div>
                             <p class="text-xl sm:text-2xl md:text-3xl mt-4">
-                              Sen bir {{ topSubject }} <span class="text-sky-500"> uzmanısın! &#129395;</span>
+                              Sen bir {{ topSubject }} <span class="text-red-600"> uzmanısın! &#129395;</span>
                             </p>
                           </div>
                         </Transition>
@@ -159,14 +163,14 @@
                         Öylesine maceracısın ki, konudan konuya atladın &#128521;
                       </h3>
                       <p class="text-lg sm:text-xl md:text-2xl mb-8">
-                        <span class="font-bold text-sky-500">En iyi 5'ine</span> bakalım!
+                        <span class="font-bold text-red-600">En iyi 5'ine</span> bakalım!
                       </p>
                     </div>
 
                     <Transition name="fade">
                       <div v-show="showTopics">
                         <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8 text-center">
-                          &#128170; <span class="font-bold text-sky-500">En iyi</span> olduğun konular şunlardı:
+                          &#128170; <span class="font-bold text-red-600">En iyi</span> olduğun konular şunlardı:
                         </h3>
                         <div class="h-64 sm:h-80 overflow-hidden">
                           <TransitionGroup enter-active-class="transition-all duration-500 ease-out"
@@ -193,7 +197,7 @@
                     <!-- Initial Teaser -->
                     <div>
                       <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                        Öğrenmeye <span class="text-sky-500">
+                        Öğrenmeye <span class="text-red-600">
                           ç{{ expandedText }}k
                         </span> zaman ayırdın &#9200;
                       </h3>
@@ -210,7 +214,7 @@
                           <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
                             Toplam öğrenme süren...
                           </h3>
-                          <div class="text-5xl sm:text-7xl md:text-9xl font-bold text-sky-500">
+                          <div class="text-5xl sm:text-7xl md:text-9xl font-bold text-red-600">
                             {{ animatedHours }}
                           </div>
                           <p class="text-lg sm:text-xl md:text-2xl">saat!</p>
@@ -224,7 +228,7 @@
                           <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
                             Bu, yaklaşık olarak
                           </h3>
-                          <div class="text-5xl sm:text-7xl md:text-9xl font-bold text-sky-500">
+                          <div class="text-5xl sm:text-7xl md:text-9xl font-bold text-red-600">
                             {{ animatedMovieCount }}
                           </div>
                           <p class="text-lg sm:text-xl md:text-2xl">
@@ -264,7 +268,7 @@
                         class="overflow-hidden">
                         <TransitionGroup name="list" tag="ul" class="space-y-2 sm:space-y-4">
                           <li v-for="(badge, index) in visibleAchievements" :key="`badge-${badge.id || index}`"
-                            class="flex items-center text-lg sm:text-xl md:text-2xl bg-white/5 rounded-lg p-4 backdrop-blur-sm"
+                            class="flex items-center text-lg sm:text-xl md:text-2xl bg-black/25 rounded-lg p-4 backdrop-blur-sm"
                             :class="[
                               'transition-all duration-500',
                               badge.isHighlighted ? 'scale-105 bg-white/10' : 'scale-100'
@@ -277,7 +281,7 @@
                               <div class="flex-1">
                                 <div :class="[
                                   'font-medium transition-colors duration-300',
-                                  badge.isHighlighted ? 'text-sky-400' : 'text-white'
+                                  badge.isHighlighted ? 'text-red-600' : 'text-white'
                                 ]">
                                   {{ badge.title }}
                                 </div>
@@ -337,7 +341,7 @@
             </button>
 
             <button @click="nextSlide"
-              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white text-[#1A93BD] hover:bg-gray-200">
+              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white text-red-600 hover:bg-gray-200">
               {{ buttonText }}
             </button>
           </div>
@@ -355,7 +359,8 @@ import html2canvas from 'html2canvas';
 import { RefreshCwIcon, Share2Icon } from "lucide-vue-next";
 import CircularProgress from '@/components/CircularProgress.vue';
 import FingerPrint from '@/assets/fingerprint.svg';
-import Logo from '@/assets/tam-okul-ai-logo.svg';
+import LogoBack from '@/assets/tam-okul-ai-logo-back.svg';
+import LogoFront from '@/assets/tam-okul-ai-logo-front.svg';
 
 const props = defineProps({
   show: Boolean,
