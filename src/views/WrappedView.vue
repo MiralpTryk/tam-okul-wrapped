@@ -638,7 +638,7 @@ const generateItems = (count, prefix, type = "video") => {
     image: movieImages[Math.floor(Math.random() * movieImages.length)],
     quote:
       type === "quote" ? motivationalQuotes[i % motivationalQuotes.length] : "",
-    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    videoUrl: "https://www.youtube.com/watch?v=Bm1NtTAtBAA",
     content: `
         <h2>${prefix} Dersi - Konu ${i + 1}</h2>
         <h3>Konu Özeti</h3>

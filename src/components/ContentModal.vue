@@ -1,8 +1,8 @@
 <template>
   <Transition name="modal">
-    <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center md:p-4">
+    <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center xl:p-4">
       <div class="absolute inset-0 bg-black bg-opacity-75 backdrop-blur-sm" @click="close"></div>
-      <div class="relative bg-black bg-opacity-90 w-full h-full md:h-auto md:max-h-[90vh] overflow-hidden md:rounded-lg md:border md:border-gray-800 md:max-w-7xl">
+      <div class="relative bg-black bg-opacity-90 w-full xl:pt-0 pt-16 h-full xl:h-auto xl:max-h-[90vh] overflow-hidden xl:rounded-lg xl:border xl:border-gray-800 xl:max-w-7xl">
         <button 
           @click="close" 
           class="absolute top-4 right-4 text-gray-400 hover:text-white z-50 bg-black bg-opacity-50 rounded-full p-1"

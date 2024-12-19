@@ -1,13 +1,13 @@
 <template>
-    <div class="flex flex-col md:flex-row h-full bg-black text-white">
-      <div class="w-full md:w-2/3 flex items-start justify-center">
+    <div class="flex flex-col xl:flex-row h-full bg-black text-white">
+      <div class="w-full xl:w-2/3 flex items-start justify-center">
         <div class="w-full max-w-[1024px] mx-auto">
           <div class="relative w-full pb-[56.25%]">
             <div id="youtube-player" class="absolute inset-0 w-full h-full"></div>
           </div>
         </div>
       </div>
-      <div class="w-full md:w-1/3 p-6 overflow-y-auto max-h-[calc(100vh-56.25vw-4rem)] md:max-h-[calc(100vh-14rem)]">
+      <div class="w-full xl:w-1/3 p-6 overflow-y-auto max-h-[calc(100vh-56.25vw-4rem)] xl:max-h-[calc(100vh-14rem)]">
         <h1 class="text-2xl font-bold mb-2">{{ lesson.title }}</h1>
         <p class="text-sm text-gray-400 mb-4">{{ lesson.channelName }}</p>
         

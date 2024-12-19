@@ -281,7 +281,7 @@
                               <div class="flex-1">
                                 <div :class="[
                                   'font-medium transition-colors duration-300',
-                                  badge.isHighlighted ? 'text-red-600' : 'text-white'
+                                  badge.isHighlighted ? 'text-yellow-600' : 'text-white'
                                 ]">
                                   {{ badge.title }}
                                 </div>

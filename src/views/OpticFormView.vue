@@ -13,8 +13,8 @@
         </div>
 
         <!-- Tabs and Search -->
-        <div class="flex flex-col sm:flex-row gap-4 sm:max-w-[50%]">
-          <div class="flex gap-4 sm:w-[40%]">
+        <div class="flex flex-col sm:flex-row gap-4 xl:max-w-[50%] text-nowrap">
+          <div class="flex gap-4">
             <button @click="activeTab = 'all'" :class="[
               'px-4 py-2 rounded text-sm font-medium transition-colors w-1/2',
               activeTab === 'all' ? 'bg-red-600 text-white' : 'bg-[#2F2F2F] text-zinc-300 hover:bg-[#3F3F3F]'
