@@ -239,7 +239,7 @@
       Bu ekran ile Kişiye Özel Kitap'ınızdan çözdüğünüz soruları cevaplandırabilir, favori sorularınızı işaretleyebilir ve cevaplarınızı kaydedebilirsiniz.
       <br>
       <br>
-      Cevaplarınızı kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını görüp kendi cevaplanırızla karşılaştırabilir, soru çözüm videolarını izleyebilirsiniz.
+      Cevaplarınızı kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını görüp kendi cevaplanırızla karşılaştırabilirsiniz.
       <br>
       <br>
       <span class="font-bold text-xs bg-red-600/10 text-red-600 py-1 px-2 rounded">Not: Klavyenizdeki A, B, C, D, E tuşlarını kullanarak hızlıca cevap verebilirsiniz.</span>
