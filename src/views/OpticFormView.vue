@@ -35,8 +35,8 @@
           </div>
           <select v-model="currentPage"
             class="bg-[#2F2F2F] text-white rounded px-2 py-2 text-sm w-full sm:w-[30%] border border-transparent focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors">
-            <template v-for="(pages, section) in groupedPages" :key="section">
-              <option disabled class="font-semibold bg-[#1F1F1F]">{{ capitalizeFirstLetter(section) }}</option>
+            <template v-for="(pages, title) in groupedPages" :key="title">
+              <option disabled class="font-semibold bg-[#1F1F1F]">{{ title }}</option>
               <option v-for="page in pages" :key="page" :value="page"
                 :class="['pl-4', { 'text-red-600': isPageSaved(page) }]">
                 Sayfa {{ page }} {{ isPageSaved(page) ? '✓ (kaydedildi)' : '' }}
@@ -83,7 +83,7 @@
           <div v-for="question in currentPageQuestions" :key="question.id" :data-question-id="question.id"
             class="bg-[#1f1f1f] rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#3F3F3F]">
             <div class="flex justify-between items-center mb-2">
-              <span class="font-bold text-base">Soru {{ question.orderNumber }}</span>
+              <span class="font-bold text-base">Soru {{ question.number }}</span>
               <button @click="toggleBookmark(question.id)" :class="[
                 'hover:scale-110 transition-transform duration-200',
                 question.bookmarked ? 'text-red-600' : 'text-green-500'
@@ -92,12 +92,13 @@
                   class="w-5 h-5 md:w-6 md:h-6" />
               </button>
             </div>
-            <p class="text-sm text-zinc-400 mb-6 truncate">{{ question.subject_names }}</p>
+            <p class="text-sm text-zinc-400 mb-6 truncate">{{ question.subject }}</p>
 
             <!-- Question Image -->
             <div v-if="showQuestionImages" class="mb-4 relative">
               <div class="aspect-w-4 aspect-h-3 relative bg-zinc-800 rounded-md overflow-hidden">
-                <img :src="imageBaseUrl + '/' + question.question_image" :alt="`Soru ${question.orderNumber} görseli`"
+                <img :src="showQuestionImages ? simulateImageError(imageBaseUrl + '/' + question.image) : ''"
+                  :alt="`Soru ${question.number} görseli`"
                   class="w-full h-full object-cover absolute inset-0" @error="handleImageError" />
                 <div v-if="imageLoadError"
                   class="absolute inset-0 flex items-center justify-center bg-zinc-800 text-zinc-400 text-sm">
@@ -141,7 +142,7 @@
 
         <!-- Bottom Navigation Bar -->
         <div v-if="activeTab !== 'bookmarked'"
-          class="fixed bottom-0 left-0 right-0 bg-[#141414]/95 backdrop-blur-sm border-t border-[#2F2F2F] z-50">
+          class="fixed bottom-0 left-0 right-0 bg-[#141414]/95 backdrop-blur-sm border-t border-[#2F2F2F] z-40">
           <div class="mx-auto flex justify-between items-center py-3 px-4 sm:px-6 lg:px-16 2xl:px-24">
             <button @click="goToPreviousPage" :disabled="!hasPreviousPage"
               class="px-4 py-2 text-sm bg-[#2F2F2F] text-white rounded hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
@@ -259,6 +260,44 @@
     </div>
   </div>
 </div>
+  <!-- Error simulation buttons -->
+  <div v-if="isDevelopment" class="fixed bottom-20 right-4 space-x-2 z-50">
+    <button @click="loadQuestions()" 
+      class="bg-green-600 text-white px-4 py-2 rounded">
+      Normal Yükleme
+    </button>
+    <button @click="() => { simulateError('network'); loadQuestions(); }"
+      class="bg-red-600 text-white px-4 py-2 rounded">
+      Ağ Hatası
+    </button>
+    <button @click="() => { simulateError('data'); loadQuestions(); }"
+      class="bg-yellow-600 text-white px-4 py-2 rounded">
+      Veri Hatası
+    </button>
+    <button @click="() => { simulateError('empty'); loadQuestions(); }"
+      class="bg-blue-600 text-white px-4 py-2 rounded">
+      Boş Veri
+    </button>
+    <button @click="() => { simulateError('null'); loadQuestions(); }"
+      class="bg-purple-600 text-white px-4 py-2 rounded">
+      Null Veri
+    </button>
+  </div>
+  <!-- Error State -->
+  <div v-if="error" class="flex items-center justify-center min-h-screen">
+    <div class="text-red-600 text-center p-4">
+      <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      <p class="text-xl mb-4">{{ error }}</p>
+      <p class="text-sm text-gray-400 mb-4">Hata Kodu: {{ Date.now() }}</p>
+      <button @click="loadQuestions" 
+        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">
+        Tekrar Dene
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -282,30 +321,54 @@ const showVideoModal = ref(false);
 const currentVideoUrl = ref('');
 const showWelcomeModal = ref(true);
 const dontShowWelcomeAgain = ref(false);
+const isDevelopment = ref(process.env.NODE_ENV === 'development');
 
-// loadQuestions fonksiyonunu güncelleyelim
+const simulateError = (type) => {
+  switch(type) {
+    case 'network':
+      throw new Error('Ağ bağlantısı hatası');
+    case 'data':
+      throw new Error('Veri yapısı hatası');
+    case 'empty':
+      wrappedData.data.optic.courses = [];
+      break;
+    case 'null':
+      wrappedData.data.optic = null;
+      break;
+    default:
+      break;
+  }
+};
+
 const loadQuestions = () => {
   try {
     loading.value = true;
+    
+    // simulateError('network');  // Ağ hatası simülasyonu
+    // simulateError('data');     // Veri yapısı hatası simülasyonu
+    // simulateError('empty');    // Boş veri simülasyonu
+    // simulateError('null');     // Null veri simülasyonu
+    
     const opticData = wrappedData.data.optic;
     
+    if (!opticData || !opticData.courses) {
+      throw new Error('Geçersiz veri yapısı');
+    }
+
     let allQuestions = [];
     
-    // Her ders için
     opticData.courses.forEach(course => {
-      // Her sayfa için
       Object.entries(course.pages).forEach(([pageNumber, pageQuestions]) => {
-        // Her soru için
         Object.values(pageQuestions).forEach(question => {
           allQuestions.push({
             id: question.id,
             number: question.number,
             difficulty: question.difficulty,
             correct_answer: question.correct_answer,
-            subject_names: question.subject, // API'dan gelen subject bilgisini subject_names'e map ediyoruz
-            question_image: question.image,
+            subject: question.subject,
+            image: question.image,
             page: parseInt(pageNumber),
-            sectionTitle: course.title || 'Genel', // Eğer title yoksa 'Genel' kullanıyoruz
+            title: course.title,
             answer: null,
             bookmarked: false,
             saved: false
@@ -314,10 +377,8 @@ const loadQuestions = () => {
       });
     });
 
-    // Soru numarasına göre sıralama
     allQuestions.sort((a, b) => a.number - b.number);
 
-    // Mevcut cevapları ve işaretlemeleri koruyarak güncelle
     questions.value = allQuestions.map(newQ => {
       const existingQ = questions.value.find(q => q.id === newQ.id);
       return existingQ ? { ...newQ, answer: existingQ.answer, bookmarked: existingQ.bookmarked, saved: existingQ.saved } : newQ;
@@ -329,7 +390,7 @@ const loadQuestions = () => {
 
   } catch (err) {
     console.error('Error loading questions:', err);
-    error.value = 'Sorular yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+    error.value = err.message || 'Sorular yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
   } finally {
     loading.value = false;
   }
@@ -346,7 +407,7 @@ const filteredQuestions = computed(() => {
     const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(q =>
       q.id.toString().includes(query) ||
-      q.subject_names.toLowerCase().includes(query)
+      q.subject.toLowerCase().includes(query)
     );
   }
 
@@ -360,10 +421,10 @@ const availablePages = computed(() => {
 const groupedPages = computed(() => {
   const grouped = {};
   filteredQuestions.value.forEach(q => {
-    if (!grouped[q.sectionTitle.toLowerCase()]) {
-      grouped[q.sectionTitle.toLowerCase()] = new Set();
+    if (!grouped[q.title]) {
+      grouped[q.title] = new Set();
     }
-    grouped[q.sectionTitle.toLowerCase()].add(q.page);
+    grouped[q.title].add(q.page);
   });
 
   // Convert sets to sorted arrays
@@ -377,7 +438,7 @@ const groupedPages = computed(() => {
 const currentPageQuestions = computed(() => {
   const questions = filteredQuestions.value.filter(q => q.page === currentPage.value);
   questions.forEach(q => {
-    console.log('Full image URL:', `${imageBaseUrl}/${q.question_image}`);
+    console.log('Full image URL:', `${imageBaseUrl}/${q.image}`);
   });
   return questions;
 });
@@ -537,10 +598,6 @@ const isPageSaved = (page) => {
   return questions.value.filter(q => q.page === page).every(q => q.saved);
 };
 
-const capitalizeFirstLetter = (string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-};
-
 const handleImageError = (event) => {
   console.error('Image load error:', event.target.src);
   event.target.style.display = 'none';
@@ -581,6 +638,10 @@ const closeWelcomeModal = () => {
   if (dontShowWelcomeAgain.value) {
     localStorage.setItem('welcomeModalShown', 'true');
   }
+};
+
+const simulateImageError = (imageUrl) => {
+  return Math.random() > 0.5 ? imageUrl : 'invalid-url';
 };
 
 onMounted(() => {
@@ -629,30 +690,6 @@ watch(availablePages, (newPages) => {
   user-select: none;
 }
 
-.rounded-full {
-  border-radius: 50%;
-}
-
-.w-10 {
-  width: 2.5rem;
-}
-
-.h-10 {
-  height: 2.5rem;
-}
-
-.flex {
-  display: flex;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
 .border-transition {
   transition: border-color 0.3s ease-in-out;
 }
@@ -667,32 +704,6 @@ select option:not(:disabled) {
 
 select option:checked {
   background-color: #374151;
-}
-
-/* Remove the general svg styling */
-svg {
-  /* Remove these lines */
-  /* fill: currentColor; */
-  /* stroke: none; */
-}
-
-/* Add specific styling for the pencil-circle */
-#pencil-circle {
-  fill: currentColor;
-  stroke: none;
-}
-
-
-.z-0 {
-  z-index: 0;
-}
-
-.z-10 {
-  z-index: 10;
-}
-
-.z-50 {
-  z-index: 50;
 }
 
 .aspect-w-4 {
