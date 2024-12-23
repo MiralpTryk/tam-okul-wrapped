@@ -267,7 +267,7 @@ const showQuestionImages = ref(process.env.VUE_APP_SHOW_QUESTION_IMAGES === 'tru
 console.log('Image Base URL:', process.env.VUE_APP_IMAGE_BASE_URL);
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { BookmarkPlusIcon, BookmarkMinusIcon, Search } from 'lucide-vue-next';
-import questionsData from '@/data/questions.json';
+import wrappedData from '@/data/wrapped.json';
 
 const questions = ref([]);
 const loading = ref(true);
@@ -283,33 +283,54 @@ const currentVideoUrl = ref('');
 const showWelcomeModal = ref(true);
 const dontShowWelcomeAgain = ref(false);
 
+// loadQuestions fonksiyonunu güncelleyelim
 const loadQuestions = () => {
   try {
-    let newQuestions = [];
-    if (Array.isArray(questionsData) && questionsData.length > 0) {
-      newQuestions = questionsData.flat().map((q, index) => ({
-        ...q,
-        answer: null,
-        bookmarked: false,
-        orderNumber: index + 1,
-        saved: false
-      }));
-    } else {
-      throw new Error('Unexpected data structure');
-    }
+    loading.value = true;
+    const opticData = wrappedData.data.optic;
+    
+    let allQuestions = [];
+    
+    // Her ders için
+    opticData.courses.forEach(course => {
+      // Her sayfa için
+      Object.entries(course.pages).forEach(([pageNumber, pageQuestions]) => {
+        // Her soru için
+        Object.values(pageQuestions).forEach(question => {
+          allQuestions.push({
+            id: question.id,
+            number: question.number,
+            difficulty: question.difficulty,
+            correct_answer: question.correct_answer,
+            subject_names: question.subject, // API'dan gelen subject bilgisini subject_names'e map ediyoruz
+            question_image: question.image,
+            page: parseInt(pageNumber),
+            sectionTitle: course.title || 'Genel', // Eğer title yoksa 'Genel' kullanıyoruz
+            answer: null,
+            bookmarked: false,
+            saved: false
+          });
+        });
+      });
+    });
 
-    questions.value = newQuestions.map(newQ => {
+    // Soru numarasına göre sıralama
+    allQuestions.sort((a, b) => a.number - b.number);
+
+    // Mevcut cevapları ve işaretlemeleri koruyarak güncelle
+    questions.value = allQuestions.map(newQ => {
       const existingQ = questions.value.find(q => q.id === newQ.id);
       return existingQ ? { ...newQ, answer: existingQ.answer, bookmarked: existingQ.bookmarked, saved: existingQ.saved } : newQ;
     });
 
-    loading.value = false;
     if (availablePages.value.length > 0) {
       currentPage.value = availablePages.value[0];
     }
+
   } catch (err) {
     console.error('Error loading questions:', err);
     error.value = 'Sorular yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+  } finally {
     loading.value = false;
   }
 };
