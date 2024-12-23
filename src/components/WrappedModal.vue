@@ -5,10 +5,10 @@
       <div class="relative bg-gradient-to-tr to-black via-black from-red-700 w-full h-full overflow-hidden">
         <div class="emoji-pattern"></div>
         <!-- Logo Container -->
-        <div class="absolute bottom-4 right-4 w-16 sm:w-24 md:w-24 h-16 sm:h-24 md:h-24">
+        <a href="https://tamokul.com" target="_blank" class="absolute bottom-4 right-4 w-16 sm:w-24 md:w-24 h-16 sm:h-24 md:h-24 z-[9999] group hover:scale-110 duration-300 transition-all hover:drop-shadow-[0_0_0.75rem_#0794bc]">
           <img :src="LogoBack" alt="Tam Okul AI Logo" class="w-full h-full animate-spin-slow absolute inset-0" crossorigin="anonymous" loading="eager" />
           <img :src="LogoFront" alt="Tam Okul AI Logo" class="w-1/2 h-1/2 absolute top-1/4 left-1/4" crossorigin="anonymous" loading="eager" />
-        </div>
+        </a>
         <!-- Progress Bar -->
         <div
           class="absolute top-0 sm:top-4 left-1/2 transform -translate-x-1/2 w-full h-2 bg-white/25 max-w-sm sm:max-w-3xl rounded-full">
@@ -823,8 +823,6 @@ const animateMovieCount = () => {
   animate();
 };
 
-
-// startSlide1Animations fonksiyonunu burada tutuyoruz
 const startSlide1Animations = () => {
   const duration = 3000;
   const startTime = Date.now();

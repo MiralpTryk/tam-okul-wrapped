@@ -7,7 +7,7 @@
         <!-- Header -->
         <div class="text-zinc-200 text-left flex justify-between items-center">
           <h2 class="text-lg font-bold max-w-64 leading-5 [margin-right:10px]">
-            {{ userName }}'in <br /> Öğrenme Yolculuğu
+            {{ full_name }}'in <br /> Öğrenme Yolculuğu
           </h2>
           <img :src="koksisLogo" alt="KÖKSİS Logo" class="w-16 absolute -top-7 -right-6 h-auto" crossorigin="anonymous"
             loading="eager" :class="{ 'opacity-0': !logoLoaded }" />
@@ -23,7 +23,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-lg">🎯</span>
-                <span class="text-sm font-bold text-red-600">%{{ successRate }}</span>
+                <span class="text-sm font-bold text-red-600">%{{ total_questions_solved_percentage }}</span>
               </div>
               <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 Başarı Oranı
@@ -40,7 +40,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-lg">🏆</span>
-                <span class="text-sm font-bold text-red-600">{{ bestCourse }}</span>
+                <span class="text-sm font-bold text-red-600 text-left">{{ best_course }}</span>
               </div>
               <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 En İyi Ders
@@ -50,7 +50,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-lg">⭐</span>
-                <span class="text-sm font-bold text-red-600">{{ bestTopic }}</span>
+                <span class="text-sm font-bold text-red-600 text-left">{{ best_subjects }}</span>
               </div>
               <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 En İyi Konu
@@ -60,7 +60,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-lg">✍️</span>
-                <span class="text-sm font-bold text-red-600">{{ totalQuestions }}</span>
+                <span class="text-sm font-bold text-red-600">{{ total_questions_solved }}</span>
               </div>
               <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 Çözülen Soru
@@ -70,7 +70,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-lg">⏱️</span>
-                <span class="text-sm font-bold text-red-600">{{ hoursSpent }}</span>
+                <span class="text-sm font-bold text-red-600">{{ total_hours_spent }}</span>
               </div>
               <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 Çalışma Saati
@@ -101,9 +101,17 @@ import { ref, onMounted, computed } from "vue";
 import tamOkulLogo from "@/assets/tam-okul-logo-dark.webp";
 import koksisLogo from "@/assets/koksis-card-logo_5.webp";
 import dahi from "@/assets/dahi.png";
+import wrappedData from '@/data/wrapped.json';
 
 const logoLoaded = ref(false);
 const cardRef = ref(null);
+
+const full_name = computed(() => wrappedData.data.user.full_name);
+const total_questions_solved = computed(() => wrappedData.data.user.student.learning_journey.total_questions_solved);
+const total_questions_solved_percentage = computed(() => wrappedData.data.user.student.learning_journey.total_questions_solved_percentage);
+const best_course = computed(() => wrappedData.data.user.student.learning_journey.best_course);
+const best_subjects = computed(() => wrappedData.data.user.student.learning_journey.best_subject);
+const total_hours_spent = computed(() => wrappedData.data.user.student.learning_journey.total_hours_spent);
 
 onMounted(() => {
   const preloadImages = [koksisLogo, tamOkulLogo].map(src => {
@@ -158,45 +166,16 @@ const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
   return badges;
 };
 
-const props = defineProps({
-  rank: {
-    type: [String, Number],
-    default: "10",
-  },
-  totalQuestions: {
-    type: Number,
-    default: 1342,
-  },
-  bestCourse: {
-    type: String,
-    default: "Matematik",
-  },
-  bestTopic: {
-    type: String,
-    default: "Sayılar",
-  },
-  hoursSpent: {
-    type: Number,
-    default: 720,
-  },
-  userName: {
-    type: String,
-    default: "Anonim",
-  },
-  successRate: {
-    type: Number,
-    default: 80,
-  },
-});
-
-// Rozetleri hesapla
 const badges = computed(() =>
-  calculateBadges(props.totalQuestions, props.successRate, props.hoursSpent)
+  calculateBadges(
+    total_questions_solved.value, 
+    total_questions_solved_percentage.value, 
+    total_hours_spent.value
+  )
 );
 </script>
 
 <style scoped>
-/* Normal durumda margin yok */
 .badge-emoji {
   font-size: 1.125rem;
   line-height: 1;
@@ -205,7 +184,6 @@ const badges = computed(() =>
   justify-content: center;
 }
 
-/* Sadece paylaşım sırasında margin ekleniyor */
 .h2c-badge-emoji {
   margin-bottom: 1rem;
   /* mb-4 */
