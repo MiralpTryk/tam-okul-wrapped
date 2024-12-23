@@ -240,6 +240,9 @@
       Bu ekran ile Kişiye Özel Kitap'ınızdan çözdüğünüz soruları cevaplandırabilir, favori sorularınızı işaretleyebilir ve cevaplarınızı kaydedebilirsiniz.
       <br>
       <br>
+      Ekranda gördüğünüz sayfalar, kitaptaki sayfalarla aynıdır.
+      <br>
+      <br>
       Cevaplarınızı kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını görüp kendi cevaplanırızla karşılaştırabilirsiniz.
       <br>
       <br>

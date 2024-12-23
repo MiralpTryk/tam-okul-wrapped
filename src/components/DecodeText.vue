@@ -1,6 +1,6 @@
 <template>
     <div class="decode-text">
-      <div v-for="(char, index) in characters" :key="index" :class="['text-animation', char.class]">
+      <div v-for="(char, index) in characters" :key="index" :class="['text-animation', char.class]" :style="char.style">
         {{ char.value }}
       </div>
     </div>
@@ -25,7 +25,8 @@
   const initializeCharacters = () => {
     characters.value = props.text.split('').map(char => ({
       value: char,
-      class: ''
+      class: '',
+      style: char === ' ' ? { marginRight: '0.25em' } : {}
     }));
   };
   
@@ -71,7 +72,6 @@
     width: 100%;
     font-size: 30px;
     text-align: left;
-    word-spacing: 0.25em;
     word-wrap: break-word;
   }
   .text-animation {

@@ -409,6 +409,7 @@ import YabanCover from "@/assets/img/yaban.jpg";
 import YasarCover from "@/assets/img/yasar-ne-yasar-ne-yasamaz.jpg";
 import YedinciCover from "@/assets/img/yedinci-gun.jpg";
 import YilkiCover from "@/assets/img/yilki-ati.png";
+import wrappedData from '@/data/wrapped.json';
 
 const touchStartX = ref(0);
 const touchStartY = ref(0);
@@ -480,7 +481,7 @@ const animationFrame = ref(null);
 const showModal = ref(false);
 const showContentModal = ref(false);
 const selectedLesson = ref(null);
-const userName = "Miralp";
+const userName = computed(() => wrappedData.data.user.name || 'Misafir');
 
 const isMobile = ref(false);
 
