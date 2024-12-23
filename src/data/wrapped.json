@@ -9,7 +9,7 @@
       "student": {
         "academic_year_title": "2024-2025",
         "learning_journey": {
-          "total_questions_solved": 487,
+          "total_questions_solved": 1487,
           "total_questions_solved_percentage": 32,
           "best_courses": [
             "Fen Bilgisi",
@@ -19,9 +19,15 @@
             "\u0130ngilizce"
           ],
           "best_course": "Fen Bilgisi",
-          "best_subjects": null,
+          "best_subjects": [
+            {"Türkçe": "Metin Türleri"},
+            {"Fen Bilgisi":"Kesirler"},
+            {"Sosyal Bilgiler":"Canlılar ve Enerji İlişkisi"},
+            {"Matematik":"Kültürel Miras"},
+            {"İngilizce":"Daily Routines"}
+          ],          
           "best_subject": null,
-          "total_hours_spent": 11
+          "total_hours_spent": 411
         }
       },
       "school": {

@@ -72,7 +72,7 @@
                             Bu yıl tam tamına
                           </h3>
                           <div class="text-5xl sm:text-7xl md:text-9xl font-bold text-red-600">
-                            {{ countedQuestions }}
+                            {{ animatedQuestionCount }}
                           </div>
                           <p class="text-lg sm:text-xl md:text-2xl">soru çözdün!</p>
                         </div>
@@ -85,7 +85,7 @@
                             Ve ortalamadan
                           </h3>
                           <div class="flex justify-center">
-                            <CircularProgress :value="percentageAboveAverage" />
+                            <CircularProgress :value="total_questions_solved_percentage" />
                           </div>
                           <p class="text-lg sm:text-xl md:text-2xl">
                             daha başarılıydın!
@@ -95,7 +95,7 @@
                     </div>
                   </div>
 
-                  <!-- Slide 2: Top Subjects Combined -->
+                  <!-- Slide 2: Top Courses Combined -->
                   <div v-if="currentSlide === 2">
                     <div class="text-center mb-8">
                       <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
@@ -108,12 +108,12 @@
                     </div>
 
                     <Transition name="fade">
-                      <div v-show="subjectsOpacity > 0" :style="{ opacity: subjectsOpacity }"
+                      <div v-show="coursesOpacity > 0" :style="{ opacity: coursesOpacity }"
                         class="h-64 sm:h-80 overflow-hidden">
                         <TransitionGroup name="list" tag="ul" class="space-y-2 sm:space-y-4">
-                          <li v-for="(subject) in visibleSubjects" :key="subject"
+                          <li v-for="(course) in visibleCourses" :key="course"
                             class="flex items-center text-xl sm:text-2xl md:text-3xl">
-                            <span>{{ subject }}</span>
+                            <span>{{ course }}</span>
                           </li>
                         </TransitionGroup>
                       </div>
@@ -134,7 +134,7 @@
                         <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
                           Öne çıkan dersin...
                         </h3>
-                        <div v-if="!topSubjectRevealed" @click="revealTopSubject"
+                        <div v-if="!topCourseRevealed" @click="revealTopCourse"
                           class="cursor-pointer flex flex-col items-center justify-center gap-4 relative mx-auto animate-pulse hover:animate-none">
                           <img :src="FingerPrint" alt="Fingerprint"
                             class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 transition-all duration-300" />
@@ -143,12 +143,12 @@
                             için tıkla</span>
                         </div>
                         <Transition name="fade">
-                          <div v-if="topSubjectRevealed">
+                          <div v-if="topCourseRevealed">
                             <div class="text-4xl sm:text-5xl md:text-7xl font-bold text-red-600">
-                              {{ topSubject }}
+                              {{ topCourse }}
                             </div>
                             <p class="text-xl sm:text-2xl md:text-3xl mt-4">
-                              Sen bir {{ topSubject }} <span class="text-red-600"> uzmanısın! &#129395;</span>
+                              Sen bir {{ topCourse }} <span class="text-red-600"> uzmanısın! &#129395;</span>
                             </p>
                           </div>
                         </Transition>
@@ -156,34 +156,31 @@
                     </Transition>
                   </div>
 
-                  <!-- Slide 4: Top Topics Combined -->
+                  <!-- Slide 4: Top Subjects Combined -->
                   <div v-if="currentSlide === 4">
                     <div class="text-center mb-8">
                       <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
                         Öylesine maceracısın ki, konudan konuya atladın &#128521;
                       </h3>
                       <p class="text-lg sm:text-xl md:text-2xl mb-8">
-                        <span class="font-bold text-red-600">En iyi 5'ine</span> bakalım!
+                        &#128170; <span class="font-bold text-red-600">En iyi</span> olduğun konular şunlardı:
                       </p>
                     </div>
 
                     <Transition name="fade">
-                      <div v-show="showTopics">
-                        <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8 text-center">
-                          &#128170; <span class="font-bold text-red-600">En iyi</span> olduğun konular şunlardı:
-                        </h3>
+                      <div v-show="showSubjects">
                         <div class="h-64 sm:h-80 overflow-hidden">
                           <TransitionGroup enter-active-class="transition-all duration-500 ease-out"
                             enter-from-class="opacity-0 scale-95 -translate-x-4"
                             enter-to-class="opacity-100 scale-100 translate-x-0"
                             move-class="transition-transform duration-500" tag="ul" class="space-y-2 sm:space-y-4">
-                            <li v-for="(topic, index) in visibleTopics" :key="topic.name"
+                            <li v-for="(subject, index) in visibleSubjects" :key="subject.name"
                               class="flex items-center text-lg sm:text-xl md:text-2xl transform"
                               :style="{ transitionDelay: `${index * 100}ms` }">
                               <span class="mr-2 sm:mr-4 font-bold opacity-50">{{ index + 1 }}.</span>
                               <div class="flex-1">
-                                <span class="font-medium">{{ topic.name }}</span>
-                                <span class="text-white/60 ml-2">({{ topic.subject }})</span>
+                                <span class="font-medium">{{ subject.name }}</span>
+                                <span class="text-sm ml-2 opacity-75">{{ subject.course }}</span>
                               </div>
                             </li>
                           </TransitionGroup>
@@ -197,9 +194,7 @@
                     <!-- Initial Teaser -->
                     <div>
                       <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                        Öğrenmeye <span class="text-red-600">
-                          ç{{ expandedText }}k
-                        </span> zaman ayırdın &#9200;
+                        Öğrenmeye <span class="text-red-600">çok</span> zaman ayırdın &#9200;
                       </h3>
                       <p class="text-lg sm:text-xl md:text-2xl">
                         Kaç saat olduğunu tahmin edebilir misin?
@@ -232,7 +227,7 @@
                             {{ animatedMovieCount }}
                           </div>
                           <p class="text-lg sm:text-xl md:text-2xl">
-                            saat film izlemek demektir! &#127909;
+                            film izlemek demektir! &#127909;
                           </p>
                         </div>
                       </Transition>
@@ -376,38 +371,57 @@ const showInitialSubtext = ref(false);
 const longestStreak = ref(10);
 const name = computed(() => wrappedData.data.user.name);
 
-const totalQuestions = 1384;
-const percentageAboveAverage = 35;
-const topSubjects = ["Matematik", "Fizik", "Tarih", "Kimya", "Biyoloji"];
-const topSubject = "Matematik";
-const topTopics = [
-  { name: "Sayılar", subject: "Matematik" },
-  { name: "Sıvıların Kaldırma Kuvveti", subject: "Fizik" },
-  { name: "Bilimsel Metotlar", subject: "Tarih" },
-  { name: "Organik Kimya", subject: "Kimya" },
-  { name: "Genetik", subject: "Biyoloji" },
-];
-const totalStudyHours = 720;
-const moviesWatched = Math.floor(totalStudyHours / 2);
+const total_questions_solved = computed(() => 
+  wrappedData?.data?.user?.student?.learning_journey?.total_questions_solved ?? 0
+);
+const total_questions_solved_percentage = computed(() => 
+  wrappedData?.data?.user?.student?.learning_journey?.total_questions_solved_percentage ?? 0
+);
+
+const topCourses = computed(() => {
+  const courses = wrappedData?.data?.user?.student?.learning_journey?.best_courses;
+  return Array.isArray(courses) ? courses : [];
+});
+const topCourse = computed(() => 
+  wrappedData?.data?.user?.student?.learning_journey?.best_course ?? '—'
+);
+const bestSubjects = computed(() => {
+  const subjects = wrappedData?.data?.user?.student?.learning_journey?.best_subjects ?? [];
+  return subjects.map(subjectObj => {
+    const [course, name] = Object.entries(subjectObj)[0];
+    return {
+      course,
+      name
+    };
+  });
+});
+
+const totalStudyHours = computed(() => 
+  wrappedData?.data?.user?.student?.learning_journey?.total_hours_spent ?? 0
+);
+
+const moviesWatched = computed(() => 
+  Math.floor(totalStudyHours.value / 1.67)
+);
 
 const buttonText = computed(() =>
   currentSlide.value === totalSlides - 1 ? "Son" : "İleri"
 );
 
+const visibleCourses = ref([]);
 const visibleSubjects = ref([]);
-const visibleTopics = ref([]);
 const visibleAchievements = ref([]);
 const highlightedBadgeId = ref(null);
 
-const countedQuestions = ref(0);
+const animatedQuestionCount = ref(0);
 const percentageOpacity = ref(0);
-const subjectsOpacity = ref(0);
-const topSubjectRevealed = ref(false);
+const coursesOpacity = ref(0);
+const topCourseRevealed = ref(false);
 const showCelebration = ref(false);
-const subjectTimeouts = ref([]);
+const courseTimeouts = ref([]);
 const showTotalQuestions = ref(false);
 const showOutstandingCourse = ref(false);
-const showTopics = ref(false);
+const showSubjects = ref(false);
 const studyTimePhase = ref('teaser');
 const achievementPhase = ref('initial');
 
@@ -425,6 +439,8 @@ const safeSetTimeout = (fn, delay) => {
 };
 
 const shuffleArray = (array) => {
+  if (!Array.isArray(array)) return [];
+  
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -468,36 +484,30 @@ const prevSlide = () => {
 };
 
 const resetSlide1 = () => {
-  showInitialSubtext.value = false;
   showTotalQuestions.value = false;
   percentageOpacity.value = 0;
-  countedQuestions.value = 0;
+  animatedQuestionCount.value = 0;
 };
 
 const resetSlide2 = () => {
-  subjectsOpacity.value = 0;
-  visibleSubjects.value = [];
-  subjectTimeouts.value.forEach(timeout => clearTimeout(timeout));
-  subjectTimeouts.value = [];
+  coursesOpacity.value = 0;
+  visibleCourses.value = [];
+  courseTimeouts.value.forEach(timeout => clearTimeout(timeout));
+  courseTimeouts.value = [];
 };
 
 const resetSlide3 = () => {
   showOutstandingCourse.value = false;
-  topSubjectRevealed.value = false;
+  topCourseRevealed.value = false;
 };
 
 const resetSlide4 = () => {
-  showTopics.value = false;
-  visibleTopics.value = [];
+  showSubjects.value = false;
+  visibleSubjects.value = [];
 };
 
 const resetSlide5 = () => {
   studyTimePhase.value = 'teaser';
-  if (expansionInterval) {
-    clearInterval(expansionInterval);
-    expansionInterval = null;
-  }
-  expandedText.value = 'o';
 };
 
 const resetSlide6 = () => {
@@ -521,7 +531,7 @@ const debounce = (fn, delay) => {
 const initializeSlide = (slideNumber) => {
   clearAllTimeouts();
 
-  let shuffledSubjects;
+  let shuffledCourses;
 
   switch (slideNumber) {
     case 1:
@@ -538,15 +548,13 @@ const initializeSlide = (slideNumber) => {
     case 2:
       resetSlide2();
       safeSetTimeout(() => {
-        // Önce "Çok sayıda farklı derste uzmanlaştın" mesajını göster
-        subjectsOpacity.value = 1;
+        coursesOpacity.value = 1;
 
-        // 2 saniye sonra dersleri sırayla göstermeye başla
         safeSetTimeout(() => {
-          shuffledSubjects = shuffleArray(topSubjects);
-          shuffledSubjects.forEach((subject, index) => {
+          shuffledCourses = shuffleArray(topCourses.value);
+          shuffledCourses.forEach((course, index) => {
             safeSetTimeout(() => {
-              visibleSubjects.value.push(subject);
+              visibleCourses.value.push(course);
             }, index * 1000);
           });
         }, 1000);
@@ -563,10 +571,10 @@ const initializeSlide = (slideNumber) => {
     case 4:
       resetSlide4();
       safeSetTimeout(() => {
-        showTopics.value = true;
-        topTopics.forEach((topic, index) => {
+        showSubjects.value = true;
+        bestSubjects.value.forEach((subject, index) => {
           safeSetTimeout(() => {
-            visibleTopics.value.push(topic);
+            visibleSubjects.value.push(subject);
           }, index * 200);
         });
       }, 1000);
@@ -575,21 +583,15 @@ const initializeSlide = (slideNumber) => {
     case 5:
       resetSlide5();
       safeSetTimeout(() => {
-        // Start the "çok" animation
-        animateExpansion();
-        
-        // Continue with the rest of slide 5 animations after expansion
+        studyTimePhase.value = 'hours';
+        animateStudyHours();
         safeSetTimeout(() => {
-          studyTimePhase.value = 'hours';
-          animateStudyHours();
+          studyTimePhase.value = 'comparison';
+          animateMovieCount();
           safeSetTimeout(() => {
-            studyTimePhase.value = 'comparison';
-            animateMovieCount();
-            safeSetTimeout(() => {
-              studyTimePhase.value = 'question';
-            }, 3000);
+            studyTimePhase.value = 'question';
           }, 3000);
-        }, 2000);
+        }, 3000);
       }, 500);
       break;
 
@@ -600,7 +602,7 @@ const initializeSlide = (slideNumber) => {
         safeSetTimeout(() => {
           achievementPhase.value = 'list';
 
-          const badges = calculateBadges(totalQuestions, 80, totalStudyHours);
+          const badges = calculateBadges(total_questions_solved.value, 80, totalStudyHours.value);
 
           badges.forEach((badge, index) => {
             safeSetTimeout(() => {
@@ -631,33 +633,20 @@ const initializeSlide = (slideNumber) => {
   }
 };
 
-// Debounced slayt başlatma fonksiyonu
 const debouncedInitializeSlide = debounce((newSlide) => {
   initializeSlide(newSlide);
-  
-  // Reset expandedText when leaving slide 5
-  if (newSlide !== 5) {
-    expandedText.value = 'o';
-  }
 });
 
-// Watch fonksiyonunu güncelle
 watch(currentSlide, (newSlide) => {
   debouncedInitializeSlide(newSlide);
-  
-  // Reset expandedText when leaving slide 5
-  if (newSlide !== 5) {
-    expandedText.value = 'o';
-  }
 });
 
-// Component unmount olduğunda timeout'ları temizle
 onUnmounted(() => {
   clearAllTimeouts();
 });
 
-const revealTopSubject = () => {
-  topSubjectRevealed.value = true;
+const revealTopCourse = () => {
+  topCourseRevealed.value = true;
 };
 
 const closeModal = () => {
@@ -683,7 +672,6 @@ const handleShare = async () => {
   try {
     const card = document.querySelector('.wrapped-stats-card');
     
-    // 1. Animasyonları devre dışı bırak
     const elements = card.querySelectorAll('*');
     const originalStyles = new Map();
     
@@ -693,9 +681,7 @@ const handleShare = async () => {
       el.style.animation = 'none';
     });
 
-    // 2. Fontların yüklenmesini bekle
     await document.fonts.ready;
-    // Ek güvence için biraz daha bekle
     await new Promise(resolve => setTimeout(resolve, 500));
 
     const canvas = await html2canvas(card, {
@@ -706,7 +692,6 @@ const handleShare = async () => {
       allowTaint: true
     });
 
-    // Orijinal stilleri geri yükle
     elements.forEach(el => {
       el.style.cssText = originalStyles.get(el);
     });
@@ -758,7 +743,6 @@ watch(
 
 const statsCardRef = ref(null);
 
-// Başarıları hesaplama fonksiyonu (WrappedStatsCard'dan alındı)
 const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
   const badges = [];
   let id = 1;
@@ -774,11 +758,11 @@ const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
 
   // Başarı Yüzdesi Rozetleri
   if (successRate >= 100) {
-    badges.push({ id: id++, emoji: '🎯', title: 'Tam İsabet (%100)' });
+    badges.push({ id: id++, emoji: '🎯', title: 'Tam İsabet (%100 Başarı)' });
   } else if (successRate >= 85) {
-    badges.push({ id: id++, emoji: '🎪', title: 'Başarı Yıldızı (%85+)' });
+    badges.push({ id: id++, emoji: '🎪', title: 'Başarı Yıldızı (%85+ Başarı)' });
   } else if (successRate >= 70) {
-    badges.push({ id: id++, emoji: '✨', title: 'Yükselen Yıldız (%70+)' });
+    badges.push({ id: id++, emoji: '✨', title: 'Yükselen Yıldız (%70+ Başarı)' });
   }
 
   // Çalışma Saati Rozetleri
@@ -793,16 +777,14 @@ const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
   return badges;
 };
 
-// Ref'leri ekleyelim
 const animatedHours = ref(0);
 const animatedMovieCount = ref(0);
 
-// Animasyon fonksiyonu
 const animateStudyHours = () => {
   let start = 0;
-  const end = totalStudyHours;
-  const duration = 2000; // 2 saniye
-  const step = end / (duration / 16); // 60 FPS'e yakın
+  const end = totalStudyHours.value;
+  const duration = 2000; 
+  const step = end / (duration / 16);
 
   const animate = () => {
     start += step;
@@ -817,11 +799,10 @@ const animateStudyHours = () => {
   animate();
 };
 
-// Film sayısı animasyon fonksiyonu
 const animateMovieCount = () => {
-  const end = moviesWatched;
-  const duration = 1500; // 1.5 saniye
-  const easeOutQuart = t => 1 - (--t) * t * t * t; // Easing fonksiyonu
+  const end = moviesWatched.value;
+  const duration = 1500;
+  const easeOutQuart = t => 1 - (--t) * t * t * t;
 
   const startTime = Date.now();
 
@@ -853,7 +834,7 @@ const startSlide1Animations = () => {
     const elapsed = currentTime - startTime;
 
     if (elapsed >= duration) {
-      countedQuestions.value = totalQuestions;
+      animatedQuestionCount.value = total_questions_solved.value;
       percentageOpacity.value = 1;
       return;
     }
@@ -861,7 +842,7 @@ const startSlide1Animations = () => {
     const easeOutQuart = t => 1 - (--t) * t * t * t;
     const progress = easeOutQuart(elapsed / duration);
 
-    countedQuestions.value = Math.round(progress * totalQuestions);
+    animatedQuestionCount.value = Math.round(progress * total_questions_solved.value);
     percentageOpacity.value = progress;
 
     requestAnimationFrame(animate);
@@ -869,36 +850,6 @@ const startSlide1Animations = () => {
 
   animate();
 };
-
-const expandedText = ref('o');
-let expansionInterval = null;
-
-// Genişleme animasyonunu yönetecek fonksiyon
-const animateExpansion = () => {
-  let expanding = true;
-  let count = 1;
-  
-  if (expansionInterval) clearInterval(expansionInterval);
-  
-  expansionInterval = setInterval(() => {
-    if (expanding) {
-      count++;
-      if (count >= 5) expanding = false;
-    } else {
-      count--;
-      if (count <= 1) {
-        clearInterval(expansionInterval);
-        expansionInterval = null;
-      }
-    }
-    expandedText.value = 'o'.repeat(count);
-  }, 100); // Her 150ms'de bir harf ekle/çıkar
-};
-
-// Component unmounted olduğunda interval'i temizle
-onUnmounted(() => {
-  if (expansionInterval) clearInterval(expansionInterval);
-});
 
 </script>
 
@@ -990,44 +941,4 @@ onUnmounted(() => {
   background-size: 300px 300px;
 }
 
-.expanding-text {
-  display: inline-block;
-  animation: expandText 5s ease-in-out forwards;
-}
-
-@keyframes expandText {
-  0% {
-    content: "çok";
-  }
-  10% {
-    content: "çook";
-  }
-  20% {
-    content: "çoook";
-  }
-  30% {
-    content: "çooook";
-  }
-  40% {
-    content: "çoooook";
-  }
-  50% {
-    content: "çooooook";
-  }
-  60% {
-    content: "çoooook";
-  }
-  70% {
-    content: "çooook";
-  }
-  80% {
-    content: "çoook";
-  }
-  90% {
-    content: "çook";
-  }
-  100% {
-    content: "çok";
-  }
-}
 </style>
