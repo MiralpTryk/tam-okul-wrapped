@@ -361,6 +361,7 @@ import CircularProgress from '@/components/CircularProgress.vue';
 import FingerPrint from '@/assets/fingerprint.svg';
 import LogoBack from '@/assets/tam-okul-ai-logo-back.svg';
 import LogoFront from '@/assets/tam-okul-ai-logo-front.svg';
+import wrappedData from '@/data/wrapped.json';
 
 const props = defineProps({
   show: Boolean,
@@ -373,7 +374,7 @@ const totalSlides = 8;
 const transitionName = ref("slide-right");
 const showInitialSubtext = ref(false);
 const longestStreak = ref(10);
-const name = ref("Miralp");
+const name = computed(() => wrappedData.data.user.name);
 
 const totalQuestions = 1384;
 const percentageAboveAverage = 35;
