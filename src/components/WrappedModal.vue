@@ -41,7 +41,7 @@
 
         <!-- Close Button -->
         <button @click="closeModal"
-          class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-gray-200 z-50 w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-xl sm:text-3xl">
+          class="absolute top-4 right-4 sm:top-6 sm:right-6 text-zinc-200 hover:text-gray-200 z-50 w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-xl sm:text-3xl">
           &times;
         </button>
 
@@ -51,7 +51,7 @@
           <div class="flex-1 overflow-hidden">
             <Transition :name="transitionName">
               <div :key="currentSlide"
-                class="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-8 text-white">
+                class="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-8 text-zinc-200">
 
                 <!-- Slide Content -->
                 <!-- Slide 0: Intro -->
@@ -66,7 +66,7 @@
                       <span class="font-bold text-red-600">{{ name }}</span>?
                     </h3>
                     <button @click="nextSlide"
-                      class="text-lg sm:text-xl md:text-2xl px-6 py-3 rounded-full bg-white text-red-600 font-semibold animate-pulse hover:animate-none">
+                      class="text-lg sm:text-xl md:text-2xl px-6 py-3 rounded-full bg-white text-red-600 font-semibold">
                       Hadi başlayalım!
                     </button>
                   </div>
@@ -79,7 +79,7 @@
                         Zaman hızla geçiyor...
                       </h3>
                       <Transition name="fade">
-                        <p v-if="showInitialSubtext" class="text-lg sm:text-xl md:text-2xl text-white/80 mb-8">
+                        <p v-if="showInitialSubtext" class="text-lg sm:text-xl md:text-2xl text-zinc-200/80 mb-8">
                           Neyse ki senin için her şeyi tarihe not düştük &#129323;
                         </p>
                       </Transition>
@@ -157,7 +157,7 @@
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
                       Ama bir derste o kadar iyiydin ki
         
-                      <span class="italic text-red-600">diğerlerinden öne çıktı &#128077;</span>
+                      <span class="text-red-600">diğerlerinden öne çıktı &#128077;</span>
                     </h3>
                     
                     <Transition name="fade" mode="out-in">
@@ -285,7 +285,7 @@
                           Çok şey başardın
                         </h3>
                         <p class="text-lg sm:text-xl md:text-2xl">
-                          Başarılarını kutlayalım! 🎉🎉🎉
+                          Başarılarını kutlayalım! 🎉
                         </p>
                       </div>
                     </Transition>
@@ -309,7 +309,7 @@
                               <div class="flex-1">
                                 <div :class="[
                                   'font-medium transition-colors duration-300',
-                                  badge.isHighlighted ? 'text-yellow-600' : 'text-white'
+                                  badge.isHighlighted ? 'text-yellow-600' : 'text-zinc-200'
                                 ]">
                                   {{ badge.title }}
                                 </div>
@@ -352,19 +352,19 @@
           <div v-if="currentSlide !== 0"
             class="relative z-[55] p-4 flex justify-center gap-2 sm:gap-4 bg-gradient-to-t from-black/20">
             <button v-if="currentSlide === totalSlides - 1" @click="rewindPresentation"
-              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 flex items-center">
+              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-zinc-200 border border-white/20 hover:bg-white/20 flex items-center">
               <RefreshCwIcon class="w-3 h-3 sm:w-3 sm:h-3" />
               <span class="hidden sm:inline sm:ml-1">Yeniden Başlat</span>
             </button>
 
             <button v-if="currentSlide === totalSlides - 1" @click="handleShare"
-              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 flex items-center">
+              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-zinc-200 border border-white/20 hover:bg-white/20 flex items-center">
               <Share2Icon class="w-3 h-3 sm:w-3 sm:h-3" />
               <span class="hidden sm:inline sm:ml-1">İstatistikleri Paylaş</span>
             </button>
 
             <button @click="prevSlide"
-              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20">
+              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:text-base font-semibold transition-all duration-300 bg-white/10 backdrop-blur-sm text-zinc-200 border border-white/20 hover:bg-white/20">
               Geri
             </button>
 
@@ -373,6 +373,46 @@
               {{ buttonText }}
             </button>
           </div>
+
+          <!-- Mobile Touch Navigation -->
+          <div v-if="currentSlide !== 0" class="absolute inset-0 sm:hidden flex">
+            <!-- Previous Slide Button -->
+            <button 
+              @click="prevSlide"
+              class="w-1/2 h-full"
+              aria-label="Önceki slayt">
+            </button>
+            
+            <!-- Next Slide Button -->
+            <button 
+              @click="nextSlide"
+              class="w-1/2 h-full"
+              aria-label="Sonraki slayt">
+            </button>
+          </div>
+
+          <!-- Mobile Navigation Hints -->
+          <Transition name="fade">
+            <div v-if="currentSlide === 1" class="absolute inset-y-0 w-full sm:hidden pointer-events-none pt-16">
+              <div class="h-full flex justify-between items-center px-4 text-zinc-200/50">
+                <!-- Left Hint -->
+                <div class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span class="text-sm">Geri</span>
+                </div>
+
+                <!-- Right Hint -->
+                <div class="flex items-center gap-2">
+                  <span class="text-sm">İleri</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </Transition>
         </div>
       </div>
     </div>
@@ -744,7 +784,7 @@ const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
 
   // Soru Çözüm Rozetleri
   if (totalQuestions >= 1500) {
-    badges.push({ id: id++, emoji: '📚', title: 'Soru Çözüm Ustas�� (1500+ Soru)' });
+    badges.push({ id: id++, emoji: '📚', title: 'Soru Çözüm Ustası (1500+ Soru)' });
   } else if (totalQuestions >= 1000) {
     badges.push({ id: id++, emoji: '📖', title: 'Soru Çözüm Uzmanı (1000+ Soru)' });
   } else if (totalQuestions >= 500) {
