@@ -166,7 +166,7 @@
                           Öne çıkan dersin...
                         </h3>
                         <div v-if="!topCourseRevealed" @click="revealTopCourse"
-                          class="cursor-pointer flex flex-col items-center justify-center gap-4 relative mx-auto animate-pulse hover:animate-none">
+                          class="cursor-pointer flex flex-col items-center justify-center gap-4 relative mx-auto animate-pulse hover:animate-none z-20">
                           <img :src="FingerPrint" alt="Fingerprint"
                             class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 transition-all duration-300" />
                           <span class="text-xl sm:text-2xl md:text-3xl transition-all duration-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-nowrap">
@@ -375,7 +375,7 @@
           </div>
 
           <!-- Mobile Touch Navigation -->
-          <div v-if="currentSlide !== 0" class="absolute inset-0 sm:hidden flex">
+          <div v-if="currentSlide !== 0" class="absolute inset-0 sm:hidden flex z-10">
             <!-- Previous Slide Button -->
             <button 
               @click="prevSlide"
