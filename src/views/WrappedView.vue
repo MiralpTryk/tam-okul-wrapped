@@ -1605,10 +1605,12 @@ const endDrag = (e) => {
 
 const openModal = () => {
   showModal.value = true;
+  document.body.style.overflow = 'hidden';
 };
 
 const closeModal = () => {
   showModal.value = false;
+  document.body.style.overflow = '';
 };
 
 const openContentModal = (item, type, event) => {

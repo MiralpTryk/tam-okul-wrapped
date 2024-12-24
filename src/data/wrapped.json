@@ -21,9 +21,9 @@
           "best_course": "Fen Bilgisi",
           "best_subjects": [
             {"Türkçe": "Metin Türleri"},
-            {"Fen Bilgisi":"Kesirler"},
-            {"Sosyal Bilgiler":"Canlılar ve Enerji İlişkisi"},
-            {"Matematik":"Kültürel Miras"},
+            {"Matematik":"Kesirler"},
+            {"Fen Bilimleri":"Canlılar ve Enerji İlişkisi"},
+            {"Sosyal Bilgiler":"Kültürel Miras"},
             {"İngilizce":"Daily Routines"}
           ],          
           "best_subject": "Metin Türleri",

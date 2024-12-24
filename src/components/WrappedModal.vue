@@ -4,19 +4,42 @@
       <div class="absolute inset-0 bg-black opacity-50" @click="closeModal"></div>
       <div class="relative bg-gradient-to-tr to-black via-black from-red-700 w-full h-full overflow-hidden">
         <div class="emoji-pattern"></div>
+
         <!-- Logo Container -->
-        <a href="https://tamokul.com" target="_blank" class="absolute bottom-4 right-4 w-16 sm:w-24 md:w-24 h-16 sm:h-24 md:h-24 z-[9999] group hover:scale-110 duration-300 transition-all hover:drop-shadow-[0_0_0.75rem_#0794bc]">
-          <img :src="LogoBack" alt="Tam Okul AI Logo" class="w-full h-full animate-spin-slow absolute inset-0" crossorigin="anonymous" loading="eager" />
-          <img :src="LogoFront" alt="Tam Okul AI Logo" class="w-1/2 h-1/2 absolute top-1/4 left-1/4" crossorigin="anonymous" loading="eager" />
+        <a href="https://tamokul.com" target="_blank"
+          class="absolute bottom-4 right-4 w-16 sm:w-24 md:w-24 h-16 sm:h-24 md:h-24 z-[9999] group hover:scale-110 duration-300 transition-all hover:drop-shadow-[0_0_0.75rem_#0794bc]">
+          <img :src="LogoBack" alt="Tam Okul AI Logo" class="w-full h-full animate-spin-slow absolute inset-0"
+            crossorigin="anonymous" loading="eager" />
+          <img :src="LogoFront" alt="Tam Okul AI Logo" class="w-1/2 h-1/2 absolute top-1/4 left-1/4"
+            crossorigin="anonymous" loading="eager" />
         </a>
-        <!-- Progress Bar -->
-        <div
-          class="absolute top-0 sm:top-4 left-1/2 transform -translate-x-1/2 w-full h-2 bg-white/25 max-w-sm sm:max-w-3xl rounded-full">
-          <div class="h-full bg-red-600 transition-all duration-500 rounded-full"
-            :style="{ width: `${(currentSlide / (totalSlides - 1)) * 100}%` }">
+
+        <!-- Progress Bar Buraya gelecek -->
+        <div class="absolute top-0 sm:top-4 left-1/2 transform -translate-x-1/2 w-full px-4 sm:px-8">
+          <div class="flex gap-1 w-full max-w-sm sm:max-w-3xl mx-auto">
+            <div v-for="(bar, index) in progressBars" :key="index"
+              class="overflow-hidden bg-white/25 transition-all duration-300 flex items-center"
+              :class="{
+                'h-1.5': currentSlide === index,
+                'h-1': currentSlide !== index,
+                'flex-[2]': currentSlide === index,
+                'flex-1': currentSlide !== index
+              }">
+              <div class="bg-white transition-[width] duration-100"
+                :class="{
+                  'h-1.5': currentSlide === index,
+                  'h-1': currentSlide !== index
+                }"
+                :style="{
+                  transitionDuration: bar.isActive ? '5000ms' : '100ms',
+                  width: `${bar.progress}%`
+                }">
+              </div>
+            </div>
           </div>
         </div>
 
+        <!-- Close Button -->
         <button @click="closeModal"
           class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-gray-200 z-50 w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-xl sm:text-3xl">
           &times;
@@ -34,12 +57,12 @@
                 <!-- Slide 0: Intro -->
                 <div>
                   <h2 v-if="currentSlide === 0"
-                    class="text-3xl sm:text-5xl md:text-6xl font-bold text-center mb-6 sm:mb-12">
+                    class="text-3xl sm:text-5xl md:text-6xl font-bold text-center mb-6">
                     <span class="text-red-600">{{ new Date().getFullYear() }}</span> Öğrenme Yolculuğun
                   </h2>
                   <div v-if="currentSlide === 0" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                     hazır, peki sen görmeye hazır mısın
+                      hazır, peki sen hazır mısın
                       <span class="font-bold text-red-600">{{ name }}</span>?
                     </h3>
                     <button @click="nextSlide"
@@ -47,7 +70,6 @@
                       Hadi başlayalım!
                     </button>
                   </div>
-
 
                   <!-- Slide 1: Questions and Percentage Combined -->
                   <div v-if="currentSlide === 1" class="text-center space-y-8">
@@ -69,12 +91,20 @@
                       <Transition name="fade">
                         <div v-if="showTotalQuestions" class="space-y-4 sm:flex-1">
                           <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
-                            Bu yıl tam tamına
+                            Bu yıl toplam
                           </h3>
-                          <div class="text-5xl sm:text-7xl md:text-9xl font-bold text-red-600">
+                          <div
+                            class="text-5xl sm:text-7xl md:text-9xl font-bold text-red-600 min-w-[200px] sm:min-w-[300px] md:min-w-[350px] text-center">
                             {{ animatedQuestionCount }}
                           </div>
                           <p class="text-lg sm:text-xl md:text-2xl">soru çözdün!</p>
+                        </div>
+                      </Transition>
+
+                      <!-- Connecting "ve" -->
+                      <Transition name="fade">
+                        <div v-if="showTotalQuestions" class="">
+                          <span class="text-2xl sm:text-3xl md:text-4xl font-semibold">ve</span>
                         </div>
                       </Transition>
 
@@ -82,20 +112,20 @@
                       <Transition name="fade">
                         <div v-if="showTotalQuestions" class="space-y-4 sm:flex-1">
                           <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
-                            Ve ortalamadan
+                            sorularda
                           </h3>
                           <div class="flex justify-center">
                             <CircularProgress :value="total_questions_solved_percentage" />
                           </div>
                           <p class="text-lg sm:text-xl md:text-2xl">
-                            daha başarılıydın!
+                            başarıya ulaştın!
                           </p>
                         </div>
                       </Transition>
                     </div>
                   </div>
 
-                  <!-- Slide 2: Top Courses Combined -->
+                  <!-- Slide 2: Top Courses -->
                   <div v-if="currentSlide === 2">
                     <div class="text-center mb-8">
                       <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
@@ -109,11 +139,13 @@
 
                     <Transition name="fade">
                       <div v-show="coursesOpacity > 0" :style="{ opacity: coursesOpacity }"
-                        class="h-64 sm:h-80 overflow-hidden">
-                        <TransitionGroup name="list" tag="ul" class="space-y-2 sm:space-y-4">
+                        class="h-72 overflow-hidden">
+                        <TransitionGroup name="list" tag="ul" class="space-y-1 sm:space-y-2">
                           <li v-for="(course) in visibleCourses" :key="course"
-                            class="flex items-center text-xl sm:text-2xl md:text-3xl">
-                            <span>{{ course }}</span>
+                            class="flex items-center text-lg sm:text-xl md:text-2xl transform rounded-lg p-2">
+                            <div class="flex items-center space-x-4 w-full">
+                              <span class="font-medium">{{ course }}</span>
+                            </div>
                           </li>
                         </TransitionGroup>
                       </div>
@@ -122,15 +154,14 @@
 
                   <!-- Slide 3: Outstanding Course Combined -->
                   <div v-if="currentSlide === 3" class="text-center">
+                    <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
+                      Ama bir derste o kadar iyiydin ki
+        
+                      <span class="italic text-red-600">diğerlerinden öne çıktı &#128077;</span>
+                    </h3>
+                    
                     <Transition name="fade" mode="out-in">
-                      <div v-if="!showOutstandingCourse" key="teaser">
-                        <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                          Ama bir derste o kadar iyiydin ki 
-                          <br>
-                          <span class="italic text-red-600">diğerlerinden öne çıktı... &#128077;</span>
-                        </h3>
-                      </div>
-                      <div v-else key="content" class="space-y-4 sm:space-y-8">
+                      <div v-if="showOutstandingCourse" class="space-y-4 sm:space-y-8">
                         <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
                           Öne çıkan dersin...
                         </h3>
@@ -138,9 +169,9 @@
                           class="cursor-pointer flex flex-col items-center justify-center gap-4 relative mx-auto animate-pulse hover:animate-none">
                           <img :src="FingerPrint" alt="Fingerprint"
                             class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 transition-all duration-300" />
-                          <span
-                            class="text-xl sm:text-2xl md:text-3xl transition-all duration-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-nowrap">Açmak
-                            için tıkla</span>
+                          <span class="text-xl sm:text-2xl md:text-3xl transition-all duration-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-nowrap">
+                            Açmak için tıkla
+                          </span>
                         </div>
                         <Transition name="fade">
                           <div v-if="topCourseRevealed">
@@ -156,11 +187,11 @@
                     </Transition>
                   </div>
 
-                  <!-- Slide 4: Top Subjects Combined -->
+                  <!-- Slide 4: Top Subjects -->
                   <div v-if="currentSlide === 4">
                     <div class="text-center mb-8">
                       <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                        Öylesine maceracısın ki, konudan konuya atladın &#128521;
+                        Konudan konuya atladın &#128521;
                       </h3>
                       <p class="text-lg sm:text-xl md:text-2xl mb-8">
                         &#128170; <span class="font-bold text-red-600">En iyi</span> olduğun konular şunlardı:
@@ -169,18 +200,20 @@
 
                     <Transition name="fade">
                       <div v-show="showSubjects">
-                        <div class="h-64 sm:h-80 overflow-hidden">
+                        <div class="h-72 overflow-hidden">
                           <TransitionGroup enter-active-class="transition-all duration-500 ease-out"
                             enter-from-class="opacity-0 scale-95 -translate-x-4"
                             enter-to-class="opacity-100 scale-100 translate-x-0"
-                            move-class="transition-transform duration-500" tag="ul" class="space-y-2 sm:space-y-4">
+                            move-class="transition-transform duration-500" tag="ul" class="space-y-1 sm:space-y-2">
                             <li v-for="(subject, index) in visibleSubjects" :key="subject.name"
-                              class="flex items-center text-lg sm:text-xl md:text-2xl transform"
+                              class="flex items-center text-lg sm:text-xl md:text-2xl transform rounded-lg p-2"
                               :style="{ transitionDelay: `${index * 100}ms` }">
-                              <span class="mr-2 sm:mr-4 font-bold opacity-50">{{ index + 1 }}.</span>
-                              <div class="flex-1">
-                                <span class="font-medium">{{ subject.name }}</span>
-                                <span class="text-sm ml-2 opacity-75">{{ subject.course }}</span>
+                              <div class="flex items-center space-x-2 w-full">
+                                <span class="mr-1 font-bold opacity-50">{{ index + 1 }}.</span>
+                                <div class="flex-1">
+                                  <span class="font-medium">{{ subject.name }}</span>
+                                  <span class="text-sm ml-2 opacity-75">{{ subject.course }}</span>
+                                </div>
                               </div>
                             </li>
                           </TransitionGroup>
@@ -205,7 +238,7 @@
                     <div class="sm:flex sm:justify-center sm:items-center sm:gap-12 sm:mx-auto">
                       <!-- Total Hours -->
                       <Transition name="fade">
-                        <div v-if="studyTimePhase !== 'teaser'" class="space-y-4 sm:flex-1">
+                        <div v-if="studyTimePhase !== 'teaser'" class="space-y-2 sm:space-y-4 sm:flex-1">
                           <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
                             Toplam öğrenme süren...
                           </h3>
@@ -219,7 +252,7 @@
                       <!-- Comparison -->
                       <Transition name="fade">
                         <div v-if="studyTimePhase === 'comparison' || studyTimePhase === 'question'"
-                          class="space-y-4 sm:flex-1 mt-8 sm:mt-0">
+                          class="space-y-2 sm:space-y-4 sm:flex-1 mt-8 sm:mt-0">
                           <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
                             Bu, yaklaşık olarak
                           </h3>
@@ -236,7 +269,7 @@
                     <!-- Time Question -->
                     <Transition name="fade">
                       <div v-if="studyTimePhase === 'question'" class="space-y-4">
-                        <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
+                        <h3 class="text-lg sm:text-xl md:text-2xl font-semibold">
                           Bu kadar zamanı nereden buluyorsun? 🫢
                         </h3>
                       </div>
@@ -371,10 +404,10 @@ const showInitialSubtext = ref(false);
 const longestStreak = ref(10);
 const name = computed(() => wrappedData.data.user.name);
 
-const total_questions_solved = computed(() => 
+const total_questions_solved = computed(() =>
   wrappedData?.data?.user?.student?.learning_journey?.total_questions_solved ?? 0
 );
-const total_questions_solved_percentage = computed(() => 
+const total_questions_solved_percentage = computed(() =>
   wrappedData?.data?.user?.student?.learning_journey?.total_questions_solved_percentage ?? 0
 );
 
@@ -382,7 +415,7 @@ const topCourses = computed(() => {
   const courses = wrappedData?.data?.user?.student?.learning_journey?.best_courses;
   return Array.isArray(courses) ? courses : [];
 });
-const topCourse = computed(() => 
+const topCourse = computed(() =>
   wrappedData?.data?.user?.student?.learning_journey?.best_course ?? '—'
 );
 const bestSubjects = computed(() => {
@@ -396,11 +429,11 @@ const bestSubjects = computed(() => {
   });
 });
 
-const totalStudyHours = computed(() => 
+const totalStudyHours = computed(() =>
   wrappedData?.data?.user?.student?.learning_journey?.total_hours_spent ?? 0
 );
 
-const moviesWatched = computed(() => 
+const moviesWatched = computed(() =>
   Math.floor(totalStudyHours.value / 1.67)
 );
 
@@ -418,7 +451,6 @@ const percentageOpacity = ref(0);
 const coursesOpacity = ref(0);
 const topCourseRevealed = ref(false);
 const showCelebration = ref(false);
-const courseTimeouts = ref([]);
 const showTotalQuestions = ref(false);
 const showOutstandingCourse = ref(false);
 const showSubjects = ref(false);
@@ -438,30 +470,22 @@ const safeSetTimeout = (fn, delay) => {
   return timeoutId;
 };
 
-const shuffleArray = (array) => {
-  if (!Array.isArray(array)) return [];
-  
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
+// Animasyon süreleri için sabitler
+const ANIMATION_CONSTANTS = {
+  TOTAL_DURATION: 5000,    // Genel animasyon süresi
+  INITIAL_DELAY: 1000,     // Başlangıç gecikmesi
+  ANIMATION_DURATION: 4000, // Ana animasyon süresi
+  PHASE_DURATION: 2000,    // Aşama süresi
+  SLIDE_1_DURATION: 3000,  // Slayt 1 için özel süre
 };
 
 const nextSlide = () => {
   if (currentSlide.value >= totalSlides - 1) return;
 
-  clearAllTimeouts();
-  switch (currentSlide.value) {
-    case 1: resetSlide1(); break;
-    case 2: resetSlide2(); break;
-    case 3: resetSlide3(); break;
-    case 4: resetSlide4(); break;
-    case 5: resetSlide5(); break;
-    case 6: resetSlide6(); break;
-  }
+  // Mevcut bar'ı tamamla
+  completeBar(currentSlide.value);
 
+  // Slaytı değiştir
   transitionName.value = "slide-left";
   currentSlide.value++;
 };
@@ -469,16 +493,10 @@ const nextSlide = () => {
 const prevSlide = () => {
   if (currentSlide.value <= 0) return;
 
-  clearAllTimeouts();
-  switch (currentSlide.value) {
-    case 1: resetSlide1(); break;
-    case 2: resetSlide2(); break;
-    case 3: resetSlide3(); break;
-    case 4: resetSlide4(); break;
-    case 5: resetSlide5(); break;
-    case 6: resetSlide6(); break;
-  }
+  // Mevcut bar'ı sıfırla
+  resetBar(currentSlide.value);
 
+  // Slaytı değiştir
   transitionName.value = "slide-right";
   currentSlide.value--;
 };
@@ -492,8 +510,6 @@ const resetSlide1 = () => {
 const resetSlide2 = () => {
   coursesOpacity.value = 0;
   visibleCourses.value = [];
-  courseTimeouts.value.forEach(timeout => clearTimeout(timeout));
-  courseTimeouts.value = [];
 };
 
 const resetSlide3 = () => {
@@ -516,22 +532,8 @@ const resetSlide6 = () => {
   showCelebration.value = false;
 };
 
-const debounce = (fn, delay) => {
-  let timeoutId;
-  return (...args) => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    timeoutId = setTimeout(() => {
-      fn(...args);
-    }, delay);
-  };
-};
-
 const initializeSlide = (slideNumber) => {
   clearAllTimeouts();
-
-  let shuffledCourses;
 
   switch (slideNumber) {
     case 1:
@@ -549,16 +551,17 @@ const initializeSlide = (slideNumber) => {
       resetSlide2();
       safeSetTimeout(() => {
         coursesOpacity.value = 1;
+        const courseInterval = ANIMATION_CONSTANTS.ANIMATION_DURATION / topCourses.value.length;
 
-        safeSetTimeout(() => {
-          shuffledCourses = shuffleArray(topCourses.value);
-          shuffledCourses.forEach((course, index) => {
-            safeSetTimeout(() => {
-              visibleCourses.value.push(course);
-            }, index * 1000);
-          });
-        }, 1000);
-      }, 1000);
+        // Kursları karıştır
+        const shuffledCourses = shuffleArray([...topCourses.value]);
+
+        shuffledCourses.forEach((course, index) => {
+          safeSetTimeout(() => {
+            visibleCourses.value.push(course);
+          }, courseInterval * index);
+        });
+      }, ANIMATION_CONSTANTS.INITIAL_DELAY);
       break;
 
     case 3:
@@ -572,12 +575,14 @@ const initializeSlide = (slideNumber) => {
       resetSlide4();
       safeSetTimeout(() => {
         showSubjects.value = true;
+        const subjectInterval = ANIMATION_CONSTANTS.ANIMATION_DURATION / bestSubjects.value.length;
+
         bestSubjects.value.forEach((subject, index) => {
           safeSetTimeout(() => {
             visibleSubjects.value.push(subject);
-          }, index * 200);
+          }, subjectInterval * index);
         });
-      }, 1000);
+      }, ANIMATION_CONSTANTS.INITIAL_DELAY);
       break;
 
     case 5:
@@ -590,9 +595,9 @@ const initializeSlide = (slideNumber) => {
           animateMovieCount();
           safeSetTimeout(() => {
             studyTimePhase.value = 'question';
-          }, 3000);
-        }, 3000);
-      }, 500);
+          }, ANIMATION_CONSTANTS.PHASE_DURATION / 2);
+        }, ANIMATION_CONSTANTS.PHASE_DURATION / 2);
+      }, ANIMATION_CONSTANTS.INITIAL_DELAY);
       break;
 
     case 6:
@@ -603,6 +608,8 @@ const initializeSlide = (slideNumber) => {
           achievementPhase.value = 'list';
 
           const badges = calculateBadges(total_questions_solved.value, 80, totalStudyHours.value);
+          const duration = 2500; // 2.5 saniye (toplam 5 saniye olması için)
+          const badgeInterval = duration / badges.length;
 
           badges.forEach((badge, index) => {
             safeSetTimeout(() => {
@@ -615,35 +622,21 @@ const initializeSlide = (slideNumber) => {
 
               safeSetTimeout(() => {
                 highlightedBadgeId.value = null;
-              }, 1000);
+              }, badgeInterval / 2);
 
               if (index === badges.length - 1) {
                 safeSetTimeout(() => {
                   achievementPhase.value = 'conclusion';
-                  safeSetTimeout(() => {
-                    showCelebration.value = true;
-                  }, 1000);
-                }, 2000);
+                  showCelebration.value = true;
+                }, badgeInterval);
               }
-            }, index * 800);
+            }, badgeInterval * index);
           });
-        }, 2000);
-      }, 1000);
+        }, 1500); // 1.5 saniye
+      }, 1000); // 1 saniye başlangıç gecikmesi
       break;
   }
 };
-
-const debouncedInitializeSlide = debounce((newSlide) => {
-  initializeSlide(newSlide);
-});
-
-watch(currentSlide, (newSlide) => {
-  debouncedInitializeSlide(newSlide);
-});
-
-onUnmounted(() => {
-  clearAllTimeouts();
-});
 
 const revealTopCourse = () => {
   topCourseRevealed.value = true;
@@ -671,10 +664,10 @@ const resetAllStates = () => {
 const handleShare = async () => {
   try {
     const card = document.querySelector('.wrapped-stats-card');
-    
+
     const elements = card.querySelectorAll('*');
     const originalStyles = new Map();
-    
+
     elements.forEach(el => {
       originalStyles.set(el, el.style.cssText);
       el.style.transition = 'none';
@@ -704,7 +697,7 @@ const handleShare = async () => {
       const file = new File([blob], "2023-degerlendirmesi.png", {
         type: "image/png",
       });
-      
+
       try {
         await navigator.share({
           files: [file],
@@ -737,6 +730,8 @@ watch(
     if (newShow) {
       currentSlide.value = 0;
       resetAllStates();
+      // Modal açıldığında ilk progress bar'ı başlat
+      startBarProgress(0);
     }
   }
 );
@@ -749,7 +744,7 @@ const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
 
   // Soru Çözüm Rozetleri
   if (totalQuestions >= 1500) {
-    badges.push({ id: id++, emoji: '📚', title: 'Soru Çözüm Ustası (1500+ Soru)' });
+    badges.push({ id: id++, emoji: '📚', title: 'Soru Çözüm Ustas�� (1500+ Soru)' });
   } else if (totalQuestions >= 1000) {
     badges.push({ id: id++, emoji: '📖', title: 'Soru Çözüm Uzmanı (1000+ Soru)' });
   } else if (totalQuestions >= 500) {
@@ -781,18 +776,22 @@ const animatedHours = ref(0);
 const animatedMovieCount = ref(0);
 
 const animateStudyHours = () => {
-  let start = 0;
+  const duration = ANIMATION_CONSTANTS.PHASE_DURATION;
   const end = totalStudyHours.value;
-  const duration = 2000; 
-  const step = end / (duration / 16);
+  const easeOutQuart = t => 1 - (--t) * t * t * t;
+  const startTime = Date.now();
 
   const animate = () => {
-    start += step;
-    if (start >= end) {
-      animatedHours.value = Math.round(end);
+    const currentTime = Date.now();
+    const elapsed = currentTime - startTime;
+
+    if (elapsed >= duration) {
+      animatedHours.value = end;
       return;
     }
-    animatedHours.value = Math.round(start);
+
+    const progress = easeOutQuart(elapsed / duration);
+    animatedHours.value = Math.round(progress * end);
     requestAnimationFrame(animate);
   };
 
@@ -800,10 +799,9 @@ const animateStudyHours = () => {
 };
 
 const animateMovieCount = () => {
+  const duration = ANIMATION_CONSTANTS.PHASE_DURATION;
   const end = moviesWatched.value;
-  const duration = 1500;
   const easeOutQuart = t => 1 - (--t) * t * t * t;
-
   const startTime = Date.now();
 
   const animate = () => {
@@ -824,7 +822,7 @@ const animateMovieCount = () => {
 };
 
 const startSlide1Animations = () => {
-  const duration = 3000;
+  const duration = ANIMATION_CONSTANTS.TOTAL_DURATION * 0.6; // Progress bar süresinin %60'ı
   const startTime = Date.now();
 
   const animate = () => {
@@ -847,6 +845,75 @@ const startSlide1Animations = () => {
   };
 
   animate();
+};
+
+watch(currentSlide, (newSlide) => {
+  initializeSlide(newSlide);
+});
+
+onUnmounted(() => {
+  clearAllTimeouts();
+});
+
+// Progress bar state'i için ref array
+const progressBars = ref(Array(8).fill().map(() => ({
+  progress: 0,
+  isActive: false,
+  isCompleted: false
+})));
+
+// Progress animasyonu için fonksiyonlar
+const startBarProgress = (index) => {
+  const startTime = Date.now();
+  progressBars.value[index].isActive = true;
+  progressBars.value[index].progress = 0;
+
+  const animate = () => {
+    const currentTime = Date.now();
+    const elapsed = currentTime - startTime;
+
+    if (elapsed < ANIMATION_CONSTANTS.TOTAL_DURATION && progressBars.value[index].isActive) {
+      progressBars.value[index].progress = (elapsed / ANIMATION_CONSTANTS.TOTAL_DURATION) * 100;
+      requestAnimationFrame(animate);
+    }
+  };
+
+  requestAnimationFrame(animate);
+};
+
+const completeBar = (index) => {
+  progressBars.value[index].progress = 100;
+  progressBars.value[index].isActive = false;
+  progressBars.value[index].isCompleted = true;
+};
+
+const resetBar = (index) => {
+  progressBars.value[index].progress = 0;
+  progressBars.value[index].isActive = false;
+  progressBars.value[index].isCompleted = false;
+};
+
+// Slayt değişimini izle ve progress'i başlat
+watch(currentSlide, (newSlide) => {
+  // Önceki tüm barları tamamla
+  for (let i = 0; i < newSlide; i++) {
+    completeBar(i);
+  }
+  // Sonraki tüm barları sıfırla
+  for (let i = newSlide + 1; i < progressBars.value.length; i++) {
+    resetBar(i);
+  }
+  // Yeni bar'ı başlat
+  startBarProgress(newSlide);
+});
+
+// Shuffle fonksiyonu
+const shuffleArray = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 };
 
 </script>
@@ -938,5 +1005,4 @@ const startSlide1Animations = () => {
   background-repeat: repeat;
   background-size: 300px 300px;
 }
-
 </style>
