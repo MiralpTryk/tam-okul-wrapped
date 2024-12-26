@@ -17,28 +17,28 @@
           <div class="flex gap-4">
             <button @click="activeTab = 'all'" :class="[
               'px-4 py-2 rounded text-sm font-medium transition-colors w-1/2',
-              activeTab === 'all' ? 'bg-red-600 text-white' : 'bg-[#2F2F2F] text-zinc-300 hover:bg-[#3F3F3F]'
+              activeTab === 'all' ? 'bg-[#E50914] text-white' : 'bg-[#2F2F2F] text-zinc-300 hover:bg-[#3F3F3F]'
             ]">
               Tüm Sorular
             </button>
             <button @click="activeTab = 'bookmarked'" :class="[
               'px-4 py-2 rounded text-sm font-medium transition-colors w-1/2',
-              activeTab === 'bookmarked' ? 'bg-red-600 text-white' : 'bg-[#2F2F2F] text-zinc-300 hover:bg-[#3F3F3F]'
+              activeTab === 'bookmarked' ? 'bg-[#E50914] text-white' : 'bg-[#2F2F2F] text-zinc-300 hover:bg-[#3F3F3F]'
             ]">
               Favori Sorular
             </button>
           </div>
           <div class="relative flex-1 sm:w-[30%]">
             <input v-model="searchQuery" type="text" placeholder="Soru ara..."
-              class="w-full bg-[#2F2F2F] text-white rounded pl-10 pr-3 py-2 text-sm min-w-0 border border-transparent focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors">
+              class="w-full bg-[#2F2F2F] text-white rounded pl-10 pr-3 py-2 text-sm min-w-0 border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
             <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
           </div>
           <select v-model="currentPage"
-            class="bg-[#2F2F2F] text-white rounded px-2 py-2 text-sm w-full sm:w-[30%] border border-transparent focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors">
+            class="bg-[#2F2F2F] text-white rounded px-2 py-2 text-sm w-full sm:w-[30%] border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
             <template v-for="(pages, title) in groupedPages" :key="title">
               <option disabled class="font-semibold bg-[#1F1F1F]">{{ title }}</option>
               <option v-for="page in pages" :key="page" :value="page"
-                :class="['pl-4', { 'text-red-600': isPageSaved(page) }]">
+                :class="['pl-4', { 'text-[#E50914]': isPageSaved(page) }]">
                 Sayfa {{ page }} {{ isPageSaved(page) ? '✓ (kaydedildi)' : '' }}
               </option>
             </template>
@@ -54,7 +54,7 @@
                 <span>{{ answeredOrSavedCount }} / {{ totalQuestions }}</span>
               </div>
               <div class="bg-[#2F2F2F] rounded-full h-2 sm:max-w-[50%]">
-                <div class="bg-red-600 h-full rounded-full transition-all duration-300"
+                <div class="bg-[#E50914] h-full rounded-full transition-all duration-300"
                   :style="{ width: `${progress}%` }">
                 </div>
               </div>
@@ -65,7 +65,7 @@
                 <span>{{ currentPageAnsweredOrSavedCount }} / {{ currentPageQuestions.length }}</span>
               </div>
               <div class="bg-[#2F2F2F] rounded-full h-2 sm:max-w-[50%]">
-                <div class="bg-red-600 h-full rounded-full transition-all duration-300"
+                <div class="bg-[#E50914] h-full rounded-full transition-all duration-300"
                   :style="{ width: `${currentPageProgress}%` }"></div>
               </div>
             </div>
@@ -75,7 +75,7 @@
         <!-- Questions Grid -->
         <div v-if="activeTab === 'bookmarked' && !hasBookmarkedQuestions"
           class="text-center text-zinc-400 py-12 mb-36">
-          <component :is="BookmarkPlusIcon" class="mx-auto w-12 h-12 mb-4 text-red-600" />
+          <component :is="BookmarkPlusIcon" class="mx-auto w-12 h-12 mb-4 text-[#E50914]" />
           <p class="text-lg">Favori sorunuz yok. Favorilere eklemek için sorulardaki işarete tıklayın.</p>
         </div>
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20 sm:pb-24">
@@ -86,7 +86,7 @@
               <span class="font-bold text-base">Soru {{ question.number }}</span>
               <button @click="toggleBookmark(question.id)" :class="[
                 'hover:scale-110 transition-transform duration-200',
-                question.bookmarked ? 'text-red-600' : 'text-green-500'
+                question.bookmarked ? 'text-[#E50914]' : 'text-green-500'
               ]">
                 <component :is="question.bookmarked ? BookmarkMinusIcon : BookmarkPlusIcon"
                   class="w-5 h-5 md:w-6 md:h-6" />
@@ -113,10 +113,10 @@
                 @click="selectAnswer(question.id, option)" :class="[
                   'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border',
                   {
-                    'border-red-600 bg-red-600 text-white': !question.saved && question.answer === index.toString(),
-                    'border-[#3F3F3F] hover:border-red-600 text-zinc-300': !question.saved && question.answer !== index.toString(),
+                    'border-[#E50914] bg-[#E50914] text-white': !question.saved && question.answer === index.toString(),
+                    'border-[#3F3F3F] hover:border-[#E50914] text-zinc-300': !question.saved && question.answer !== index.toString(),
                     'border-green-500 bg-green-500 text-white': question.saved && question.correct_answer === index.toString(),
-                    'border-red-600 bg-red-600 text-white': question.saved && question.answer === index.toString() && question.answer !== question.correct_answer,
+                    'border-[#E50914] bg-[#E50914] text-white': question.saved && question.answer === index.toString() && question.answer !== question.correct_answer,
                     'border-[#3F3F3F] text-zinc-300': question.saved && question.answer !== index.toString() && question.correct_answer !== index.toString(),
                     'opacity-50 cursor-not-allowed': question.saved || isPageSaved(question.page)
                   }
@@ -152,7 +152,7 @@
               'px-4 py-2 text-sm rounded transition-colors',
               isPageSaved(currentPage)
                 ? 'bg-[#2F2F2F] text-white opacity-50 cursor-not-allowed'
-                : 'bg-red-600 text-white hover:bg-red-600/90 disabled:opacity-50 disabled:cursor-not-allowed'
+                : 'bg-[#E50914] text-white hover:bg-[#E50914]/90 disabled:opacity-50 disabled:cursor-not-allowed'
             ]">
               {{ isPageSaved(currentPage) ? 'Kaydedildi' : 'Kaydet' }}
             </button>
@@ -168,16 +168,16 @@
       <div v-if="showConfirmation"
         class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
         <div class="bg-[#141414] text-white p-6 md:p-8 rounded-md max-w-xl w-full border border-zinc-800 shadow-2xl">
-          <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-red-600">Cevapları Kaydet</h2>
+          <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-[#E50914]">Cevapları Kaydet</h2>
           <p class="mb-6 md:mb-8 text-sm md:text-base text-gray-200 leading-relaxed">
             Cevapları kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını göreceğiniz için 
-            <span class="font-bold text-red-600">tekrar işaretleme yapamayacaksınız.</span>
+            <span class="font-bold text-[#E50914]">tekrar işaretleme yapamayacaksınız.</span>
             <br><br>
             {{ currentPage }}. sayfa için cevapları kaydetmek istediğinize emin misiniz?
           </p>
           <div class="flex items-center mb-6 md:mb-8">
             <input type="checkbox" id="dontShowAgain" v-model="dontShowConfirmationAgain"
-              class="mr-3 w-4 h-4 bg-[#141414] border-2 border-gray-600 text-red-600 rounded focus:ring-red-600 focus:ring-offset-[#141414]">
+              class="mr-3 w-4 h-4 bg-[#141414] border-2 border-gray-600 text-[#E50914] rounded focus:ring-[#E50914] focus:ring-offset-[#141414]">
             <label for="dontShowAgain" class="text-sm md:text-base text-gray-300 select-none hover:text-white transition-colors">
               Bu uyarıyı tekrar gösterme
             </label>
@@ -188,7 +188,7 @@
               Hayır
             </button>
             <button @click="confirmSave"
-              class="px-8 py-3 text-base md:text-lg font-medium bg-red-600 text-white rounded hover:bg-red-600/90 transition-colors duration-300 shadow-xl shadow-red-600/20">
+              class="px-8 py-3 text-base md:text-lg font-medium bg-[#E50914] text-white rounded hover:bg-[#E50914]/90 transition-colors duration-300 shadow-xl shadow-[#E50914]/20">
               Evet
             </button>
           </div>
@@ -235,7 +235,7 @@
   <div v-if="showWelcomeModal"
     class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
   <div class="bg-[#141414] text-white p-6 md:p-8 rounded-md max-w-xl w-full border border-zinc-800 shadow-2xl">
-    <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-red-600">Kişiye Özel Kitap Optik Form</h2>
+    <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-[#E50914]">Kişiye Özel Kitap Optik Form</h2>
     <p class="mb-6 md:mb-8 text-sm md:text-base text-gray-200 leading-relaxed">
       Bu ekran ile Kişiye Özel Kitap'ınızdan çözdüğünüz soruları cevaplandırabilir, favori sorularınızı işaretleyebilir ve cevaplarınızı kaydedebilirsiniz.
       <br>
@@ -246,31 +246,32 @@
       Cevaplarınızı kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını görüp kendi cevaplanırızla karşılaştırabilirsiniz.
       <br>
       <br>
-      <span class="font-bold text-xs bg-red-600/10 text-red-600 py-1 px-2 rounded">Not: Klavyenizdeki A, B, C, D, E tuşlarını kullanarak hızlıca cevap verebilirsiniz.</span>
+      <span class="font-bold text-xs bg-[#E50914]/10 text-[#E50914] py-1 px-2 rounded">Not: Klavyenizdeki A, B, C, D, E tuşlarını kullanarak hızlıca cevap verebilirsiniz.</span>
     </p>
     <div class="flex items-center mb-6 md:mb-8">
       <input type="checkbox" id="dontShowWelcomeAgain" v-model="dontShowWelcomeAgain"
-        class="mr-3 w-4 h-4 bg-[#141414] border-2 border-gray-600 text-red-600 rounded focus:ring-red-600 focus:ring-offset-[#141414]">
+        class="mr-3 w-4 h-4 bg-[#141414] border-2 border-gray-600 text-[#E50914] rounded focus:ring-[#E50914] focus:ring-offset-[#141414]">
       <label for="dontShowWelcomeAgain" class="text-sm md:text-base text-gray-300 select-none hover:text-white transition-colors">
         Bu bilgilendirmeyi tekrar gösterme
       </label>
     </div>
     <div class="flex justify-end">
       <button @click="closeWelcomeModal"
-        class="px-8 py-3 text-base md:text-lg font-medium bg-red-600 text-white rounded hover:bg-red-600/90 transition-colors duration-300 shadow-xl shadow-red-600/20">
+        class="px-8 py-3 text-base md:text-lg font-medium bg-[#E50914] text-white rounded hover:bg-[#E50914]/90 transition-colors duration-300 shadow-xl shadow-[#E50914]/20">
         Tamam
       </button>
     </div>
   </div>
 </div>
+
   <!-- Error simulation buttons -->
-  <div v-if="isDevelopment" class="fixed bottom-20 right-4 space-x-2 z-50">
+<!--   <div v-if="isDevelopment" class="fixed bottom-20 right-4 space-x-2 z-50">
     <button @click="loadQuestions()" 
       class="bg-green-600 text-white px-4 py-2 rounded">
       Normal Yükleme
     </button>
     <button @click="() => { simulateError('network'); loadQuestions(); }"
-      class="bg-red-600 text-white px-4 py-2 rounded">
+      class="bg-[#E50914] text-white px-4 py-2 rounded">
       Ağ Hatası
     </button>
     <button @click="() => { simulateError('data'); loadQuestions(); }"
@@ -285,10 +286,11 @@
       class="bg-purple-600 text-white px-4 py-2 rounded">
       Null Veri
     </button>
-  </div>
+  </div>  -->
+
   <!-- Error State -->
   <div v-if="error" class="flex items-center justify-center min-h-screen">
-    <div class="text-red-600 text-center p-4">
+    <div class="text-[#E50914] text-center p-4">
       <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
           d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -296,7 +298,7 @@
       <p class="text-xl mb-4">{{ error }}</p>
       <p class="text-sm text-gray-400 mb-4">Hata Kodu: {{ Date.now() }}</p>
       <button @click="loadQuestions" 
-        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">
+        class="bg-[#E50914] text-white px-4 py-2 rounded hover:bg-[#E50914]/90 transition-colors">
         Tekrar Dene
       </button>
     </div>
@@ -324,9 +326,9 @@ const showVideoModal = ref(false);
 const currentVideoUrl = ref('');
 const showWelcomeModal = ref(true);
 const dontShowWelcomeAgain = ref(false);
-const isDevelopment = ref(process.env.NODE_ENV === 'development');
+// const isDevelopment = ref(process.env.NODE_ENV === 'development');
 
-const simulateError = (type) => {
+/* const simulateError = (type) => {
   switch(type) {
     case 'network':
       throw new Error('Ağ bağlantısı hatası');
@@ -341,7 +343,7 @@ const simulateError = (type) => {
     default:
       break;
   }
-};
+}; */
 
 const loadQuestions = () => {
   try {

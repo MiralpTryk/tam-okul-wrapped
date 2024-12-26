@@ -20,25 +20,24 @@
       </nav>
     </header>
 
-    <!-- Info Modal -->
+    <!-- Analysis Modal -->
     <Transition name="modal">
-      <div v-if="showInfoModal" class="fixed inset-0 z-[60]">
+      <div v-if="showAnalysisModal" class="fixed inset-0 z-[60]">
         <!-- Backdrop -->
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-
         <!-- Modal Content -->
         <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-0 sm:p-4" @click="showInfoModal = false">
+          <div class="flex min-h-full items-center justify-center p-0 sm:p-4" @click="closeAnalysisModal">
             <div
               class="max-w-3xl relative transform sm:rounded-2xl bg-zinc-900 p-4 sm:p-6 text-left shadow-xl transition-all overflow-y-auto z-50 sm:max-h-[80vh] md:rounded-2xl sm:m-4 h-screen w-screen m-0 rounded-none sm:h-auto sm:w-auto">
               <div class="absolute top-0 right-0">
-                <button v-if="isMobile" @click="showInfoModal = false"
+                <button v-if="isMobile" @click="showAnalysisModal = false"
                   class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-gray-200 z-50 w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-xl sm:text-3xl">
                   &times;
                 </button>
               </div>
               <h3 class="text-base sm:text-lg font-medium leading-6 text-white mb-4">
-                Neden bu videoları görüyorum?
+                {{ selectedCourse }} Dersi Analizi
               </h3>
               <div class="mt-2">
                 <p class="text-xs sm:text-sm text-zinc-300">
@@ -157,7 +156,7 @@
               <div class="mt-6">
                 <button type="button"
                   class="inline-flex items-center justify-center rounded-md bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
-                  @click="showInfoModal = false">
+                  @click="closeAnalysisModal">
                   Anladım
                 </button>
               </div>
@@ -222,14 +221,11 @@
         </div>
         <div>
           <div class="relative inline-flex">
-            <button @click="openModal"
+            <button @click="openWrappedModal"
               class="relative inline-flex items-center justify-center px-6 py-2 text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-600 active:scale-95 rounded"
               role="button">
               <Play class="w-6 h-6 mr-2 fill-black" /> {{ new Date().getFullYear() }} Öğrenme Yolculuğun
-
             </button>
-            <!-- <AnimatedCTAButton @click="openModal" /> -->
-            <!-- <GlowingCTAButton @click="openModal" /> -->
           </div>
         </div>
       </div>
@@ -244,17 +240,19 @@
           <!-- Mobile Button -->
           <button v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
             class="sm:hidden bg-zinc-800 text-white rounded-full w-8 h-8 flex items-center justify-center z-10"
-            @click="showInfoModal = true">
+            @click="showAnalysisForCourse(section.title)">
             <span class="text-sm flex-shrink-0 flex items-center justify-center">
               <Info class="w-4 h-4" />
-            </span> </button>
+            </span>
+          </button>
 
           <!-- Desktop Button -->
           <button v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
             class="hidden sm:flex bg-zinc-800 text-white rounded-full items-center justify-end transition-all duration-300 ease-in-out overflow-hidden z-10"
             :class="{ 'w-8 h-8': !hoveredSection[index], 'w-[228px] h-8': hoveredSection[index] }"
-            @mouseenter="hoveredSection[index] = true" @mouseleave="hoveredSection[index] = false"
-            @click="showInfoModal = true">
+            @mouseenter="hoveredSection[index] = true" 
+            @mouseleave="hoveredSection[index] = false"
+            @click="showAnalysisForCourse(section.title)">
             <div class="flex items-center w-full h-full justify-end">
               <span class="whitespace-nowrap text-xs transition-all duration-300 ease-in-out overflow-hidden mr-1"
                 :class="{ 'w-0 opacity-0': !hoveredSection[index], 'w-auto opacity-100': hoveredSection[index] }">
@@ -266,11 +264,11 @@
             </div>
           </button>
         </div>
-        <a href="/#/browse">
+        <RouterLink :to="`/browse?section=${section.title}`">
           <button class="text-sm text-white hover:text-zinc-300">
-            Tümünü Gör
+            Daha Fazla Göster
           </button>
-        </a>
+        </RouterLink>
       </div>
 
       <div class="relative">
@@ -362,8 +360,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { ChevronLeftIcon, ChevronRightIcon, Info } from "lucide-vue-next";
-// import AnimatedCTAButton from "@/components/AnimatedCTAButton.vue";
-// import GlowingCTAButton from "@/components/GlowingCTAButton.vue";
 import WrappedModal from "@/components/WrappedModal.vue";
 import ContentModal from "@/components/ContentModal.vue";
 import LessonContent from "@/components/LessonContent.vue";
@@ -431,6 +427,24 @@ import analysis from '@/data/analysis.json';
 
 const touchStartX = ref(0);
 const touchStartY = ref(0);
+const scrollContainers = ref([]);
+const isDragging = ref(false);
+const startX = ref(0);
+const startY = ref(0);
+const isDragged = ref(false);
+const scrollLeft = ref(0);
+const momentum = ref({ velocity: 0, timestamp: 0 });
+const animationFrame = ref(null);
+const showModal = ref(false);
+const showContentModal = ref(false);
+const selectedLesson = ref(null);
+const userName = computed(() => analysis.data.user.name || 'Misafir');
+const isMobile = ref(false);
+const courseData = ref(null);
+const isScrolled = ref(false);
+const hoveredSection = ref({});
+const showAnalysisModal = ref(false)
+const selectedCourse = ref(null);
 
 const movieImages = [
   "https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&h=450&q=80",
@@ -487,21 +501,6 @@ const backgroundImages = [
   'https://images.unsplash.com/photo-1518021964703-4b2030f03085',
   'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86'
 ];
-
-const scrollContainers = ref([]);
-const isDragging = ref(false);
-const startX = ref(0);
-const startY = ref(0);
-const isDragged = ref(false);
-const scrollLeft = ref(0);
-const momentum = ref({ velocity: 0, timestamp: 0 });
-const animationFrame = ref(null);
-const showModal = ref(false);
-const showContentModal = ref(false);
-const selectedLesson = ref(null);
-const userName = computed(() => analysis.data.user.name || 'Misafir');
-
-const isMobile = ref(false);
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth < 768;
@@ -1481,8 +1480,6 @@ const generateBooks = (count) => {
   }));
 };
 
-const courseData = ref(null);
-
 const formatTitle = (title) => {
   return title
     .toLowerCase()
@@ -1707,7 +1704,7 @@ const generateItemsFromSubjects = (subjects) => {
     animationFrame.value = requestAnimationFrame(applyMomentum);
   };
 
-  const openModal = () => {
+  const openWrappedModal = () => {
     showModal.value = true;
     document.body.style.overflow = 'hidden';
   };
@@ -1752,124 +1749,72 @@ const generateItemsFromSubjects = (subjects) => {
     showContentModal.value = false;
   };
 
-  const isScrolled = ref(false);
-
   onMounted(() => {
+    // Event listeners for scroll
     window.addEventListener('scroll', handleScroll);
-  });
 
-  onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll);
-  });
-
-  const handleScroll = () => {
-    isScrolled.value = window.scrollY > 70;
-  };
-
-  onMounted(() => {
+    // Set viewport height
     const setVH = () => {
       let vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty("--vh", `${vh}px`);
     };
     setVH();
     window.addEventListener("resize", setVH);
+
+    // Set cursor style for scroll containers
     scrollContainers.value.forEach((container) => {
       if (container) {
         container.style.cursor = "grab";
       }
     });
+
+    // Open wrapped modal
+    openWrappedModal();
   });
 
   onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
     cancelAnimationFrame(animationFrame.value);
   });
 
-  const hoveredSection = ref({});
+  const handleScroll = () => {
+    isScrolled.value = window.scrollY > 70;
+  };
 
-  const showInfoModal = ref(false)
+  const showAnalysisForCourse = (courseTitle) => {
+    selectedCourse.value = courseTitle;
+    showAnalysisModal.value = true;
+  };
 
-  const analysisData = [
-    {
-      subject: "Sözcükte Anlam",
-      correct: 18,
-      wrong: 4,
-      empty: 3,
-      net: 17,
-      successRate: 68
-    },
-    {
-      subject: "Paragrafta Ana Düşünce",
-      correct: 22,
-      wrong: 2,
-      empty: 1,
-      net: 21.5,
-      successRate: 86
-    },
-    {
-      subject: "Üçgenler ve Dörtgenler",
-      correct: 12,
-      wrong: 8,
-      empty: 5,
-      net: 10,
-      successRate: 40
-    },
-    {
-      subject: "İkinci Dereceden Denklemler",
-      correct: 25,
-      wrong: 5,
-      empty: 0,
-      net: 23.75,
-      successRate: 83
-    },
-    {
-      subject: "Kuvvet ve Hareket",
-      correct: 8,
-      wrong: 12,
-      empty: 5,
-      net: 5,
-      successRate: 20
-    },
-    {
-      subject: "Asitler ve Bazlar",
-      correct: 15,
-      wrong: 5,
-      empty: 5,
-      net: 13.75,
-      successRate: 55
-    },
-    {
-      subject: "Hücre ve Organeller",
-      correct: 20,
-      wrong: 3,
-      empty: 2,
-      net: 19.25,
-      successRate: 77
-    },
-    {
-      subject: "Dalgalar ve Ses",
-      correct: null,
-      wrong: null,
-      empty: null,
-      net: null,
-      successRate: null
-    },
-    {
-      subject: "Organik Kimya",
-      correct: null,
-      wrong: null,
-      empty: null,
-      net: null,
-      successRate: null
-    },
-    {
-      subject: "Logaritma",
-      correct: null,
-      wrong: null,
-      empty: null,
-      net: null,
-      successRate: null
+  const analysisData = computed(() => {
+    if (!courseData.value?.content?.courses || !selectedCourse.value) {
+      return [];
     }
-  ];
+
+    const course = courseData.value.content.courses.find(
+      course => formatTitle(course.title || course.title_uppercase) === selectedCourse.value
+    );
+
+    if (!course) return [];
+
+    const transformedData = [];
+    
+    Object.entries(course.subjects).forEach(([subjectName, data]) => {
+      const analysis = data.analysis?.[0];
+      if (analysis) {
+        transformedData.push({
+          subject: subjectName,
+          correct: analysis.correct,
+          wrong: analysis.incorrect,
+          empty: analysis.empty,
+          net: analysis.net,
+          successRate: analysis.success_ratio
+        });
+      }
+    });
+
+    return transformedData;
+  });
 
   const getColorClass = (item) => {
     if (item.correct === null || item.correct === undefined ||
@@ -1887,29 +1832,34 @@ const generateItemsFromSubjects = (subjects) => {
   };
 
   const sortedData = computed(() => {
-    const excellent = analysisData
+    const excellent = analysisData.value
       .filter(item => item.successRate >= 80)
       .sort((a, b) => b.successRate - a.successRate);
 
-    const good = analysisData
+    const good = analysisData.value
       .filter(item => item.successRate >= 50 && item.successRate < 80)
       .sort((a, b) => b.successRate - a.successRate);
 
-    const needsImprovement = analysisData
+    const needsImprovement = analysisData.value
       .filter(item => item.successRate !== null && item.successRate < 50)
       .sort((a, b) => b.successRate - a.successRate);
 
-    const noData = analysisData
+    const noData = analysisData.value
       .filter(item => item.successRate === null);
 
     return { excellent, good, needsImprovement, noData };
   });
 
   onMounted(() => {
-    openModal();
+    openWrappedModal();
   });
   
+  const closeAnalysisModal = () => {
+    showAnalysisModal.value = false;
+    selectedCourse.value = null;
+  };
 </script>
+
 <style scoped>
 .scrollbar-hide {
   -ms-overflow-style: none;
