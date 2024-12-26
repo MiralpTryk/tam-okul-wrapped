@@ -1481,52 +1481,44 @@ const generateBooks = (count) => {
   }));
 };
 
-// Eski statik array'i kaldırıyoruz
-// const lessonSections = [ ... ];
-
-// JSON verisini reactive olarak tutacağız
 const courseData = ref(null);
 
-// Başlığı formatlamak için yardımcı fonksiyon
 const formatTitle = (title) => {
   return title
     .toLowerCase()
     .split(' ')
     .map(word => {
-      // Nokta içeren kelimeleri özel olarak işle
       if (word.includes('.')) {
-        // Önce ardışık noktaları temizle
         const cleanWord = word.replace(/\.+/g, '.');
         return cleanWord
           .split('.')
-          .filter(part => part.length > 0) // Boş parçaları filtrele
+          .filter(part => part.length > 0) 
           .map((part, index, array) => {
             return part.charAt(0).toUpperCase() + part.slice(1) + (index < array.length ? '.' : '');
           })
           .join('');
       }
-      // Normal kelimeler için ilk harfi büyük yap
       return word.charAt(0).toUpperCase() + word.slice(1);
     })
     .join(' ');
 };
 
-// lessonSections'ı computed property olarak tanımlıyoruz
+
 const lessonSections = computed(() => {
-  console.log('courseData:', courseData.value); // Debug için
+  console.log('courseData:', courseData.value);
 
   if (!courseData.value?.content?.courses) {
-    console.log('Courses not found'); // Debug için
+    console.log('Courses not found');
     return [];
   }
 
   const sections = courseData.value.content.courses.map(course => ({
-    title: formatTitle(course.title || course.title_uppercase), // title'ı formatlıyoruz
+    title: formatTitle(course.title || course.title_uppercase),
     type: "lesson",
     items: generateItemsFromSubjects(course.subjects || {})
   }));
 
-  console.log('Generated sections:', sections); // Debug için
+  console.log('Generated sections:', sections);
   return sections;
 });
 
@@ -1548,12 +1540,12 @@ const generateItemsFromSubjects = (subjects) => {
   
   const subjectEntries = Object.entries(subjects);
   
-  // 1. Her konudan en az 1 video seçelim
+
   let selectedVideos = subjectEntries.map(([name, data]) => {
     const analysis = data.analysis?.[0] || {};
     const videos = generateDummyVideos(name);
     
-    // Her konudan random 1 video seç
+
     return {
       ...videos[Math.floor(Math.random() * videos.length)],
       subjectName: name,
@@ -1566,14 +1558,11 @@ const generateItemsFromSubjects = (subjects) => {
     };
   });
 
-  // 2. Kalan slotları dolduralım (20'ye tamamlayalım)
   const remainingSlots = 20 - selectedVideos.length;
   
   if (remainingSlots > 0) {
-    // Tüm konulardan kalan videoları bir havuzda toplayalım
     const remainingVideos = subjectEntries.flatMap(([name, data]) => {
       const analysis = data.analysis?.[0] || {};
-      // İlk seçilen videoları hariç tut
       return generateDummyVideos(name)
         .slice(1)
         .map(video => ({
@@ -1588,7 +1577,7 @@ const generateItemsFromSubjects = (subjects) => {
         }));
     });
 
-    // Random seç ama karıştır
+
     const additionalVideos = remainingVideos
       .sort(() => Math.random() - 0.5)
       .slice(0, remainingSlots);
@@ -1596,16 +1585,16 @@ const generateItemsFromSubjects = (subjects) => {
     selectedVideos = [...selectedVideos, ...additionalVideos];
   }
 
-  // Son bir kez karıştır
+
   return selectedVideos.sort(() => Math.random() - 0.5);
 };
 
-  // Component mount olduğunda JSON verisini yükleyelim
+
   onMounted(async () => {
     try {
-      // JSON dosyasını import edelim
+
       const response = await import('@/data/analysis.json');
-      courseData.value = response.default.data; // .data ekledik
+      courseData.value = response.default.data;
     } catch (error) {
       console.error('JSON verisi yüklenirken hata:', error);
     }
@@ -1634,10 +1623,10 @@ const generateItemsFromSubjects = (subjects) => {
     }
   ];
 
-  // sections'ı computed property olarak tanımlayalım
+
   const sections = computed(() => {
     const lessonSectionsValue = lessonSections.value || [];
-    console.log('Final sections:', [...lessonSectionsValue, ...otherSections]); // Debug için
+    console.log('Final sections:', [...lessonSectionsValue, ...otherSections]); 
     return [...lessonSectionsValue, ...otherSections];
   });
 
@@ -1745,11 +1734,10 @@ const generateItemsFromSubjects = (subjects) => {
     } else if (type === "quote") {
       selectedLesson.value = {
         ...item,
-        text: item.quote,  // quote değerini text olarak aktarıyoruz
+        text: item.quote,
         type: type
       };
     } else {
-      // Diğer tipler için (music, book, story)
       selectedLesson.value = {
         ...item,
         type: type
@@ -1775,7 +1763,7 @@ const generateItemsFromSubjects = (subjects) => {
   });
 
   const handleScroll = () => {
-    isScrolled.value = window.scrollY > 70; // 50px scroll threshold
+    isScrolled.value = window.scrollY > 70;
   };
 
   onMounted(() => {
