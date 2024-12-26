@@ -309,7 +309,7 @@ const showQuestionImages = ref(process.env.VUE_APP_SHOW_QUESTION_IMAGES === 'tru
 console.log('Image Base URL:', process.env.VUE_APP_IMAGE_BASE_URL);
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { BookmarkPlusIcon, BookmarkMinusIcon, Search } from 'lucide-vue-next';
-import wrappedData from '@/data/wrapped.json';
+import analysis from '@/data/analysis.json';
 
 const questions = ref([]);
 const loading = ref(true);
@@ -333,10 +333,10 @@ const simulateError = (type) => {
     case 'data':
       throw new Error('Veri yapısı hatası');
     case 'empty':
-      wrappedData.data.optic.courses = [];
+      analysis.data.optic.courses = [];
       break;
     case 'null':
-      wrappedData.data.optic = null;
+      analysis.data.optic = null;
       break;
     default:
       break;
@@ -352,7 +352,7 @@ const loadQuestions = () => {
     // simulateError('empty');    // Boş veri simülasyonu
     // simulateError('null');     // Null veri simülasyonu
     
-    const opticData = wrappedData.data.optic;
+    const opticData = analysis.data.optic;
     
     if (!opticData || !opticData.courses) {
       throw new Error('Geçersiz veri yapısı');

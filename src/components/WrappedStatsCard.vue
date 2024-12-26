@@ -101,17 +101,17 @@ import { ref, onMounted, computed } from "vue";
 import tamOkulLogo from "@/assets/tam-okul-logo-dark.webp";
 import koksisLogo from "@/assets/koksis-card-logo_5.webp";
 import dahi from "@/assets/dahi.png";
-import wrappedData from '@/data/wrapped.json';
+import analysis from '@/data/analysis.json';
 
 const logoLoaded = ref(false);
 const cardRef = ref(null);
 
-const full_name = computed(() => wrappedData.data.user.full_name);
-const total_questions_solved = computed(() => wrappedData.data.user.student.learning_journey.total_questions_solved);
-const total_questions_solved_percentage = computed(() => wrappedData.data.user.student.learning_journey.total_questions_solved_percentage);
-const best_course = computed(() => wrappedData.data.user.student.learning_journey.best_course);
-const best_subjects = computed(() => wrappedData.data.user.student.learning_journey.best_subject);
-const total_hours_spent = computed(() => wrappedData.data.user.student.learning_journey.total_hours_spent);
+const full_name = computed(() => analysis.data.user.full_name);
+const total_questions_solved = computed(() => analysis.data.user.student.learning_journey.total_questions_solved);
+const total_questions_solved_percentage = computed(() => analysis.data.user.student.learning_journey.total_questions_solved_percentage);
+const best_course = computed(() => analysis.data.user.student.learning_journey.best_course);
+const best_subjects = computed(() => analysis.data.user.student.learning_journey.best_subject);
+const total_hours_spent = computed(() => analysis.data.user.student.learning_journey.total_hours_spent);
 
 onMounted(() => {
   const preloadImages = [koksisLogo, tamOkulLogo].map(src => {

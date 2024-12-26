@@ -11,7 +11,8 @@
         </a>
         <div class="flex items-center space-x-4">
           <RouterLink to="/optic-form">
-            <button class="bg-[#E50914] hover:bg-[#E50914]/90 text-white px-6 py-2 rounded text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-[#E50914]/20 hover:scale-105 active:scale-100">
+            <button
+              class="bg-[#E50914] hover:bg-[#E50914]/90 text-white px-6 py-2 rounded text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-[#E50914]/20 hover:scale-105 active:scale-100">
               Optik İşaretle
             </button>
           </RouterLink>
@@ -168,20 +169,33 @@
 
     <!-- Hero Section -->
     <section class="relative h-screen flex items-center">
-<img :src="HeroImage" alt="Hero"
+      <img :src="HeroImage" alt="Hero"
         class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center" />
       <div class="absolute inset-0 bg-red-600 mix-blend-multiply opacity-60"></div>
-      <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-30% from-black via-black/70 to-transparent overflow-hidden">
+      <div
+        class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-30% from-black via-black/70 to-transparent overflow-hidden">
         <div class="flex gap-4 pr-4 w-[200%] h-full animate-marquee" style="--marquee-duration: 5000ms;">
           <div class="flex flex-1 h-full">
-            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
-            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
-            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
+            <div
+              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+              Bu içerikler senin için özenle hazırlandı</div>
+            <div
+              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+              Bu içerikler senin için özenle hazırlandı</div>
+            <div
+              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+              Bu içerikler senin için özenle hazırlandı</div>
           </div>
           <div class="flex flex-1 h-full">
-            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
-            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
-            <div class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">Bu içerikler senin için özenle hazırlandı</div>
+            <div
+              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+              Bu içerikler senin için özenle hazırlandı</div>
+            <div
+              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+              Bu içerikler senin için özenle hazırlandı</div>
+            <div
+              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+              Bu içerikler senin için özenle hazırlandı</div>
           </div>
         </div>
       </div>
@@ -277,7 +291,7 @@
           <div v-for="item in section.items" :key="item.id"
             class="flex-shrink-0 w-64 sm:w-72 relative group cursor-pointer"
             @click="openContentModal(item, section.type, $event)">
-            <img v-if="section.type !== 'quote'" :src="item.image" :alt="item.title" @dragstart.prevent
+            <img v-if="section.type !== 'quote'" :src="item.image" @dragstart.prevent
               class="w-full h-40 object-cover rounded-md transition-opacity duration-300" />
             <div v-if="section.type === 'quote'"
               class="w-full h-40 rounded-md flex items-center justify-center p-4 relative overflow-hidden transition-transform duration-300"
@@ -309,6 +323,10 @@
               <p
                 class="text-xs text-gray-300 truncate opacity-75 group-hover:opacity-100 transition-opacity duration-300">
                 {{ item.subtitle }}
+              </p>
+              <p
+                class="text-xs text-gray-300 truncate opacity-75 group-hover:opacity-100 transition-opacity duration-300">
+                {{ item.videoTitle }}
               </p>
             </div>
           </div>
@@ -409,7 +427,7 @@ import YabanCover from "@/assets/img/yaban.jpg";
 import YasarCover from "@/assets/img/yasar-ne-yasar-ne-yasamaz.jpg";
 import YedinciCover from "@/assets/img/yedinci-gun.jpg";
 import YilkiCover from "@/assets/img/yilki-ati.png";
-import wrappedData from '@/data/wrapped.json';
+import analysis from '@/data/analysis.json';
 
 const touchStartX = ref(0);
 const touchStartY = ref(0);
@@ -481,7 +499,7 @@ const animationFrame = ref(null);
 const showModal = ref(false);
 const showContentModal = ref(false);
 const selectedLesson = ref(null);
-const userName = computed(() => wrappedData.data.user.name || 'Misafir');
+const userName = computed(() => analysis.data.user.name || 'Misafir');
 
 const isMobile = ref(false);
 
@@ -517,7 +535,7 @@ const generateItems = (count, prefix, type = "video") => {
       spotifyEmbed:
         "https://open.spotify.com/embed/playlist/37i9dQZF1DWZeKCadgRdKQ?utm_source=generator",
       studyTip:
-        "Elektronik ve ambient müzikler, uzun süreli odaklanma gerektiren çalışmalar için idealdir. Sözsüz müzikler, dil işleyen beyin bölgelerini meşgul etmeden çalışmanıza olanak sa��lar. Özellikle yazı yazma ve okuma çalışmalarında tercih edilebilir.",
+        "Elektronik ve ambient müzikler, uzun süreli odaklanma gerektiren çalışmalar için idealdir. Sözsüz müzikler, dil işleyen beyin bölgelerini meşgul etmeden çalışmanıza olanak sağlar. Özellikle yazı yazma ve okuma çalışmalarında tercih edilebilir.",
     },
     {
       id: 3,
@@ -619,8 +637,8 @@ const generateItems = (count, prefix, type = "video") => {
         type: "music",
       };
     });
-  } 
-  
+  }
+
   else if (type === "quote") {
     return motivationalQuotes.slice(0, count).map((quote, i) => ({
       id: `${prefix}-${i + 1}`,
@@ -870,7 +888,7 @@ const generateStories = (count) => {
       Deniz'in çalışma sistemi:
       • Haftalık detaylı program
       • Pomodoro tekniği kullanımı
-      • Sanat ve t���bbı birleştiren projeler
+      • Sanat ve tıbbı birleştiren projeler
       • Stres yönetimi için sanat terapisi`,
     },
   ];
@@ -1050,11 +1068,11 @@ const generateBooks = (count) => {
     },
     {
       id: 16,
-      title: "Drina'da Son G��n",
+      title: "Drina'da Son Gün",
       subtitle: "Faik Baysal",
       image: DrinadaCover,
       description:
-        "Balkan Savaşı s��rasında yaşanan dramı anlatan roman. Savaşın insan psikolojisi üzerindeki etkilerini ve göçün trajik sonuçlarını işler.",
+        "Balkan Savaşı sırasında yaşanan dramı anlatan roman. Savaşın insan psikolojisi üzerindeki etkilerini ve göçün trajik sonuçlarını işler.",
       category: ["Türk Edebiyatı", "Savaş Romanı", "Tarihi Roman"],
       readingTime: "13 saat",
       pages: "312 sayfa",
@@ -1263,7 +1281,7 @@ const generateBooks = (count) => {
       subtitle: "Halide Edib Adıvar",
       image: MorCover,
       description:
-        "Yazarın çocukluk ve gençlik yıllarını anlattığı otobiyografik eser. Osmanlı'n��n son dönemini ve modernleşme sürecini bireysel bir hikaye üzerinden aktarır.",
+        "Yazarın çocukluk ve gençlik yıllarını anlattığı otobiyografik eser. Osmanlı'nın son dönemini ve modernleşme sürecini bireysel bir hikaye üzerinden aktarır.",
       category: ["Türk Edebiyatı", "Anı", "Otobiyografi"],
       readingTime: "12 saat",
       pages: "288 sayfa",
@@ -1463,350 +1481,447 @@ const generateBooks = (count) => {
   }));
 };
 
-const lessonSections = [
-  {
-    title: "Matematik",
-    type: "lesson",
-    items: generateItems(10, "Matematik")
-  },
-  {
-    title: "Fizik",
-    type: "lesson",
-    items: generateItems(10, "Fizik")
-  },
-  {
-    title: "Kimya",
-    type: "lesson",
-    items: generateItems(10, "Kimya")
-  },
-  {
-    title: "Biyoloji",
-    type: "lesson",
-    items: generateItems(10, "Biyoloji")
-  },
-  {
-    title: "Türkçe",
-    type: "lesson",
-    items: generateItems(10, "Türkçe")
-  },
-  {
-    title: "Tarih",
-    type: "lesson",
-    items: generateItems(10, "Tarih")
-  },
-  {
-    title: "Coğrafya",
-    type: "lesson",
-    items: generateItems(10, "Coğrafya")
-  }
-];
+// Eski statik array'i kaldırıyoruz
+// const lessonSections = [ ... ];
 
-const otherSections = [
-  {
-    title: "Çalışırken Dinle 🎶",
-    type: "music",
-    items: generateItems(10, "Music", "music")
-  },
-  {
-    title: "Motivasyon Sözleri 💬",
-    type: "quote",
-    items: generateItems(10, "Quote", "quote")
-  },
-  {
-    title: "İlham Veren Hikayeler ✍️",
-    type: "story",
-    items: generateStories(5)
-  },
-  {
-    title: "Kitap Önerileri 📚",
-    type: "book",
-    items: generateBooks(10)
-  }
-];
+// JSON verisini reactive olarak tutacağız
+const courseData = ref(null);
 
-const sections = [...lessonSections, ...otherSections];
-
-const scroll = (index, direction) => {
-  const container = scrollContainers.value[index];
-  if (container) {
-    const scrollAmount =
-      direction === "left" ? -container.offsetWidth : container.offsetWidth;
-    container.scrollBy({ left: scrollAmount, behavior: "smooth" });
-  }
+// Başlığı formatlamak için yardımcı fonksiyon
+const formatTitle = (title) => {
+  return title
+    .toLowerCase()
+    .split(' ')
+    .map(word => {
+      // Nokta içeren kelimeleri özel olarak işle
+      if (word.includes('.')) {
+        // Önce ardışık noktaları temizle
+        const cleanWord = word.replace(/\.+/g, '.');
+        return cleanWord
+          .split('.')
+          .filter(part => part.length > 0) // Boş parçaları filtrele
+          .map((part, index, array) => {
+            return part.charAt(0).toUpperCase() + part.slice(1) + (index < array.length ? '.' : '');
+          })
+          .join('');
+      }
+      // Normal kelimeler için ilk harfi büyük yap
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
 };
 
-const startDrag = (e) => {
-  if (e.type.includes("mouse")) {
-    isDragging.value = true;
-    startX.value = e.clientX;
-    startY.value = e.clientY;
-    isDragged.value = false;
-  } else {
-    touchStartX.value = e.touches[0].clientX;
-    touchStartY.value = e.touches[0].clientY;
-  }
-  const container = e.currentTarget;
-  scrollLeft.value = container.scrollLeft;
-  momentum.value = { velocity: 0, timestamp: 0 };
-};
+// lessonSections'ı computed property olarak tanımlıyoruz
+const lessonSections = computed(() => {
+  console.log('courseData:', courseData.value); // Debug için
 
-const drag = (e) => {
-  if (e.type.includes("mouse")) {
-    if (!isDragging.value) return;
-    e.preventDefault();
-    const x = e.clientX;
-    const y = e.clientY;
-
-    if (Math.abs(x - startX.value) > 5 || Math.abs(y - startY.value) > 5) {
-      isDragged.value = true;
-    }
-
-    const walk = (x - startX.value) * 2;
-    e.currentTarget.scrollLeft = scrollLeft.value - walk;
-  } else {
-
-    const touchX = e.touches[0].clientX;
-    const touchY = e.touches[0].clientY;
-    const deltaX = touchStartX.value - touchX;
-    const deltaY = touchStartY.value - touchY;
-
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      e.preventDefault();
-      e.currentTarget.scrollLeft += deltaX * 2;
-    }
-
-    touchStartX.value = touchX;
-    touchStartY.value = touchY;
+  if (!courseData.value?.content?.courses) {
+    console.log('Courses not found'); // Debug için
+    return [];
   }
 
-  const currentTimestamp = Date.now();
-  const dt = currentTimestamp - momentum.value.timestamp;
-  const velocity = (e.currentTarget.scrollLeft - scrollLeft.value) / dt;
+  const sections = courseData.value.content.courses.map(course => ({
+    title: formatTitle(course.title || course.title_uppercase), // title'ı formatlıyoruz
+    type: "lesson",
+    items: generateItemsFromSubjects(course.subjects || {})
+  }));
 
-  momentum.value = { velocity, timestamp: currentTimestamp };
+  console.log('Generated sections:', sections); // Debug için
+  return sections;
+});
+
+const generateDummyVideos = (subjectName) => {
+  return Array(5).fill(null).map((_, index) => ({
+    id: `${subjectName}-video-${index}`,
+    title: subjectName, // 1. Konu adı
+    subtitle: 'Eğitim Kanalı', // 2. Kanal adı
+    videoTitle: `Video ${index + 1}`, // 3. Video adı
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    channelName: "Eğitim Kanalı",
+    thumbnail: `https://picsum.photos/seed/${subjectName}-${index}/300/200`,
+    type: "lesson"
+  }));
 };
 
-const endDrag = (e) => {
-  isDragging.value = false;
-  const container = e.currentTarget;
-
-  const applyMomentum = () => {
-    momentum.value.velocity *= 0.98;
-    container.scrollLeft += momentum.value.velocity;
-
-    if (Math.abs(momentum.value.velocity) > 0.5) {
-      animationFrame.value = requestAnimationFrame(applyMomentum);
-    }
-  };
-
-  cancelAnimationFrame(animationFrame.value);
-  animationFrame.value = requestAnimationFrame(applyMomentum);
-};
-
-const openModal = () => {
-  showModal.value = true;
-  document.body.style.overflow = 'hidden';
-};
-
-const closeModal = () => {
-  showModal.value = false;
-  document.body.style.overflow = '';
-};
-
-const openContentModal = (item, type, event) => {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-
-  if (type === "video") {
-    selectedLesson.value = {
-      title: item.title,
-      channelName: item.subtitle,
-      videoUrl: item.videoUrl,
-      content: item.content,
-      type: "video"
-    };
-  } else if (type === "quote") {
-    selectedLesson.value = {
-      ...item,
-      text: item.quote,  // quote değerini text olarak aktarıyoruz
-      type: type
-    };
-  } else {
-    // Diğer tipler için (music, book, story)
-    selectedLesson.value = {
-      ...item,
-      type: type
-    };
-  }
+const generateItemsFromSubjects = (subjects) => {
+  if (!subjects) return [];
   
-  showContentModal.value = true;
-  console.log('Selected Lesson:', selectedLesson.value);
+  const subjectEntries = Object.entries(subjects);
+  
+  // 1. Her konudan en az 1 video seçelim
+  let selectedVideos = subjectEntries.map(([name, data]) => {
+    const analysis = data.analysis?.[0] || {};
+    const videos = generateDummyVideos(name);
+    
+    // Her konudan random 1 video seç
+    return {
+      ...videos[Math.floor(Math.random() * videos.length)],
+      subjectName: name,
+      subjectAnalysis: {
+        correct: analysis.correct || 0,
+        incorrect: analysis.incorrect || 0,
+        empty: analysis.empty || 0,
+        success_ratio: analysis.success_ratio || 0
+      }
+    };
+  });
+
+  // 2. Kalan slotları dolduralım (20'ye tamamlayalım)
+  const remainingSlots = 20 - selectedVideos.length;
+  
+  if (remainingSlots > 0) {
+    // Tüm konulardan kalan videoları bir havuzda toplayalım
+    const remainingVideos = subjectEntries.flatMap(([name, data]) => {
+      const analysis = data.analysis?.[0] || {};
+      // İlk seçilen videoları hariç tut
+      return generateDummyVideos(name)
+        .slice(1)
+        .map(video => ({
+          ...video,
+          subjectName: name,
+          subjectAnalysis: {
+            correct: analysis.correct || 0,
+            incorrect: analysis.incorrect || 0,
+            empty: analysis.empty || 0,
+            success_ratio: analysis.success_ratio || 0
+          }
+        }));
+    });
+
+    // Random seç ama karıştır
+    const additionalVideos = remainingVideos
+      .sort(() => Math.random() - 0.5)
+      .slice(0, remainingSlots);
+
+    selectedVideos = [...selectedVideos, ...additionalVideos];
+  }
+
+  // Son bir kez karıştır
+  return selectedVideos.sort(() => Math.random() - 0.5);
 };
 
-const closeContentModal = () => {
-  showContentModal.value = false;
-};
-
-const isScrolled = ref(false);
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
-});
-
-const handleScroll = () => {
-  isScrolled.value = window.scrollY > 70; // 50px scroll threshold
-};
-
-onMounted(() => {
-  const setVH = () => {
-    let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty("--vh", `${vh}px`);
-  };
-  setVH();
-  window.addEventListener("resize", setVH);
-  scrollContainers.value.forEach((container) => {
-    if (container) {
-      container.style.cursor = "grab";
+  // Component mount olduğunda JSON verisini yükleyelim
+  onMounted(async () => {
+    try {
+      // JSON dosyasını import edelim
+      const response = await import('@/data/analysis.json');
+      courseData.value = response.default.data; // .data ekledik
+    } catch (error) {
+      console.error('JSON verisi yüklenirken hata:', error);
     }
   });
-});
 
-onUnmounted(() => {
-  cancelAnimationFrame(animationFrame.value);
-});
+  const otherSections = [
+    {
+      title: "Çalışırken Dinle 🎶",
+      type: "music",
+      items: generateItems(10, "Music", "music")
+    },
+    {
+      title: "Motivasyon Sözleri 💬",
+      type: "quote",
+      items: generateItems(10, "Quote", "quote")
+    },
+    {
+      title: "İlham Veren Hikayeler ✍️",
+      type: "story",
+      items: generateStories(5)
+    },
+    {
+      title: "Kitap Önerileri 📚",
+      type: "book",
+      items: generateBooks(10)
+    }
+  ];
 
-const hoveredSection = ref({});
+  // sections'ı computed property olarak tanımlayalım
+  const sections = computed(() => {
+    const lessonSectionsValue = lessonSections.value || [];
+    console.log('Final sections:', [...lessonSectionsValue, ...otherSections]); // Debug için
+    return [...lessonSectionsValue, ...otherSections];
+  });
 
-const showInfoModal = ref(false)
+  const scroll = (index, direction) => {
+    const container = scrollContainers.value[index];
+    if (container) {
+      const scrollAmount =
+        direction === "left" ? -container.offsetWidth : container.offsetWidth;
+      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
 
-const analysisData = [
-  {
-    subject: "Sözcükte Anlam",
-    correct: 18,
-    wrong: 4,
-    empty: 3,
-    net: 17,
-    successRate: 68
-  },
-  {
-    subject: "Paragrafta Ana Düşünce",
-    correct: 22,
-    wrong: 2,
-    empty: 1,
-    net: 21.5,
-    successRate: 86
-  },
-  {
-    subject: "Üçgenler ve Dörtgenler",
-    correct: 12,
-    wrong: 8,
-    empty: 5,
-    net: 10,
-    successRate: 40
-  },
-  {
-    subject: "İkinci Dereceden Denklemler",
-    correct: 25,
-    wrong: 5,
-    empty: 0,
-    net: 23.75,
-    successRate: 83
-  },
-  {
-    subject: "Kuvvet ve Hareket",
-    correct: 8,
-    wrong: 12,
-    empty: 5,
-    net: 5,
-    successRate: 20
-  },
-  {
-    subject: "Asitler ve Bazlar",
-    correct: 15,
-    wrong: 5,
-    empty: 5,
-    net: 13.75,
-    successRate: 55
-  },
-  {
-    subject: "Hücre ve Organeller",
-    correct: 20,
-    wrong: 3,
-    empty: 2,
-    net: 19.25,
-    successRate: 77
-  },
-  {
-    subject: "Dalgalar ve Ses",
-    correct: null,
-    wrong: null,
-    empty: null,
-    net: null,
-    successRate: null
-  },
-  {
-    subject: "Organik Kimya",
-    correct: null,
-    wrong: null,
-    empty: null,
-    net: null,
-    successRate: null
-  },
-  {
-    subject: "Logaritma",
-    correct: null,
-    wrong: null,
-    empty: null,
-    net: null,
-    successRate: null
-  }
-];
+  const startDrag = (e) => {
+    if (e.type.includes("mouse")) {
+      isDragging.value = true;
+      startX.value = e.clientX;
+      startY.value = e.clientY;
+      isDragged.value = false;
+    } else {
+      touchStartX.value = e.touches[0].clientX;
+      touchStartY.value = e.touches[0].clientY;
+    }
+    const container = e.currentTarget;
+    scrollLeft.value = container.scrollLeft;
+    momentum.value = { velocity: 0, timestamp: 0 };
+  };
 
-const getColorClass = (item) => {
-  if (item.correct === null || item.correct === undefined ||
-    item.wrong === null || item.wrong === undefined ||
-    item.empty === null || item.empty === undefined) {
-    return 'text-zinc-400';
-  }
+  const drag = (e) => {
+    if (e.type.includes("mouse")) {
+      if (!isDragging.value) return;
+      e.preventDefault();
+      const x = e.clientX;
+      const y = e.clientY;
 
-  const totalQuestions = item.correct + item.wrong + item.empty;
-  const percentage = (item.correct / totalQuestions) * 100;
+      if (Math.abs(x - startX.value) > 5 || Math.abs(y - startY.value) > 5) {
+        isDragged.value = true;
+      }
 
-  if (percentage >= 80) return 'text-green-500';
-  if (percentage >= 50) return 'text-yellow-500';
-  return 'text-red-600';
-};
+      const walk = (x - startX.value) * 2;
+      e.currentTarget.scrollLeft = scrollLeft.value - walk;
+    } else {
 
-const sortedData = computed(() => {
-  const excellent = analysisData
-    .filter(item => item.successRate >= 80)
-    .sort((a, b) => b.successRate - a.successRate);
+      const touchX = e.touches[0].clientX;
+      const touchY = e.touches[0].clientY;
+      const deltaX = touchStartX.value - touchX;
+      const deltaY = touchStartY.value - touchY;
 
-  const good = analysisData
-    .filter(item => item.successRate >= 50 && item.successRate < 80)
-    .sort((a, b) => b.successRate - a.successRate);
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        e.preventDefault();
+        e.currentTarget.scrollLeft += deltaX * 2;
+      }
 
-  const needsImprovement = analysisData
-    .filter(item => item.successRate !== null && item.successRate < 50)
-    .sort((a, b) => b.successRate - a.successRate);
+      touchStartX.value = touchX;
+      touchStartY.value = touchY;
+    }
 
-  const noData = analysisData
-    .filter(item => item.successRate === null);
+    const currentTimestamp = Date.now();
+    const dt = currentTimestamp - momentum.value.timestamp;
+    const velocity = (e.currentTarget.scrollLeft - scrollLeft.value) / dt;
 
-  return { excellent, good, needsImprovement, noData };
-});
+    momentum.value = { velocity, timestamp: currentTimestamp };
+  };
 
-onMounted(() => {
-  openModal();
-});
+  const endDrag = (e) => {
+    isDragging.value = false;
+    const container = e.currentTarget;
+
+    const applyMomentum = () => {
+      momentum.value.velocity *= 0.98;
+      container.scrollLeft += momentum.value.velocity;
+
+      if (Math.abs(momentum.value.velocity) > 0.5) {
+        animationFrame.value = requestAnimationFrame(applyMomentum);
+      }
+    };
+
+    cancelAnimationFrame(animationFrame.value);
+    animationFrame.value = requestAnimationFrame(applyMomentum);
+  };
+
+  const openModal = () => {
+    showModal.value = true;
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    showModal.value = false;
+    document.body.style.overflow = '';
+  };
+
+  const openContentModal = (item, type, event) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    if (type === "video") {
+      selectedLesson.value = {
+        title: item.title,
+        channelName: item.subtitle,
+        videoUrl: item.videoUrl,
+        content: item.content,
+        type: "video"
+      };
+    } else if (type === "quote") {
+      selectedLesson.value = {
+        ...item,
+        text: item.quote,  // quote değerini text olarak aktarıyoruz
+        type: type
+      };
+    } else {
+      // Diğer tipler için (music, book, story)
+      selectedLesson.value = {
+        ...item,
+        type: type
+      };
+    }
+
+    showContentModal.value = true;
+    console.log('Selected Lesson:', selectedLesson.value);
+  };
+
+  const closeContentModal = () => {
+    showContentModal.value = false;
+  };
+
+  const isScrolled = ref(false);
+
+  onMounted(() => {
+    window.addEventListener('scroll', handleScroll);
+  });
+
+  onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+  });
+
+  const handleScroll = () => {
+    isScrolled.value = window.scrollY > 70; // 50px scroll threshold
+  };
+
+  onMounted(() => {
+    const setVH = () => {
+      let vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    };
+    setVH();
+    window.addEventListener("resize", setVH);
+    scrollContainers.value.forEach((container) => {
+      if (container) {
+        container.style.cursor = "grab";
+      }
+    });
+  });
+
+  onUnmounted(() => {
+    cancelAnimationFrame(animationFrame.value);
+  });
+
+  const hoveredSection = ref({});
+
+  const showInfoModal = ref(false)
+
+  const analysisData = [
+    {
+      subject: "Sözcükte Anlam",
+      correct: 18,
+      wrong: 4,
+      empty: 3,
+      net: 17,
+      successRate: 68
+    },
+    {
+      subject: "Paragrafta Ana Düşünce",
+      correct: 22,
+      wrong: 2,
+      empty: 1,
+      net: 21.5,
+      successRate: 86
+    },
+    {
+      subject: "Üçgenler ve Dörtgenler",
+      correct: 12,
+      wrong: 8,
+      empty: 5,
+      net: 10,
+      successRate: 40
+    },
+    {
+      subject: "İkinci Dereceden Denklemler",
+      correct: 25,
+      wrong: 5,
+      empty: 0,
+      net: 23.75,
+      successRate: 83
+    },
+    {
+      subject: "Kuvvet ve Hareket",
+      correct: 8,
+      wrong: 12,
+      empty: 5,
+      net: 5,
+      successRate: 20
+    },
+    {
+      subject: "Asitler ve Bazlar",
+      correct: 15,
+      wrong: 5,
+      empty: 5,
+      net: 13.75,
+      successRate: 55
+    },
+    {
+      subject: "Hücre ve Organeller",
+      correct: 20,
+      wrong: 3,
+      empty: 2,
+      net: 19.25,
+      successRate: 77
+    },
+    {
+      subject: "Dalgalar ve Ses",
+      correct: null,
+      wrong: null,
+      empty: null,
+      net: null,
+      successRate: null
+    },
+    {
+      subject: "Organik Kimya",
+      correct: null,
+      wrong: null,
+      empty: null,
+      net: null,
+      successRate: null
+    },
+    {
+      subject: "Logaritma",
+      correct: null,
+      wrong: null,
+      empty: null,
+      net: null,
+      successRate: null
+    }
+  ];
+
+  const getColorClass = (item) => {
+    if (item.correct === null || item.correct === undefined ||
+      item.wrong === null || item.wrong === undefined ||
+      item.empty === null || item.empty === undefined) {
+      return 'text-zinc-400';
+    }
+
+    const totalQuestions = item.correct + item.wrong + item.empty;
+    const percentage = (item.correct / totalQuestions) * 100;
+
+    if (percentage >= 80) return 'text-green-500';
+    if (percentage >= 50) return 'text-yellow-500';
+    return 'text-red-600';
+  };
+
+  const sortedData = computed(() => {
+    const excellent = analysisData
+      .filter(item => item.successRate >= 80)
+      .sort((a, b) => b.successRate - a.successRate);
+
+    const good = analysisData
+      .filter(item => item.successRate >= 50 && item.successRate < 80)
+      .sort((a, b) => b.successRate - a.successRate);
+
+    const needsImprovement = analysisData
+      .filter(item => item.successRate !== null && item.successRate < 50)
+      .sort((a, b) => b.successRate - a.successRate);
+
+    const noData = analysisData
+      .filter(item => item.successRate === null);
+
+    return { excellent, good, needsImprovement, noData };
+  });
+
+  onMounted(() => {
+    openModal();
+  });
+  
 </script>
-
 <style scoped>
 .scrollbar-hide {
   -ms-overflow-style: none;
@@ -1915,3 +2030,4 @@ header {
   }
 }
 </style>
+

@@ -429,7 +429,7 @@ import CircularProgress from '@/components/CircularProgress.vue';
 import FingerPrint from '@/assets/fingerprint.svg';
 import LogoBack from '@/assets/tam-okul-ai-logo-back.svg';
 import LogoFront from '@/assets/tam-okul-ai-logo-front.svg';
-import wrappedData from '@/data/wrapped.json';
+import analysis from '@/data/analysis.json';
 
 const props = defineProps({
   show: Boolean,
@@ -442,24 +442,24 @@ const totalSlides = 8;
 const transitionName = ref("slide-right");
 const showInitialSubtext = ref(false);
 const longestStreak = ref(10);
-const name = computed(() => wrappedData.data.user.name);
+const name = computed(() => analysis.data.user.name);
 
 const total_questions_solved = computed(() =>
-  wrappedData?.data?.user?.student?.learning_journey?.total_questions_solved ?? 0
+  analysis?.data?.user?.student?.learning_journey?.total_questions_solved ?? 0
 );
 const total_questions_solved_percentage = computed(() =>
-  wrappedData?.data?.user?.student?.learning_journey?.total_questions_solved_percentage ?? 0
+  analysis?.data?.user?.student?.learning_journey?.total_questions_solved_percentage ?? 0
 );
 
 const topCourses = computed(() => {
-  const courses = wrappedData?.data?.user?.student?.learning_journey?.best_courses;
+  const courses = analysis?.data?.user?.student?.learning_journey?.best_courses;
   return Array.isArray(courses) ? courses : [];
 });
 const topCourse = computed(() =>
-  wrappedData?.data?.user?.student?.learning_journey?.best_course ?? '—'
+  analysis?.data?.user?.student?.learning_journey?.best_course ?? '—'
 );
 const bestSubjects = computed(() => {
-  const subjects = wrappedData?.data?.user?.student?.learning_journey?.best_subjects ?? [];
+  const subjects = analysis?.data?.user?.student?.learning_journey?.best_subjects ?? [];
   return subjects.map(subjectObj => {
     const [course, name] = Object.entries(subjectObj)[0];
     return {
@@ -470,7 +470,7 @@ const bestSubjects = computed(() => {
 });
 
 const totalStudyHours = computed(() =>
-  wrappedData?.data?.user?.student?.learning_journey?.total_hours_spent ?? 0
+  analysis?.data?.user?.student?.learning_journey?.total_hours_spent ?? 0
 );
 
 const moviesWatched = computed(() =>

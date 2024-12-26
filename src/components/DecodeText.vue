@@ -70,7 +70,6 @@
   <style scoped>
   .decode-text {
     width: 100%;
-    font-size: 30px;
     text-align: left;
     word-wrap: break-word;
   }
