@@ -9,6 +9,7 @@ import "sweetalert2/dist/sweetalert2.min.css";
 import "primeicons/primeicons.css";
 import { useStore } from "vuex";
 import axios from "axios";
+import "./styles/modal.css";
 
 const app = createApp(App);
 

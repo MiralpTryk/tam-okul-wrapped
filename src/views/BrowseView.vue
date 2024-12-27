@@ -10,17 +10,14 @@
           <img src="https://tamokul.com/new-landing/assets/images/logo/header-logo.webp" alt="Tam Okul" class="h-8" />
         </a>
         <div class="flex items-center gap-4">
-          <button 
-            @click="toggleSidebar"
-            class="xl:hidden text-white hover:text-gray-300"
-            aria-label="Toggle menu"
-            type="button"
-          >
+          <button @click="toggleSidebar" class="xl:hidden text-white hover:text-gray-300" aria-label="Toggle menu"
+            type="button">
             <MenuIcon v-if="!isSidebarOpen" class="w-6 h-6" />
             <XIcon v-else class="w-6 h-6" />
           </button>
           <RouterLink to="/optic-form">
-            <button class="bg-[#E50914] hover:bg-[#E50914]/90 text-white px-6 py-2 rounded text-sm font-medium transition-all duration-300">
+            <button
+              class="bg-[#E50914] hover:bg-[#E50914]/90 text-white px-6 py-2 rounded text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-[#E50914]/20">
               Optik İşaretle
             </button>
           </RouterLink>
@@ -31,9 +28,7 @@
     <!-- Content wrapper -->
     <div class="pt-16 min-h-screen">
       <!-- Mobile Overlay -->
-      <div v-show="isSidebarOpen" 
-          class="fixed inset-0 bg-black/50 z-20 xl:hidden"
-          @click="toggleSidebar">
+      <div v-show="isSidebarOpen" class="fixed inset-0 bg-black/50 z-20 xl:hidden" @click="toggleSidebar">
       </div>
 
       <aside :class="[
@@ -56,16 +51,13 @@
                   </button>
                   <ul v-if="openCategories.includes(category.id)" class="mx-4  mt-2">
                     <li v-for="subcategory in category.subcategories" :key="subcategory">
-                      <a href="#" 
-                        @click.prevent="scrollToSection(category.id, subcategory)"
-                        :data-section="`${category.id}-${subcategory}`"
-                        :class="[
+                      <a href="#" @click.prevent="scrollToSection(category.id, subcategory)"
+                        :data-section="`${category.id}-${subcategory}`" :class="[
                           'block py-3 px-4 truncate rounded-r transition-colors text-sm border-l',
                           isActiveSection(`${category.id}-${subcategory}`)
                             ? 'bg-zinc-900 border-l-4 border-red-600 text-zinc-300'
                             : 'hover:bg-zinc-950 hover:border-l-4 hover:border-red-700 text-zinc-400 hover:text-zinc-300 border-zinc-800'
-                        ]"
-                      >
+                        ]">
                         {{ subcategory }}
                       </a>
                     </li>
@@ -94,24 +86,21 @@
               </h3>
               <!-- Responsive grid for video cards -->
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <div v-for="video in generateDummyVideos(category.name, subcategory)" 
-                  :key="video.id"
-                  @click="openContentModal(video)"
-                  class="flex-shrink-0 relative group cursor-pointer">
+                <div v-for="video in generateDummyVideos(category.name, subcategory)" :key="video.id"
+                  @click="openContentModal(video)" class="flex-shrink-0 relative group cursor-pointer">
                   <!-- Thumbnail Container -->
                   <div class="relative">
-                    <img 
-                      :src="video.thumbnail" 
-                      :alt="video.title"
+                    <img :src="video.thumbnail" :alt="video.title"
                       class="w-full h-40 object-cover rounded-md transition-opacity duration-300 group-hover:opacity-75"
-                      @dragstart.prevent
-                    />
+                      @dragstart.prevent />
                     <!-- Gradient overlay -->
                     <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
-                      <p class="text-sm font-semibold truncate text-white opacity-75 group-hover:opacity-100 transition-opacity duration-300">
+                      <p
+                        class="text-sm font-semibold truncate text-white opacity-75 group-hover:opacity-100 transition-opacity duration-300">
                         {{ video.videoTitle }}
                       </p>
-                      <p class="text-xs text-gray-300 truncate opacity-75 group-hover:opacity-100 transition-opacity duration-300">
+                      <p
+                        class="text-xs text-gray-300 truncate opacity-75 group-hover:opacity-100 transition-opacity duration-300">
                         {{ video.subtitle }}
                       </p>
                     </div>
@@ -124,27 +113,20 @@
       </div>
 
       <!-- Back to Top Button - Updated visibility condition -->
-      <button
-        @click="scrollToTop"
-        :class="[
-          'fixed bottom-6 right-6 z-[60]',
-          'bg-red-600 hover:bg-red-700',
-          'rounded-full p-3 shadow-lg',
-          'transition-all duration-300 ease-in-out',
-          showBackToTop ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
-        ]"
-        aria-label="Back to top"
-      >
+      <button @click="scrollToTop" :class="[
+        'fixed bottom-6 right-6 z-[60]',
+        'bg-red-600 hover:bg-red-700',
+        'rounded-full p-3 shadow-lg',
+        'transition-all duration-300 ease-in-out',
+        showBackToTop ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
+      ]" aria-label="Back to top">
         <ChevronUp class="w-6 h-6 text-white" />
       </button>
 
       <!-- Add Content Modal -->
       <ContentModal :show="showContentModal" @close="closeContentModal">
         <template v-if="selectedLesson">
-          <LessonContent 
-            v-if="selectedLesson.type === 'video'" 
-            :lesson="selectedLesson" 
-          />
+          <LessonContent v-if="selectedLesson.type === 'video'" :lesson="selectedLesson" />
         </template>
       </ContentModal>
     </div>
@@ -203,9 +185,9 @@ const scrollToSection = (categoryId, subcategory) => {
   if (targetRef) {
     if (window.innerWidth < 1280) {
       isSidebarOpen.value = false
-      
+
       setTimeout(() => {
-        const headerOffset = 80 
+        const headerOffset = 80
         const elementPosition = targetRef.getBoundingClientRect().top + window.pageYOffset
         window.scrollTo({
           top: elementPosition - headerOffset,
@@ -301,7 +283,7 @@ const scrollToSectionByTitle = (sectionTitle) => {
     if (!openCategories.value.includes(category.id)) {
       toggleCategory(category.id)
     }
-    
+
     nextTick(() => {
       const element = categoryRefs.value[category.id]
       if (element) {
@@ -360,7 +342,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
   window.removeEventListener('resize', handleResize)
-  
+
   Object.values(observers.value).forEach(observer => {
     observer.disconnect()
   })
