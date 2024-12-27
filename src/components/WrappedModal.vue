@@ -200,7 +200,7 @@
 
                     <Transition name="fade">
                       <div v-show="showSubjects">
-                        <div class="h-72 overflow-hidden">
+                        <div class="h-96 overflow-hidden">
                           <TransitionGroup enter-active-class="transition-all duration-500 ease-out"
                             enter-from-class="opacity-0 scale-95 -translate-x-4"
                             enter-to-class="opacity-100 scale-100 translate-x-0"
@@ -211,7 +211,7 @@
                               <div class="flex items-center space-x-2 w-full">
                                 <span class="mr-1 font-bold opacity-50">{{ index + 1 }}.</span>
                                 <div class="flex-1">
-                                  <span class="font-medium">{{ subject.name }}</span>
+                                  <span class="font-medium">{{ truncateText(subject.name) }}</span>
                                   <span class="text-sm ml-2 opacity-75">{{ subject.course }}</span>
                                 </div>
                               </div>
@@ -954,6 +954,20 @@ const shuffleArray = (array) => {
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
+};
+
+// Add this to your script setup section
+const truncateText = (text) => {
+  if (text.length <= 57) return text;
+  
+  // Find the last space within the first 57 characters
+  const truncateIndex = text.substring(0, 57).lastIndexOf(' ');
+  
+  // If no space found, force cut at 57
+  if (truncateIndex === -1) return text.substring(0, 57) + '...';
+  
+  // Return truncated text at the last word boundary
+  return text.substring(0, truncateIndex) + '...';
 };
 
 </script>

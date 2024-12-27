@@ -1,6 +1,6 @@
 <template>
     <div 
-      class="flex-shrink-0 w-64 sm:w-72 relative group cursor-pointer"
+      class="flex-shrink-0 w-60 relative group cursor-pointer"
       @click="$emit('click', item, type)"
     >
       <component 

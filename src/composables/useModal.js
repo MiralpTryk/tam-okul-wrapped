@@ -23,13 +23,10 @@ export function useModal() {
       event.stopPropagation()
     }
 
-    if (type === "video") {
+    if (type === "lesson") {
       selectedLesson.value = {
-        title: item.title,
-        channelName: item.subtitle,
-        videoUrl: item.videoUrl,
-        content: item.content,
-        type: "video"
+        ...item,
+        type: "lesson"
       }
     } else if (type === "quote") {
       selectedLesson.value = {

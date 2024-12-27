@@ -1,9 +1,9 @@
 <template>
-  <div class="bg-black text-white min-h-screen">
+  <div class="text-white min-h-screen overflow-x-hidden">
     <!-- Header -->
     <header :class="[
-      'fixed top-0 left-0 right-0 z-20 transition-all duration-300',
-      isScrolled ? 'bg-black backdrop-blur-sm' : 'bg-gradient-to-b from-black to-transparent'
+      'fixed top-0 left-0 right-0 z-20 transition-all duration-1000',
+      isScrolled ? 'bg-black backdrop-blur-sm' : 'bg-gradient-to-t from-transparent to-black'
     ]">
       <nav class=" mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-16 2xl:px-24">
         <a href="/">
@@ -171,9 +171,9 @@
       <img :src="HeroImage" alt="Hero"
         class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center" />
       <div class="absolute inset-0 bg-red-600 mix-blend-multiply opacity-60"></div>
-      <div
-        class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-30% from-black via-black/70 to-transparent overflow-hidden">
-        <div class="flex gap-4 pr-4 w-[200%] h-full animate-marquee" style="--marquee-duration: 5000ms;">
+      <!--       <div
+        class="absolute inset-x-0 bottom-0 h-12 sm:h-16 md:h-24 bg-gradient-to-t from-30% from-[#141414] via-[#141414]/70 to-transparent overflow-hidden">
+<div class="flex gap-4 pr-4 w-[200%] h-full animate-marquee" style="--marquee-duration: 5000ms;">
           <div class="flex flex-1 h-full">
             <div
               class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
@@ -197,18 +197,18 @@
               Bu içerikler senin için özenle hazırlandı</div>
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="absolute inset-0"></div>
       <div class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full">
         <div class="max-w-[720px] mb-8">
-          <h1 class="text-3xl sm:text-4xl font-bold mb-4">
+          <h1 class="text-2xl sm:text-3xl font-bold mb-4">
             Merhaba
             <span class="inline-flex items-center -mr-2">
               <DecodeText :text="userName" :interval="5000" />
             </span>
             , senin için tasarlanan eşsiz öğrenme deneyimine hoş geldin!
           </h1>
-          <p class="text-sm sm:text-base bg-black/50 sm:bg-transparent rounded-lg px-4 py-2">
+          <p class="text-sm sm:text-base bg-black/50 sm:bg-transparent rounded-lg px-4 py-2 sm:px-0">
             Tam Okul ile öğrenme yolculuğun tamamen sana özel.
             Başarı durumuna göre YouTube'dan seçilen konu anlatım videoları ile eksiklerini tamamla, kişisel duvarında
             müzik dinle, kitap önerilerini keşfet ve motivasyon sözleriyle ilham al.
@@ -222,7 +222,7 @@
         <div>
           <div class="relative inline-flex">
             <button @click="openWrappedModal"
-              class="relative inline-flex items-center justify-center px-6 py-2 text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-600 active:scale-95 rounded"
+              class="relative inline-flex items-center justify-center px-6 py-2 text-base sm:text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-600 active:scale-95 rounded"
               role="button">
               <Play class="w-6 h-6 mr-2 fill-black" /> {{ new Date().getFullYear() }} Öğrenme Yolculuğun
             </button>
@@ -232,78 +232,92 @@
     </section>
 
     <!-- Content Sections -->
-    <section v-for="(section, index) in sections" :key="index" class="pb-6 px-4 sm:px-6 lg:px-16 2xl:px-24">
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-2">
-          <h2 class="text-xl">{{ section.title }}</h2>
+    <div class="sm:-mt-[3.5rem] relative z-10 bg-gradient-to-t from-[#141414] from-95% to-transparent">
+      <section v-for="(section, index) in sections" :key="index" class="pb-8 pt-0 sm:pt-4">
+        <!-- Section header with original padding -->
+        <div class="px-4 sm:px-6 lg:px-16 2xl:px-24">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm sm:text-xl font-semibold tracking-wide">{{ section.title }}</h2>
 
-          <!-- Mobile Button -->
-          <button v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
-            class="sm:hidden bg-zinc-800 text-white rounded-full w-8 h-8 flex items-center justify-center z-10"
-            @click="showAnalysisForCourse(section.title)">
-            <span class="text-sm flex-shrink-0 flex items-center justify-center">
-              <Info class="w-4 h-4" />
-            </span>
-          </button>
+              <!-- Mobile Button -->
+              <button v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
+                class="sm:hidden b   text-white rounded-full w-8 h-8 flex items-center justify-center z-10"
+                @click="showAnalysisForCourse(section.title)">
+                <span class="text-sm flex-shrink-0 flex items-center justify-center">
+                  <Info class="w-4 h-4" />
+                </span>
+              </button>
 
-          <!-- Desktop Button -->
-          <button v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
-            class="hidden sm:flex bg-zinc-800 text-white rounded-full items-center justify-end transition-all duration-300 ease-in-out overflow-hidden z-10"
-            :class="{ 'w-8 h-8': !hoveredSection[index], 'w-[228px] h-8': hoveredSection[index] }"
-            @mouseenter="hoveredSection[index] = true" 
-            @mouseleave="hoveredSection[index] = false"
-            @click="showAnalysisForCourse(section.title)">
-            <div class="flex items-center w-full h-full justify-end">
-              <span class="whitespace-nowrap text-xs transition-all duration-300 ease-in-out overflow-hidden mr-1"
-                :class="{ 'w-0 opacity-0': !hoveredSection[index], 'w-auto opacity-100': hoveredSection[index] }">
-                Neden bu videoları görüyorum?
-              </span>
-              <span class="text-sm flex-shrink-0 mr-2 flex items-center justify-center">
-                <Info class="w-4 h-4" />
-              </span>
+              <!-- Desktop Button -->
+              <button 
+                v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
+                class="hidden sm:flex text-[#54b9c5] font-semibold rounded-full items-center justify-end transition-all duration-500 ease-in-out overflow-hidden z-10 relative"
+                :class="{ 
+                  'w-8': !hoveredSection[index], 
+                  'w-[250px]': hoveredSection[index] 
+                }"
+                @mouseenter="hoveredSection[index] = true" 
+                @mouseleave="hoveredSection[index] = false"
+                @click="showAnalysisForCourse(section.title)"
+              >
+                <div class="absolute inset-0 bg-[#54b9c5]/20 transition-transform duration-500 ease-in-out origin-right"
+                  :class="{ 'scale-x-0': !hoveredSection[index] }">
+                </div>
+                
+                <div class="flex items-center w-full h-8 justify-end relative">
+                  <span 
+                    class="whitespace-nowrap text-xs overflow-hidden transition-all duration-500 ease-in-out absolute"
+                    :class="{ 
+                      'opacity-0 translate-x-4 right-8': !hoveredSection[index], 
+                      'opacity-100 translate-x-0 right-10': hoveredSection[index] 
+                    }"
+                  >
+                    Neden bu videoları görüyorum?
+                  </span>
+                  <span class="text-sm flex-shrink-0 mr-2 flex items-center justify-center relative">
+                    <Info class="w-4 h-4" />
+                  </span>
+                </div>
+              </button>
             </div>
-          </button>
-        </div>
-        <RouterLink :to="`/browse?section=${section.title}`">
-          <button class="text-sm text-white hover:text-zinc-300">
-            Daha Fazla Göster
-          </button>
-        </RouterLink>
-      </div>
-
-      <div class="relative">
-        <button @click="scroll(index, 'left')"
-          class="left-chevron absolute -left-16 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 pl-16 rounded-full z-10 hidden sm:block">
-          <ChevronLeftIcon class="w-6 h-6" />
-        </button>
-        <button @click="scroll(index, 'right')"
-          class="right-chevron absolute -right-16 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 pr-16 rounded-full z-10 hidden sm:block">
-          <ChevronRightIcon class="w-6 h-6" />
-        </button>
-        <div 
-          :ref="(el) => { if (el) scrollContainers[index] = el }"
-          class="flex space-x-4 overflow-x-auto scrollbar-hide select-none" 
-          :class="{ dragging: isDragging }"
-          @mousedown="startDrag"
-          @mousemove="drag"
-          @mouseup="endDrag"
-          @mouseleave="endDrag"
-          @touchstart="startDrag"
-          @touchmove="drag"
-          @touchend="endDrag">
-          <div v-for="item in section.items" :key="item.id">
-            <ContentCard 
-              :item="item"
-              :type="section.type"
-              @click="openContentModal"
-            />
+            
+            <!-- Only show "Daha Fazla Göster" for lesson sections -->
+            <RouterLink v-if="section.type === 'lesson'" :to="`/browse?section=${section.title}`">
+              <button class="text-xs sm:text-sm text-white hover:text-zinc-300">
+                Daha Fazla Göster
+              </button>
+            </RouterLink>
           </div>
         </div>
-      </div>
-    </section>
+
+        <div class="relative w-screen -ml-[50vw] left-1/2">
+          <!-- Left scroll button -->
+          <button @click="() => handleCarouselScroll(index, 'left')"
+            class="left-chevron absolute left-4 sm:left-6 lg:left-16 2xl:left-24 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10 hidden sm:block">
+            <ChevronLeftIcon class="w-6 h-6" />
+          </button>
+
+          <!-- Right scroll button -->
+          <button @click="() => handleCarouselScroll(index, 'right')"
+            class="right-chevron absolute right-4 sm:right-6 lg:right-16 2xl:right-24 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10 hidden sm:block">
+            <ChevronRightIcon class="w-6 h-6" />
+          </button>
+
+          <!-- Content container -->
+          <div :ref="(el) => { if (el) scrollContainers[index] = el }"
+            class="flex space-x-2 overflow-x-auto scrollbar-hide select-none pl-4 sm:pl-6 lg:pl-16 2xl:pl-24"
+            @touchstart="startDrag" @touchmove="drag" @touchend="endDrag">
+            <div v-for="item in section.items" :key="item.id">
+              <ContentCard :item="item" :type="section.type" @click="openContentModal" />
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <!-- Footer -->
-    <footer class="bg-zinc-900 text-zinc-400 py-3 px-4 sm:px-6 lg:px-8">
+    <footer class="bg-[#141414] text-zinc-400 py-6 px-4 sm:px-6 lg:px-8">
       <div class="container mx-auto">
         <p class="text-center text-sm">
           &copy; {{ new Date().getFullYear() }} Tam Okul. Tüm hakları saklıdır.
@@ -317,11 +331,11 @@
     <!-- Content Modal -->
     <ContentModal :show="showContentModal" @close="closeContentModal">
       <template v-if="selectedLesson">
-        <LessonContent v-if="selectedLesson && selectedLesson.type === 'lesson'" :lesson="selectedLesson" />
-        <MusicContent v-else-if="selectedLesson && selectedLesson.type === 'music'" :music="selectedLesson" />
-        <QuoteContent v-else-if="selectedLesson && selectedLesson.type === 'quote'" :quote="selectedLesson" />
-        <BookContent v-else-if="selectedLesson && selectedLesson.type === 'book'" :book="selectedLesson" />
-        <StoryContent v-else-if="selectedLesson && selectedLesson.type === 'story'" :story="selectedLesson" />
+        <LessonContent v-if="selectedLesson.type === 'lesson'" :lesson="selectedLesson" />
+        <MusicContent v-else-if="selectedLesson.type === 'music'" :music="selectedLesson" />
+        <QuoteContent v-else-if="selectedLesson.type === 'quote'" :quote="selectedLesson" />
+        <BookContent v-else-if="selectedLesson.type === 'book'" :book="selectedLesson" />
+        <StoryContent v-else-if="selectedLesson.type === 'story'" :story="selectedLesson" />
       </template>
     </ContentModal>
   </div>
@@ -355,14 +369,13 @@ const userName = computed(() => analysis.data.user.name || 'Misafir')
 
 // Get functionality from composables
 const { otherSections } = useContent()
-const { 
-  scrollContainers, 
-  isDragging, 
-  scroll, 
-  startDrag, 
-  drag, 
-  endDrag, 
-  cleanup 
+const {
+  scrollContainers,
+  scroll,
+  startDrag,
+  drag,
+  endDrag,
+  cleanup
 } = useScroll()
 const {
   showModal,
@@ -388,7 +401,7 @@ const formatTitle = (title) => {
         const cleanWord = word.replace(/\.+/g, '.')
         return cleanWord
           .split('.')
-          .filter(part => part.length > 0) 
+          .filter(part => part.length > 0)
           .map((part, index, array) => {
             return part.charAt(0).toUpperCase() + part.slice(1) + (index < array.length ? '.' : '')
           })
@@ -399,69 +412,44 @@ const formatTitle = (title) => {
     .join(' ')
 }
 
-// Generate dummy videos
-const generateDummyVideos = (subjectName) => {
-  return Array(5).fill(null).map((_, index) => ({
-    id: `${subjectName}-video-${index}`,
-    title: subjectName,
-    subtitle: 'Eğitim Kanalı',
-    videoTitle: `Video ${index + 1}`,
-    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    channelName: "Eğitim Kanalı",
-    thumbnail: `https://picsum.photos/seed/${subjectName}-${index}/300/200`,
-    type: "lesson"
+// Replace generateDummyVideos with generateVideos
+const generateVideos = (subjectName, subjectData) => {
+  if (!subjectData?.videos?.length) {
+    return [{
+      id: `${subjectName}-default`,
+      title: subjectName,
+      channel_title: 'Eğitim Kanalı',
+      video_id: "dQw4w9WgXcQ",
+      thumbnail_url: `https://picsum.photos/seed/${subjectName}/300/200`,
+      type: "lesson"
+    }]
+  }
+
+  return subjectData.videos.map(video => ({
+    ...video, // Spread the video object to keep all original properties
+    type: "lesson",
+    subjectName
   }))
 }
 
-// Generate items from subjects
+// Update generateItemsFromSubjects to handle the new structure
 const generateItemsFromSubjects = (subjects) => {
   if (!subjects) return []
-  
-  const subjectEntries = Object.entries(subjects)
-  
-  let selectedVideos = subjectEntries.map(([name, data]) => {
-    const analysis = data.analysis?.[0] || {}
-    const videos = generateDummyVideos(name)
-    
-    return {
-      ...videos[Math.floor(Math.random() * videos.length)],
-      subjectName: name,
-      subjectAnalysis: {
-        correct: analysis.correct || 0,
-        incorrect: analysis.incorrect || 0,
-        empty: analysis.empty || 0,
-        success_ratio: analysis.success_ratio || 0
-      }
-    }
+
+  console.log('Subjects received:', subjects); // Debug log
+
+  // Get all videos from all subjects
+  const allVideos = Object.entries(subjects).flatMap(([name, data]) => {
+    console.log('Processing subject:', name, 'with data:', data); // Debug log
+    return generateVideos(name, data)
   })
 
-  const remainingSlots = 20 - selectedVideos.length
-  
-  if (remainingSlots > 0) {
-    const remainingVideos = subjectEntries.flatMap(([name, data]) => {
-      const analysis = data.analysis?.[0] || {}
-      return generateDummyVideos(name)
-        .slice(1)
-        .map(video => ({
-          ...video,
-          subjectName: name,
-          subjectAnalysis: {
-            correct: analysis.correct || 0,
-            incorrect: analysis.incorrect || 0,
-            empty: analysis.empty || 0,
-            success_ratio: analysis.success_ratio || 0
-          }
-        }))
-    })
+  console.log('All videos generated:', allVideos); // Debug log
 
-    const additionalVideos = remainingVideos
-      .sort(() => Math.random() - 0.5)
-      .slice(0, remainingSlots)
-
-    selectedVideos = [...selectedVideos, ...additionalVideos]
-  }
-
-  return selectedVideos.sort(() => Math.random() - 0.5)
+  // Randomly select videos to fill the grid
+  return allVideos
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 20) // Limit to 20 videos
 }
 
 // Computed properties
@@ -488,7 +476,7 @@ const analysisData = computed(() => {
   if (!course) return []
 
   const transformedData = []
-  
+
   Object.entries(course.subjects).forEach(([subjectName, data]) => {
     const analysis = data.analysis?.[0]
     if (analysis) {
@@ -547,6 +535,12 @@ const getColorClass = (item) => {
   if (percentage >= 80) return 'text-green-500'
   if (percentage >= 50) return 'text-yellow-500'
   return 'text-red-600'
+}
+
+// Change the name of the carousel scroll handler
+const handleCarouselScroll = (index, direction) => {
+  console.log('Scrolling carousel:', index, direction) // Debug log
+  scroll(index, direction)
 }
 
 // Lifecycle hooks
@@ -671,4 +665,3 @@ header {
   }
 }
 </style>
-

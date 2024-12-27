@@ -86,7 +86,7 @@
               </h3>
               <!-- Responsive grid for video cards -->
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <div v-for="video in generateDummyVideos(category.name, subcategory)" :key="video.id"
+                <div v-for="video in generateVideos(subcategory)" :key="video.id"
                   @click="openContentModal(video)" class="flex-shrink-0 relative group cursor-pointer">
                   <!-- Thumbnail Container -->
                   <div class="relative">
@@ -154,15 +154,33 @@ const categories = computed(() => {
   });
 });
 
-const generateDummyVideos = (subjectName, topicName) => {
-  return Array(5).fill(null).map((_, index) => ({
-    id: `${subjectName}-${topicName}-${index}`,
-    title: topicName,
-    subtitle: 'Eğitim Kanalı',
-    videoTitle: `Video ${index + 1}`,
-    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    thumbnail: `https://picsum.photos/seed/${subjectName}-${topicName}-${index}/300/450`,
-    type: "lesson"
+const generateVideos = (subjectName) => {
+  const course = analysis?.data?.content?.courses?.find(
+    course => course.subjects && course.subjects[subjectName]
+  );
+
+  if (!course?.subjects?.[subjectName]?.videos?.length) {
+    return [{
+      id: `${subjectName}-default`,
+      title: subjectName,
+      channel_title: 'Eğitim Kanalı',
+      video_id: "dQw4w9WgXcQ",
+      thumbnail_url: `https://picsum.photos/seed/${subjectName}/300/450`,
+      type: "video"
+    }];
+  }
+
+  return course.subjects[subjectName].videos.map(video => ({
+    id: video.id,
+    title: video.title,
+    videoTitle: video.title,
+    channel_title: video.channel_title,
+    subtitle: video.channel_title,
+    thumbnail: video.thumbnail_url,
+    video_id: video.video_id,
+    description: video.description,
+    summary: video.summary,
+    type: "video"
   }));
 };
 
@@ -263,8 +281,10 @@ const selectedLesson = ref(null);
 const openContentModal = (video) => {
   selectedLesson.value = {
     title: video.title,
-    channelName: video.subtitle,
-    videoUrl: video.videoUrl,
+    channel_title: video.channel_title,
+    video_id: video.video_id,
+    description: video.description,
+    summary: video.summary,
     type: "video"
   };
   showContentModal.value = true;
@@ -278,25 +298,35 @@ const closeContentModal = () => {
 const route = useRoute()
 
 const scrollToSectionByTitle = (sectionTitle) => {
-  const category = categories.value.find(cat => cat.name === sectionTitle)
+  // Normalize the search title
+  const normalizedSearch = sectionTitle.toLowerCase().trim();
+  
+  // Find category with normalized comparison
+  const category = categories.value.find(cat => {
+    const normalizedName = (cat.name || cat.title || cat.title_uppercase || '').toLowerCase().trim();
+    return normalizedName === normalizedSearch;
+  });
+
   if (category) {
     if (!openCategories.value.includes(category.id)) {
-      toggleCategory(category.id)
+      toggleCategory(category.id);
     }
 
     nextTick(() => {
-      const element = categoryRefs.value[category.id]
+      const element = categoryRefs.value[category.id];
       if (element) {
-        const headerOffset = 80
-        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+        const headerOffset = 80;
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
         window.scrollTo({
           top: elementPosition - headerOffset,
           behavior: 'smooth'
-        })
+        });
       }
-    })
+    });
+  } else {
+    console.log('Category not found:', sectionTitle);
   }
-}
+};
 
 watch(
   () => route.query.section,
