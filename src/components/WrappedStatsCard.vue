@@ -126,7 +126,7 @@ onMounted(() => {
   Promise.all(preloadImages)
     .then(() => {
       logoLoaded.value = true;
-      console.log('Tüm logolar yüklendi');
+      // console.log('Tüm logolar yüklendi');
     })
     .catch(error => {
       console.error('Logo yükleme hatası:', error);

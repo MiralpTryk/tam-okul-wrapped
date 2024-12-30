@@ -3,7 +3,10 @@ module.exports = {
   darkMode: "class",
   mode: "jit",
   important: true,
-  content: ["./src/**/*.{vue,js,ts,jsx,tsx}", "./public/index.html"],
+  content: [
+    "./index.html",
+    "./src/**/*.{vue,js,ts,jsx,tsx}",
+  ],
   theme: {
     extend: {
       fontFamily: {
@@ -158,6 +161,20 @@ module.exports = {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" },
         },
+        blob: {
+          '0%': {
+            transform: 'translate(0px, 0px) scale(1)',
+          },
+          '33%': {
+            transform: 'translate(30px, -50px) scale(1.1)',
+          },
+          '66%': {
+            transform: 'translate(-20px, 20px) scale(0.9)',
+          },
+          '100%': {
+            transform: 'translate(0px, 0px) scale(1)',
+          },
+        },
       },
       animation: {
         wiggle: "wiggle 1s ease-in-out infinite",
@@ -174,6 +191,7 @@ module.exports = {
         marquee: "marquee var(--marquee-duration) linear infinite",
         "marquee-vertical":
           "marquee-vertical var(--marquee-duration) linear infinite",
+        'blob': 'blob 7s infinite',
       },
       screens: {
         "2xl": "1920px",

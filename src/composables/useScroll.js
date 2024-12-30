@@ -15,8 +15,8 @@ export function useScroll() {
   const scroll = (index, direction) => {
     const container = scrollContainers.value[index]
     if (container) {
-      console.log('Container found:', container)
-      console.log('Container scrollLeft before:', container.scrollLeft)
+      // console.log('Container found:', container)
+      // console.log('Container scrollLeft before:', container.scrollLeft)
       
       const card = container.querySelector('div > div')
       if (!card) {
@@ -24,24 +24,24 @@ export function useScroll() {
         return
       }
 
-      console.log('Card found:', card)
-      console.log('Card width:', card.offsetWidth)
+      // console.log('Card found:', card)
+      // console.log('Card width:', card.offsetWidth)
       
       const cardWidth = card.offsetWidth
-      const gap = 16
+      const gap = 8
       const cardsToScroll = 5
       const scrollAmount = direction === "left" 
         ? -(cardWidth + gap) * cardsToScroll 
         : (cardWidth + gap) * cardsToScroll
       
-      console.log('Scroll amount:', scrollAmount)
+      // console.log('Scroll amount:', scrollAmount)
       
       container.scrollBy({ 
         left: scrollAmount, 
         behavior: "smooth" 
       })
 
-      console.log('Container scrollLeft after:', container.scrollLeft)
+      // console.log('Container scrollLeft after:', container.scrollLeft)
     } else {
       console.error('No container found for index:', index)
     }
@@ -92,7 +92,7 @@ export function useScroll() {
   }
 
   const applyMomentum = (container) => {
-    const decay = 0.98
+    const decay = 0.95
     return () => {
       momentum.value.velocity *= decay
       container.scrollLeft += momentum.value.velocity

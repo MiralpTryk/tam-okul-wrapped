@@ -32,17 +32,17 @@ export function useContent() {
     {
       title: "Motivasyon Sözleri 💭",
       type: "quote",
-      items: generateItems(10, "Quote", "quote")
+      items: generateItems(100, "Quote", "quote")
     },
     {
       title: "İlham Veren Hikayeler 📝",
       type: "story",
-      items: generateItems(5, "Story", "story")
+      items: generateItems(10, "Story", "story")
     },
     {
       title: "Kitap Önerileri 📚",
       type: "book",
-      items: generateItems(10, "Book", "book")
+      items: generateItems(100, "Book", "book")
     }
   ])
 

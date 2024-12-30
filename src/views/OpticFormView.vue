@@ -1,40 +1,55 @@
 <template>
-  <div class=" text-white min-h-screen">
-    <div class="mx-auto px-4 sm:px-6 lg:px-16 2xl:px-24">
-      <div class="space-y-4">
-        <!-- Header and Navigation -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4">
-          <div class="flex items-center gap-4">
-            <a href="/" class="flex items-center">
-              <img src="@/assets/tam-okul-logo-dark.webp" alt="Tam Okul Logo" class="h-8 w-auto" />
-            </a>
-            <h1 class="text-2xl md:text-3xl font-bold">Optik Form</h1>
-          </div>
-        </div>
+  <div class="text-white min-h-screen relative overflow-hidden">
+    <!-- Grid Pattern Background -->
+    <div class="fixed inset-0 z-0">
+      <div class="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f_1px,transparent_1px)] bg-[size:8rem_8rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_50%,#000_20%,transparent_80%)] opacity-[0.35]"></div>
+    </div>
 
-        <!-- Tabs and Search -->
+    <!-- Gradient Blobs -->
+    <div class="fixed inset-0 z-[1]">
+      <!-- sky gradient -->
+      <div class="absolute top-[-6rem] -left-[10rem] w-[30rem] h-[30rem] bg-sky-500/60 rounded-full mix-blend-multiply filter blur-[128px] animate-blob [animation-delay:2000ms]"></div>
+      
+      <!-- Red gradient -->
+      <div class="absolute top-[-1rem] -right-[10rem] w-[30rem] h-[30rem] bg-red-500/60 rounded-full mix-blend-multiply filter blur-[128px] animate-blob [animation-delay:3000ms]"></div>
+      
+      <!-- violet gradient -->
+      <div class="absolute top-[15rem] left-[30rem] w-[30rem] h-[30rem] bg-violet-500/60 rounded-full mix-blend-multiply filter blur-[128px] animate-blob [animation-delay:4000ms]"></div>
+    </div>
+
+    <!-- Header -->
+    <AppHeader class="sticky top-0 z-50" hide-optic-button>
+      <template #before-button>
+        <h1 class="text-xl md:text-2xl font-bold text-white">Optik Form</h1>
+      </template>
+    </AppHeader>
+
+    <!-- Main Content -->
+    <div class="mx-auto px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10">
+      <!-- Tabs and Search -->
+      <div class="py-6">
         <div class="flex flex-col sm:flex-row gap-4 xl:max-w-[50%] text-nowrap">
           <div class="flex gap-4">
             <button @click="activeTab = 'all'" :class="[
               'px-4 py-2 rounded text-sm font-medium transition-colors w-1/2',
-              activeTab === 'all' ? 'bg-[#E50914] text-white' : 'bg-[#2F2F2F] text-zinc-300 hover:bg-[#3F3F3F]'
+              activeTab === 'all' ? 'bg-[#E50914] text-white' : 'bg-[#141414] text-zinc-200 hover:bg-[#3F3F3F]'
             ]">
               Tüm Sorular
             </button>
             <button @click="activeTab = 'bookmarked'" :class="[
               'px-4 py-2 rounded text-sm font-medium transition-colors w-1/2',
-              activeTab === 'bookmarked' ? 'bg-[#E50914] text-white' : 'bg-[#2F2F2F] text-zinc-300 hover:bg-[#3F3F3F]'
+              activeTab === 'bookmarked' ? 'bg-[#E50914] text-white' : 'bg-[#141414] text-zinc-200 hover:bg-[#3F3F3F]'
             ]">
               Favori Sorular
             </button>
           </div>
           <div class="relative flex-1 sm:w-[30%]">
             <input v-model="searchQuery" type="text" placeholder="Soru ara..."
-              class="w-full bg-[#2F2F2F] text-white rounded pl-10 pr-3 py-2 text-sm min-w-0 border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
+              class="w-full bg-[#141414] text-white rounded pl-10 pr-3 py-2 text-sm min-w-0 border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
             <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
           </div>
           <select v-model="currentPage"
-            class="bg-[#2F2F2F] text-white rounded px-2 py-2 text-sm w-full sm:w-[30%] border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
+            class="bg-[#141414] text-zinc-200 rounded px-2 py-2 text-sm w-full sm:w-[30%] border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
             <template v-for="(pages, title) in groupedPages" :key="title">
               <option disabled class="font-semibold bg-[#1F1F1F]">{{ title }}</option>
               <option v-for="page in pages" :key="page" :value="page"
@@ -44,120 +59,126 @@
             </template>
           </select>
         </div>
+      </div>
 
-        <!-- Progress Bars -->
-        <div class="sticky top-0 bg-black backdrop-blur-sm z-50 py-4 border-b border-[#2F2F2F]">
-          <div class="grid gap-2">
-            <div>
-              <div class="flex justify-between text-sm mb-1 sm:max-w-[50%]">
-                <span>Toplam İlerleme</span>
-                <span>{{ answeredOrSavedCount }} / {{ totalQuestions }}</span>
-              </div>
-              <div class="bg-[#2F2F2F] rounded-full h-2 sm:max-w-[50%]">
-                <div class="bg-[#E50914] h-full rounded-full transition-all duration-300"
-                  :style="{ width: `${progress}%` }">
+      <!-- Progress Bars Container -->
+      <div class="relative">
+        <div class="sticky top-16 -mx-4 sm:-mx-6 lg:-mx-16 2xl:-mx-24 backdrop-blur-sm z-40 py-4">
+          <div class="mx-auto px-4 sm:px-6 lg:px-16 2xl:px-24">
+            <div class="grid gap-2">
+              <div>
+                <div class="flex justify-between text-sm mb-1 sm:max-w-[50%]">
+                  <span>Toplam İlerleme</span>
+                  <span>{{ answeredOrSavedCount }} / {{ totalQuestions }}</span>
+                </div>
+                <div class="bg-[#141414] rounded-full h-2 sm:max-w-[50%]">
+                  <div class="bg-[#E50914] h-full rounded-full transition-all duration-300"
+                    :style="{ width: `${progress}%` }">
+                  </div>
                 </div>
               </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm mb-1 sm:max-w-[50%]">
-                <span>Sayfa {{ currentPage }}</span>
-                <span>{{ currentPageAnsweredOrSavedCount }} / {{ currentPageQuestions.length }}</span>
-              </div>
-              <div class="bg-[#2F2F2F] rounded-full h-2 sm:max-w-[50%]">
-                <div class="bg-[#E50914] h-full rounded-full transition-all duration-300"
-                  :style="{ width: `${currentPageProgress}%` }"></div>
+              <div>
+                <div class="flex justify-between text-sm mb-1 sm:max-w-[50%]">
+                  <span>Sayfa {{ currentPage }}</span>
+                  <span>{{ currentPageAnsweredOrSavedCount }} / {{ currentPageQuestions.length }}</span>
+                </div>
+                <div class="bg-[#141414] rounded-full h-2 sm:max-w-[50%]">
+                  <div class="bg-[#E50914] h-full rounded-full transition-all duration-300"
+                    :style="{ width: `${currentPageProgress}%` }"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Questions Grid -->
-        <div v-if="activeTab === 'bookmarked' && !hasBookmarkedQuestions"
-          class="text-center text-zinc-400 py-12 mb-36">
-          <component :is="BookmarkPlusIcon" class="mx-auto w-12 h-12 mb-4 text-[#E50914]" />
-          <p class="text-lg">Favori sorunuz yok. Favorilere eklemek için sorulardaki işarete tıklayın.</p>
-        </div>
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20 sm:pb-24">
-          <!-- Question Card -->
-          <div v-for="question in currentPageQuestions" :key="question.id" :data-question-id="question.id"
-            class="bg-[#1f1f1f] rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#3F3F3F]">
-            <div class="flex justify-between items-center mb-2">
-              <span class="font-bold text-base">Soru {{ question.number }}</span>
-              <button @click="toggleBookmark(question.id)" :class="[
-                'hover:scale-110 transition-transform duration-200',
-                question.bookmarked ? 'text-[#E50914]' : 'text-green-500'
-              ]">
-                <component :is="question.bookmarked ? BookmarkMinusIcon : BookmarkPlusIcon"
-                  class="w-5 h-5 md:w-6 md:h-6" />
-              </button>
-            </div>
-            <p class="text-sm text-zinc-400 mb-6 truncate">{{ question.subject }}</p>
+        <div class="pt-4">
+          <div v-if="activeTab === 'bookmarked' && !hasBookmarkedQuestions"
+            class="text-center text-zinc-400 py-12 mb-36">
+            <component :is="BookmarkPlusIcon" class="mx-auto w-12 h-12 mb-4 text-[#E50914]" />
+            <p class="text-lg">Favori sorunuz yok. Favorilere eklemek için sorulardaki işarete tıklayın.</p>
+          </div>
+          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20 sm:pb-24">
+            <!-- Question Card -->
+            <div v-for="question in currentPageQuestions" :key="question.id" :data-question-id="question.id"
+              class="bg-[#141414]/70 backdrop-blur-sm rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#3F3F3F]">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-base">Soru {{ question.number }}</span>
+                <button @click="toggleBookmark(question.id)" :class="[
+                  'hover:scale-110 transition-transform duration-200',
+                  question.bookmarked ? 'text-[#E50914]' : 'text-green-500'
+                ]">
+                  <component :is="question.bookmarked ? BookmarkMinusIcon : BookmarkPlusIcon"
+                    class="w-5 h-5 md:w-6 md:h-6" />
+                </button>
+              </div>
+              <p class="text-sm text-zinc-400 mb-6 truncate">{{ question.subject }}</p>
 
-            <!-- Question Image -->
-            <div v-if="showQuestionImages" class="mb-4 relative">
-              <div class="aspect-w-4 aspect-h-3 relative bg-zinc-800 rounded-md overflow-hidden">
-                <img :src="showQuestionImages ? simulateImageError(imageBaseUrl + '/' + question.image) : ''"
-                  :alt="`Soru ${question.number} görseli`"
-                  class="w-full h-full object-cover absolute inset-0" @error="handleImageError" />
-                <div v-if="imageLoadError"
-                  class="absolute inset-0 flex items-center justify-center bg-zinc-800 text-zinc-400 text-sm">
-                  Resim yüklenemedi
+              <!-- Question Image -->
+              <div v-if="showQuestionImages" class="mb-4 relative">
+                <div class="aspect-w-4 aspect-h-3 relative bg-zinc-800 rounded-md overflow-hidden">
+                  <img :src="showQuestionImages ? simulateImageError(imageBaseUrl + '/' + question.image) : ''"
+                    :alt="`Soru ${question.number} görseli`"
+                    class="w-full h-full object-cover absolute inset-0" @error="handleImageError" />
+                  <div v-if="imageLoadError"
+                    class="absolute inset-0 flex items-center justify-center bg-zinc-800 text-zinc-400 text-sm">
+                    Resim yüklenemedi
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Answer Options -->
-            <div class="grid grid-cols-5 gap-4 md:gap-6">
-              <button v-for="(option, index) in ['A', 'B', 'C', 'D', 'E']" :key="option"
-                @click="selectAnswer(question.id, option)" :class="[
-                  'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border',
-                  {
-                    'border-[#E50914] bg-[#E50914] text-white': !question.saved && question.answer === index.toString(),
-                    'border-[#3F3F3F] hover:border-[#E50914] text-zinc-300': !question.saved && question.answer !== index.toString(),
-                    'border-green-500 bg-green-500 text-white': question.saved && question.correct_answer === index.toString(),
-                    'border-[#E50914] bg-[#E50914] text-white': question.saved && question.answer === index.toString() && question.answer !== question.correct_answer,
-                    'border-[#3F3F3F] text-zinc-300': question.saved && question.answer !== index.toString() && question.correct_answer !== index.toString(),
-                    'opacity-50 cursor-not-allowed': question.saved || isPageSaved(question.page)
-                  }
-                ]">
-                {{ option }}
-              </button>
-            </div>
+              <!-- Answer Options -->
+              <div class="grid grid-cols-5 gap-4 md:gap-6">
+                <button v-for="(option, index) in ['A', 'B', 'C', 'D', 'E']" :key="option"
+                  @click="selectAnswer(question.id, option)" :class="[
+                    'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border',
+                    {
+                      'border-[#E50914] bg-red-600 text-white': !question.saved && question.answer === index.toString(),
+                      'border-[#3F3F3F] hover:border-[#E50914] text-zinc-200': !question.saved && question.answer !== index.toString(),
+                      'border-green-500 bg-green-500 text-white': question.saved && question.correct_answer === index.toString(),
+                      'border-[#E50914] bg-[#E50914] text-white': question.saved && question.answer === index.toString() && question.answer !== question.correct_answer,
+                      'border-[#3F3F3F] text-zinc-200': question.saved && question.answer !== index.toString() && question.correct_answer !== index.toString(),
+                      'opacity-50 cursor-not-allowed': question.saved || isPageSaved(question.page)
+                    }
+                  ]">
+                  {{ option }}
+                </button>
+              </div>
 
 
-            <!-- Solution Video Button -->
-            <div v-if="question.saved" class="mt-6">
-              <button @click="watchSolutionVideo(question.id)"
-                class="w-full bg-[#2F2F2F] hover:bg-[#3F3F3F] text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200 border border-[#3F3F3F]">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
-                </svg>
-                <span class="text-sm">Çözüm Videosu</span>
-              </button>
+              <!-- Solution Video Button -->
+              <div v-if="question.saved" class="mt-6">
+                <button @click="watchSolutionVideo(question.id)"
+                  class="w-full bg-[#141414] hover:bg-[#3F3F3F] text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200 border border-[#3F3F3F]">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
+                  </svg>
+                  <span class="text-sm">Çözüm Videosu</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Bottom Navigation Bar -->
         <div v-if="activeTab !== 'bookmarked'"
-          class="fixed bottom-0 left-0 right-0 bg-[#141414]/95 backdrop-blur-sm border-t border-[#2F2F2F] z-40">
+          class="fixed bottom-0 left-0 right-0 bg-[#141414] backdrop-blur-sm border-t border-[#141414] z-40">
           <div class="mx-auto flex justify-between items-center py-3 px-4 sm:px-6 lg:px-16 2xl:px-24">
             <button @click="goToPreviousPage" :disabled="!hasPreviousPage"
-              class="px-4 py-2 text-sm bg-[#2F2F2F] text-white rounded hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              class="px-4 py-2 text-sm bg-[#141414] text-white rounded hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
               Önceki
             </button>
             <button @click="showSaveConfirmation" :disabled="!hasUnsavedAnswers || isPageSaved(currentPage)" :class="[
               'px-4 py-2 text-sm rounded transition-colors',
               isPageSaved(currentPage)
-                ? 'bg-[#2F2F2F] text-white opacity-50 cursor-not-allowed'
+                ? 'bg-[#141414] text-white opacity-50 cursor-not-allowed'
                 : 'bg-[#E50914] text-white hover:bg-[#E50914]/90 disabled:opacity-50 disabled:cursor-not-allowed'
             ]">
               {{ isPageSaved(currentPage) ? 'Kaydedildi' : 'Kaydet' }}
             </button>
             <button @click="goToNextPage" :disabled="!hasNextPage"
-              class="px-4 py-2 text-sm bg-[#2F2F2F] text-white rounded hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              class="px-4 py-2 text-sm bg-[#141414] text-white rounded hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
               Sonraki
             </button>
           </div>
@@ -209,12 +230,13 @@
       </svg>
     </div>
   </div>
+
   <!-- Video Modal -->
   <div v-if="showVideoModal"
     class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="bg-zinc-900 rounded-lg overflow-hidden max-w-4xl w-full">
       <div class="p-4 flex justify-between items-center border-b border-zinc-800">
-        <h3 class="text-lg font-medium text-zinc-300">Çözüm Videosu</h3>
+        <h3 class="text-lg font-medium text-zinc-200">Çözüm Videosu</h3>
         <button @click="closeVideoModal" class="text-zinc-400 hover:text-white">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -231,6 +253,7 @@
       </div>
     </div>
   </div>
+
   <!-- Welcome Modal -->
   <div v-if="showWelcomeModal"
     class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
@@ -306,12 +329,14 @@
 </template>
 
 <script setup>
-const imageBaseUrl = process.env.VUE_APP_IMAGE_BASE_URL || '';
-const showQuestionImages = ref(process.env.VUE_APP_SHOW_QUESTION_IMAGES === 'true');
-console.log('Image Base URL:', process.env.VUE_APP_IMAGE_BASE_URL);
+import AppHeader from "@/components/AppHeader.vue"
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { BookmarkPlusIcon, BookmarkMinusIcon, Search } from 'lucide-vue-next';
 import analysis from '@/data/analysis.json';
+
+const imageBaseUrl = process.env.VUE_APP_IMAGE_BASE_URL || '';
+const showQuestionImages = ref(process.env.VUE_APP_SHOW_QUESTION_IMAGES === 'true');
+// console.log('Image Base URL:', process.env.VUE_APP_IMAGE_BASE_URL);
 
 const questions = ref([]);
 const loading = ref(true);
@@ -349,11 +374,6 @@ const loadQuestions = () => {
   try {
     loading.value = true;
     
-    // simulateError('network');  // Ağ hatası simülasyonu
-    // simulateError('data');     // Veri yapısı hatası simülasyonu
-    // simulateError('empty');    // Boş veri simülasyonu
-    // simulateError('null');     // Null veri simülasyonu
-    
     const opticData = analysis.data.optic;
     
     if (!opticData || !opticData.courses) {
@@ -369,7 +389,7 @@ const loadQuestions = () => {
             id: question.id,
             number: question.number,
             difficulty: question.difficulty,
-            correct_answer: question.correct_answer,
+            correct_answer: question.correct_answer.toString(),
             subject: question.subject,
             image: question.image,
             page: parseInt(pageNumber),
@@ -432,7 +452,6 @@ const groupedPages = computed(() => {
     grouped[q.title].add(q.page);
   });
 
-  // Convert sets to sorted arrays
   for (const section in grouped) {
     grouped[section] = Array.from(grouped[section]).sort((a, b) => a - b);
   }
@@ -442,9 +461,9 @@ const groupedPages = computed(() => {
 
 const currentPageQuestions = computed(() => {
   const questions = filteredQuestions.value.filter(q => q.page === currentPage.value);
-  questions.forEach(q => {
+/*   questions.forEach(q => {
     console.log('Full image URL:', `${imageBaseUrl}/${q.image}`);
-  });
+  }); */
   return questions;
 });
 
@@ -615,21 +634,21 @@ const handleImageError = (event) => {
 };
 
 const watchSolutionVideo = (questionId) => {
-  console.log('watchSolutionVideo called with questionId:', questionId);
+  // console.log('watchSolutionVideo called with questionId:', questionId);
 
   const question = questions.value.find(q => q.id === questionId);
-  console.log('Found question:', question);
+  // console.log('Found question:', question);
 
   if (question) {
     const videoUrl = question.video_url || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
-    console.log('Video URL:', videoUrl);
+    // console.log('Video URL:', videoUrl);
     currentVideoUrl.value = videoUrl;
-    console.log('Set currentVideoUrl to:', currentVideoUrl.value);
+    // console.log('Set currentVideoUrl to:', currentVideoUrl.value);
 
     showVideoModal.value = true;
-    console.log('Set showVideoModal to:', showVideoModal.value);
+    // console.log('Set showVideoModal to:', showVideoModal.value);
   } else {
-    console.error('Question not found for id:', questionId);
+    // console.error('Question not found for id:', questionId);
   }
 };
 
@@ -659,7 +678,6 @@ onMounted(() => {
     }
   });
   
-  // Check if welcome modal has been shown before
   if (localStorage.getItem('welcomeModalShown')) {
     showWelcomeModal.value = false;
   }
@@ -714,7 +732,6 @@ select option:checked {
 .aspect-w-4 {
   position: relative;
   padding-bottom: 75%;
-  /* 4:3 aspect ratio */
 }
 
 .aspect-w-4>* {
@@ -730,7 +747,6 @@ select option:checked {
 .aspect-w-16 {
   position: relative;
   padding-bottom: 56.25%;
-  /* 16:9 aspect ratio */
 }
 
 .aspect-w-16>* {
@@ -743,7 +759,6 @@ select option:checked {
   left: 0;
 }
 
-/* Smooth fade-in animation for modal */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
@@ -765,7 +780,6 @@ select option:checked {
   background-color: var(--netflix-red);
 }
 
-/* Smooth fade-in animation for modals */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }

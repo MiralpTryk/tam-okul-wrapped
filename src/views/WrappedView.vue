@@ -1,31 +1,11 @@
 <template>
   <div class="text-white min-h-screen overflow-x-hidden">
-    <!-- Header -->
-    <header :class="[
-      'fixed top-0 left-0 right-0 z-20 transition-all duration-1000',
-      isScrolled ? 'bg-black backdrop-blur-sm' : 'bg-gradient-to-t from-transparent to-black'
-    ]">
-      <nav class=" mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-16 2xl:px-24">
-        <a href="/">
-          <img src="https://tamokul.com/new-landing/assets/images/logo/header-logo.webp" alt="Tam Okul" class="h-8" />
-        </a>
-        <div class="flex items-center space-x-4">
-          <RouterLink to="/optic-form">
-            <button
-              class="bg-[#E50914] hover:bg-[#E50914]/90 text-white px-6 py-2 rounded text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-[#E50914]/20">
-              Optik İşaretle
-            </button>
-          </RouterLink>
-        </div>
-      </nav>
-    </header>
+    <AppHeader />
 
     <!-- Analysis Modal -->
     <Transition name="modal">
       <div v-if="showAnalysisModal" class="fixed inset-0 z-[60]">
-        <!-- Backdrop -->
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-        <!-- Modal Content -->
         <div class="fixed inset-0 overflow-y-auto">
           <div class="flex min-h-full items-center justify-center p-0 sm:p-4" @click="closeAnalysisModal">
             <div
@@ -69,7 +49,7 @@
                     <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-green-500">Çok
                       İyi</td>
                   </tr>
-                  <tr v-for="item in sortedData.excellent" :key="item.subject" class="border-b border-zinc-800">
+                  <tr v-for="(item, itemIndex) in sortedData.excellent" :key="`excellent-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
                       item.correct ?? '—' }}</td>
@@ -93,7 +73,7 @@
                     <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-yellow-500">
                       Daha İyi Olabilir</td>
                   </tr>
-                  <tr v-for="item in sortedData.good" :key="item.subject" class="border-b border-zinc-800">
+                  <tr v-for="(item, itemIndex) in sortedData.good" :key="`good-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
                       item.correct ?? '—' }}</td>
@@ -117,7 +97,7 @@
                     <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-red-600">
                       Geliştirilmeli</td>
                   </tr>
-                  <tr v-for="item in sortedData.needsImprovement" :key="item.subject" class="border-b border-zinc-800">
+                  <tr v-for="(item, itemIndex) in sortedData.needsImprovement" :key="`needs-improvement-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
                       item.correct ?? '—' }}</td>
@@ -141,7 +121,7 @@
                     <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-zinc-400">Veri
                       Yok</td>
                   </tr>
-                  <tr v-for="item in sortedData.noData" :key="item.subject" class="border-b border-zinc-800">
+                  <tr v-for="(item, itemIndex) in sortedData.noData" :key="`no-data-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
                     <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
@@ -233,8 +213,7 @@
 
     <!-- Content Sections -->
     <div class="sm:-mt-[3.5rem] relative z-10 bg-gradient-to-t from-[#141414] from-95% to-transparent">
-      <section v-for="(section, index) in sections" :key="index" class="pb-8 pt-0 sm:pt-4">
-        <!-- Section header with original padding -->
+      <section v-for="(section, index) in sections" :key="`section-${section.title}-${index}`" class="pb-8 pt-0 sm:pt-4">
         <div class="px-4 sm:px-6 lg:px-16 2xl:px-24">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
@@ -282,7 +261,6 @@
               </button>
             </div>
             
-            <!-- Only show "Daha Fazla Göster" for lesson sections -->
             <RouterLink v-if="section.type === 'lesson'" :to="`/browse?section=${section.title}`">
               <button class="text-xs sm:text-sm text-white hover:text-zinc-300">
                 Daha Fazla Göster
@@ -293,22 +271,30 @@
 
         <div class="relative w-screen -ml-[50vw] left-1/2">
           <!-- Left scroll button -->
-          <button @click="() => handleCarouselScroll(index, 'left')"
-            class="left-chevron absolute left-4 sm:left-6 lg:left-16 2xl:left-24 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10 hidden sm:block">
+          <button 
+            v-if="showLeftScrollButton[index]"
+            @click="() => handleCarouselScroll(index, 'left')"
+            class="absolute h-full top-1/2 transform -translate-y-1/2 bg-black bg-opacity-75 text-white px-4 py-2 z-10 hidden sm:block">
             <ChevronLeftIcon class="w-6 h-6" />
           </button>
 
           <!-- Right scroll button -->
-          <button @click="() => handleCarouselScroll(index, 'right')"
-            class="right-chevron absolute right-4 sm:right-6 lg:right-16 2xl:right-24 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10 hidden sm:block">
+          <button 
+            v-if="showRightScrollButton[index]"
+            @click="() => handleCarouselScroll(index, 'right')"
+            class="absolute right-0 h-full top-1/2 transform -translate-y-1/2 bg-black bg-opacity-75 text-white px-4 py-2 z-10 hidden sm:block">
             <ChevronRightIcon class="w-6 h-6" />
           </button>
 
           <!-- Content container -->
-          <div :ref="(el) => { if (el) scrollContainers[index] = el }"
-            class="flex space-x-2 overflow-x-auto scrollbar-hide select-none pl-4 sm:pl-6 lg:pl-16 2xl:pl-24"
-            @touchstart="startDrag" @touchmove="drag" @touchend="endDrag">
-            <div v-for="item in section.items" :key="item.id">
+          <div 
+            :ref="(el) => { if (el) scrollContainers[index] = el }"
+            class="flex space-x-2 overflow-x-auto scrollbar-hide select-none pl-4 sm:pl-6 lg:pl-16 2xl:pl-24 pr-4 sm:pr-6 lg:pr-16 2xl:pr-24"
+            @scroll="() => checkScrollPosition(index)"
+            @touchstart.passive="startDrag" 
+            @touchmove.passive="drag" 
+            @touchend.passive="endDrag">
+            <div v-for="(item, itemIndex) in section.items" :key="`${section.type}-${item.id}-${itemIndex}`">
               <ContentCard :item="item" :type="section.type" @click="openContentModal" />
             </div>
           </div>
@@ -342,8 +328,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from "vue"
+import { ref, onMounted, onUnmounted, computed, nextTick } from "vue"
 import { ChevronLeftIcon, ChevronRightIcon, Info } from "lucide-vue-next"
+import AppHeader from "@/components/AppHeader.vue"
 import WrappedModal from "@/components/WrappedModal.vue"
 import ContentModal from "@/components/ContentModal.vue"
 import LessonContent from "@/components/LessonContent.vue"
@@ -360,14 +347,13 @@ import { useContent } from '@/composables/useContent'
 import { useScroll } from '@/composables/useScroll'
 import { useModal } from '@/composables/useModal'
 
-// State Management
 const isMobile = ref(false)
 const courseData = ref(null)
-const isScrolled = ref(false)
 const hoveredSection = ref({})
+const showLeftScrollButton = ref({})
+const showRightScrollButton = ref({})
 const userName = computed(() => analysis.data.user.name || 'Misafir')
 
-// Get functionality from composables
 const { otherSections } = useContent()
 const {
   scrollContainers,
@@ -391,7 +377,6 @@ const {
   closeAnalysisModal
 } = useModal()
 
-// Format title function
 const formatTitle = (title) => {
   return title
     .toLowerCase()
@@ -412,11 +397,10 @@ const formatTitle = (title) => {
     .join(' ')
 }
 
-// Replace generateDummyVideos with generateVideos
 const generateVideos = (subjectName, subjectData) => {
   if (!subjectData?.videos?.length) {
     return [{
-      id: `${subjectName}-default`,
+      id: `default-${subjectName}-${Date.now()}`,
       title: subjectName,
       channel_title: 'Eğitim Kanalı',
       video_id: "dQw4w9WgXcQ",
@@ -425,34 +409,27 @@ const generateVideos = (subjectName, subjectData) => {
     }]
   }
 
-  return subjectData.videos.map(video => ({
-    ...video, // Spread the video object to keep all original properties
+  return subjectData.videos.map((video, index) => ({
+    ...video,
+    id: `${video.id || video.video_id}-${subjectName}-${index}`,
     type: "lesson",
     subjectName
   }))
 }
 
-// Update generateItemsFromSubjects to handle the new structure
 const generateItemsFromSubjects = (subjects) => {
   if (!subjects) return []
 
-  console.log('Subjects received:', subjects); // Debug log
 
-  // Get all videos from all subjects
   const allVideos = Object.entries(subjects).flatMap(([name, data]) => {
-    console.log('Processing subject:', name, 'with data:', data); // Debug log
     return generateVideos(name, data)
   })
 
-  console.log('All videos generated:', allVideos); // Debug log
-
-  // Randomly select videos to fill the grid
   return allVideos
     .sort(() => Math.random() - 0.5)
     .slice(0, 20) // Limit to 20 videos
 }
 
-// Computed properties
 const lessonSections = computed(() => {
   if (!courseData.value?.content?.courses) return []
 
@@ -465,7 +442,6 @@ const lessonSections = computed(() => {
 
 const sections = computed(() => [...lessonSections.value, ...otherSections.value])
 
-// Analysis data computed properties
 const analysisData = computed(() => {
   if (!courseData.value?.content?.courses || !selectedCourse.value) return []
 
@@ -494,6 +470,13 @@ const analysisData = computed(() => {
   return transformedData
 })
 
+const getColorClass = (item) => {
+  if (!item.successRate) return 'text-zinc-400'
+  if (item.successRate >= 80) return 'text-green-500'
+  if (item.successRate >= 50) return 'text-yellow-500'
+  return 'text-red-600'
+}
+
 const sortedData = computed(() => {
   const excellent = analysisData.value
     .filter(item => item.successRate >= 80)
@@ -513,37 +496,40 @@ const sortedData = computed(() => {
   return { excellent, good, needsImprovement, noData }
 })
 
-// Methods
 const checkMobile = () => {
   isMobile.value = window.innerWidth < 768
 }
 
-const handleScroll = () => {
-  isScrolled.value = window.scrollY > 70
-}
-
-const getColorClass = (item) => {
-  if (item.correct === null || item.correct === undefined ||
-    item.wrong === null || item.wrong === undefined ||
-    item.empty === null || item.empty === undefined) {
-    return 'text-zinc-400'
-  }
-
-  const totalQuestions = item.correct + item.wrong + item.empty
-  const percentage = (item.correct / totalQuestions) * 100
-
-  if (percentage >= 80) return 'text-green-500'
-  if (percentage >= 50) return 'text-yellow-500'
-  return 'text-red-600'
-}
-
-// Change the name of the carousel scroll handler
 const handleCarouselScroll = (index, direction) => {
-  console.log('Scrolling carousel:', index, direction) // Debug log
+  // console.log('Scrolling carousel:', index, direction)
   scroll(index, direction)
+  setTimeout(() => checkScrollPosition(index), 100)
 }
 
-// Lifecycle hooks
+const checkScrollPosition = (index) => {
+  if (scrollContainers.value[index]) {
+    const container = scrollContainers.value[index]
+    const scrollLeft = Math.round(container.scrollLeft)
+    const clientWidth = Math.round(container.clientWidth)
+    const scrollWidth = Math.round(container.scrollWidth)
+    
+    // Sol buton kontrolü
+    showLeftScrollButton.value[index] = scrollLeft > 0
+    
+    // Sağ buton kontrolü - 1 piksellik tolerans ekledik
+    const isAtEnd = scrollLeft + clientWidth + 1 >= scrollWidth
+    showRightScrollButton.value[index] = !isAtEnd
+
+/*     console.log(`Section ${index}:`, {
+      scrollLeft,
+      clientWidth,
+      scrollWidth,
+      isAtEnd,
+      showRight: showRightScrollButton.value[index]
+    }) */
+  }
+}
+
 onMounted(async () => {
   try {
     const response = await import('@/data/analysis.json')
@@ -554,9 +540,7 @@ onMounted(async () => {
 
   checkMobile()
   window.addEventListener('resize', checkMobile)
-  window.addEventListener('scroll', handleScroll)
 
-  // Set viewport height
   const setVH = () => {
     let vh = window.innerHeight * 0.01
     document.documentElement.style.setProperty("--vh", `${vh}px`)
@@ -564,12 +548,25 @@ onMounted(async () => {
   setVH()
   window.addEventListener("resize", setVH)
 
-  openWrappedModal()
+  const lastShownTime = localStorage.getItem('wrappedModalLastShown')
+  const currentTime = Date.now()
+  const tenMinutes = 10 * 60 * 1000
+
+  if (!lastShownTime || currentTime - parseInt(lastShownTime) > tenMinutes) {
+    openWrappedModal()
+    localStorage.setItem('wrappedModalLastShown', currentTime.toString())
+  }
+
+  // Her section için başlangıç scroll durumunu kontrol et
+  nextTick(() => {
+    sections.value.forEach((_, index) => {
+      checkScrollPosition(index)
+    })
+  })
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkMobile)
-  window.removeEventListener('scroll', handleScroll)
   cleanup()
 })
 </script>
