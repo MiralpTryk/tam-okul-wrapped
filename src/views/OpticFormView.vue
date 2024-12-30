@@ -356,13 +356,6 @@ const currentVideoUrl = ref('');
 const showWelcomeModal = ref(true);
 const dontShowWelcomeAgain = ref(false);
 
-// Watch for opticData changes
-watch(() => analysisStore.opticData.value, (newData) => {
-  if (newData && !questions.value.length) {
-    loadQuestions();
-  }
-}, { immediate: true });
-
 const loadQuestions = () => {
   error.value = null; // Reset error state
   
@@ -421,6 +414,13 @@ const loadQuestions = () => {
     error.value = err.message || 'Sorular yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
   }
 };
+
+// Watch for opticData changes
+watch(() => analysisStore.opticData.value, (newData) => {
+  if (newData && !questions.value.length) {
+    loadQuestions();
+  }
+}, { immediate: true });
 
 const filteredQuestions = computed(() => {
   let filtered = questions.value;
