@@ -420,7 +420,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from "vue";
+import { ref, computed, watch, onUnmounted, onMounted } from "vue";
+import { useAnalysisStore } from '@/composables/useAnalysisStore';
 import Celebration from "@/components/Celebration.vue";
 import WrappedStatsCard from "@/components/WrappedStatsCard.vue";
 import html2canvas from 'html2canvas';
@@ -429,7 +430,6 @@ import CircularProgress from '@/components/CircularProgress.vue';
 import FingerPrint from '@/assets/fingerprint.svg';
 import LogoBack from '@/assets/tam-okul-ai-logo-back.svg';
 import LogoFront from '@/assets/tam-okul-ai-logo-front.svg';
-import analysis from '@/data/analysis.json';
 
 const props = defineProps({
   show: Boolean,
@@ -437,29 +437,28 @@ const props = defineProps({
 
 const emit = defineEmits(["close"]);
 
+const analysisStore = useAnalysisStore();
+
+const loadData = () => {
+  // Store'dan gerekli verileri al
+  total_questions_solved.value = analysisStore.totalQuestionsSolved.value;
+  // Diğer gerekli verileri buradan yükle
+};
+
 const currentSlide = ref(0);
 const totalSlides = 8;
 const transitionName = ref("slide-right");
 const showInitialSubtext = ref(false);
 const longestStreak = ref(10);
-const name = computed(() => analysis.data.user.name);
+const name = computed(() => analysisStore.userName.value);
 
-const total_questions_solved = computed(() =>
-  analysis?.data?.user?.student?.learning_journey?.total_questions_solved ?? 0
-);
-const total_questions_solved_percentage = computed(() =>
-  analysis?.data?.user?.student?.learning_journey?.total_questions_solved_percentage ?? 0
-);
+const total_questions_solved = computed(() => analysisStore.totalQuestionsSolved.value);
+const total_questions_solved_percentage = computed(() => analysisStore.totalQuestionsSolvedPercentage.value ?? 0);
 
-const topCourses = computed(() => {
-  const courses = analysis?.data?.user?.student?.learning_journey?.best_courses;
-  return Array.isArray(courses) ? courses : [];
-});
-const topCourse = computed(() =>
-  analysis?.data?.user?.student?.learning_journey?.best_course ?? '—'
-);
+const topCourses = computed(() => analysisStore.bestCourses.value);
+const topCourse = computed(() => analysisStore.bestCourse.value ?? '—');
 const bestSubjects = computed(() => {
-  const subjects = analysis?.data?.user?.student?.learning_journey?.best_subjects ?? [];
+  const subjects = analysisStore.bestSubjects.value ?? [];
   return subjects.map(subjectObj => {
     const [course, name] = Object.entries(subjectObj)[0];
     return {
@@ -469,9 +468,7 @@ const bestSubjects = computed(() => {
   });
 });
 
-const totalStudyHours = computed(() =>
-  analysis?.data?.user?.student?.learning_journey?.total_hours_spent ?? 0
-);
+const totalStudyHours = computed(() => analysisStore.totalHoursSpent.value);
 
 const moviesWatched = computed(() =>
   Math.floor(totalStudyHours.value / 1.67)
@@ -969,6 +966,11 @@ const truncateText = (text) => {
   // Return truncated text at the last word boundary
   return text.substring(0, truncateIndex) + '...';
 };
+
+onMounted(() => {
+  // Sadece store'dan veriyi kullan, yükleme yapma
+  loadData();
+});
 
 </script>
 

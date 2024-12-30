@@ -272,7 +272,7 @@
         <div class="relative w-screen -ml-[50vw] left-1/2">
           <!-- Left scroll button -->
           <button 
-            v-if="showLeftScrollButton[index]"
+            v-show="showLeftScrollButton[index]"
             @click="() => handleCarouselScroll(index, 'left')"
             class="absolute h-full top-1/2 transform -translate-y-1/2 bg-black bg-opacity-75 text-white px-4 py-2 z-10 hidden sm:block">
             <ChevronLeftIcon class="w-6 h-6" />
@@ -280,7 +280,7 @@
 
           <!-- Right scroll button -->
           <button 
-            v-if="showRightScrollButton[index]"
+            v-show="showRightScrollButton[index]"
             @click="() => handleCarouselScroll(index, 'right')"
             class="absolute right-0 h-full top-1/2 transform -translate-y-1/2 bg-black bg-opacity-75 text-white px-4 py-2 z-10 hidden sm:block">
             <ChevronRightIcon class="w-6 h-6" />
@@ -330,6 +330,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, nextTick } from "vue"
 import { ChevronLeftIcon, ChevronRightIcon, Info } from "lucide-vue-next"
+import { useAnalysisStore } from '@/composables/useAnalysisStore'
 import AppHeader from "@/components/AppHeader.vue"
 import WrappedModal from "@/components/WrappedModal.vue"
 import ContentModal from "@/components/ContentModal.vue"
@@ -342,17 +343,47 @@ import QuoteContent from "@/components/QuoteContent.vue"
 import BookContent from "@/components/BookContent.vue"
 import StoryContent from "@/components/StoryContent.vue"
 import ContentCard from '@/components/ContentCard.vue'
-import analysis from '@/data/analysis.json'
 import { useContent } from '@/composables/useContent'
 import { useScroll } from '@/composables/useScroll'
 import { useModal } from '@/composables/useModal'
 
+const analysisStore = useAnalysisStore()
 const isMobile = ref(false)
-const courseData = ref(null)
 const hoveredSection = ref({})
 const showLeftScrollButton = ref({})
 const showRightScrollButton = ref({})
-const userName = computed(() => analysis.data.user.name || 'Misafir')
+const userName = computed(() => analysisStore.userName.value || 'Misafir')
+
+// Loading states
+const isCoursesLoading = computed(() => analysisStore.isCoursesLoading.value)
+
+const loadWrappedData = () => {
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+
+  const setVH = () => {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty("--vh", `${vh}px`);
+  };
+  setVH();
+  window.addEventListener("resize", setVH);
+
+  const lastShownTime = localStorage.getItem('wrappedModalLastShown');
+  const currentTime = Date.now();
+  const tenMinutes = 10 * 60 * 1000;
+
+  if (!lastShownTime || currentTime - parseInt(lastShownTime) > tenMinutes) {
+    openWrappedModal();
+    localStorage.setItem('wrappedModalLastShown', currentTime.toString());
+  }
+
+  // Her section için başlangıç scroll durumunu kontrol et
+  nextTick(() => {
+    sections.value.forEach((_, index) => {
+      checkScrollPosition(index);
+    });
+  });
+};
 
 const { otherSections } = useContent()
 const {
@@ -420,7 +451,6 @@ const generateVideos = (subjectName, subjectData) => {
 const generateItemsFromSubjects = (subjects) => {
   if (!subjects) return []
 
-
   const allVideos = Object.entries(subjects).flatMap(([name, data]) => {
     return generateVideos(name, data)
   })
@@ -431,9 +461,25 @@ const generateItemsFromSubjects = (subjects) => {
 }
 
 const lessonSections = computed(() => {
-  if (!courseData.value?.content?.courses) return []
+  if (isCoursesLoading.value) {
+    // Return skeleton sections while loading
+    return Array(3).fill().map((_, index) => ({
+      title: 'Loading...',
+      type: 'lesson',
+      items: Array(5).fill().map((_, itemIndex) => ({
+        id: `skeleton-${index}-${itemIndex}`,
+        type: 'lesson',
+        title: 'Loading...',
+        thumbnail_url: '',
+        isLoading: true
+      }))
+    }))
+  }
 
-  return courseData.value.content.courses.map(course => ({
+  const courses = analysisStore.courses.value
+  if (!courses) return []
+
+  return courses.map(course => ({
     title: formatTitle(course.title || course.title_uppercase),
     type: "lesson",
     items: generateItemsFromSubjects(course.subjects || {})
@@ -443,15 +489,27 @@ const lessonSections = computed(() => {
 const sections = computed(() => [...lessonSections.value, ...otherSections.value])
 
 const analysisData = computed(() => {
-  if (!courseData.value?.content?.courses || !selectedCourse.value) return []
+  if (!selectedCourse.value) return []
 
-  const course = courseData.value.content.courses.find(
-    course => formatTitle(course.title || course.title_uppercase) === selectedCourse.value
-  )
-
+  console.log('Selected Course:', selectedCourse.value)
+  const course = analysisStore.getCourseByTitle(selectedCourse.value)
+  console.log('Found Course:', course)
   if (!course) return []
 
   const transformedData = []
+
+  // Eğer subjects verisi yoksa boş bir dizi döndür
+  if (!course.subjects || Object.keys(course.subjects).length === 0) {
+    console.log('No subjects found for course:', selectedCourse.value)
+    return [{
+      subject: 'Henüz veri yok',
+      correct: null,
+      wrong: null,
+      empty: null,
+      net: null,
+      successRate: null
+    }]
+  }
 
   Object.entries(course.subjects).forEach(([subjectName, data]) => {
     const analysis = data.analysis?.[0]
@@ -467,6 +525,7 @@ const analysisData = computed(() => {
     }
   })
 
+  console.log('Transformed Data:', transformedData)
   return transformedData
 })
 
@@ -517,53 +576,24 @@ const checkScrollPosition = (index) => {
     showLeftScrollButton.value[index] = scrollLeft > 0
     
     // Sağ buton kontrolü - 1 piksellik tolerans ekledik
-    const isAtEnd = scrollLeft + clientWidth + 1 >= scrollWidth
-    showRightScrollButton.value[index] = !isAtEnd
+    const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 1
+    showRightScrollButton.value[index] = !isAtEnd && scrollWidth > clientWidth
 
-/*     console.log(`Section ${index}:`, {
+    console.log(`Section ${index}:`, {
       scrollLeft,
       clientWidth,
       scrollWidth,
       isAtEnd,
+      showLeft: showLeftScrollButton.value[index],
       showRight: showRightScrollButton.value[index]
-    }) */
+    })
   }
 }
 
-onMounted(async () => {
-  try {
-    const response = await import('@/data/analysis.json')
-    courseData.value = response.default.data
-  } catch (error) {
-    console.error('JSON verisi yüklenirken hata:', error)
-  }
-
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
-
-  const setVH = () => {
-    let vh = window.innerHeight * 0.01
-    document.documentElement.style.setProperty("--vh", `${vh}px`)
-  }
-  setVH()
-  window.addEventListener("resize", setVH)
-
-  const lastShownTime = localStorage.getItem('wrappedModalLastShown')
-  const currentTime = Date.now()
-  const tenMinutes = 10 * 60 * 1000
-
-  if (!lastShownTime || currentTime - parseInt(lastShownTime) > tenMinutes) {
-    openWrappedModal()
-    localStorage.setItem('wrappedModalLastShown', currentTime.toString())
-  }
-
-  // Her section için başlangıç scroll durumunu kontrol et
-  nextTick(() => {
-    sections.value.forEach((_, index) => {
-      checkScrollPosition(index)
-    })
-  })
-})
+onMounted(() => {
+  // Sadece store'dan veriyi kullan
+  loadWrappedData();
+});
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkMobile)

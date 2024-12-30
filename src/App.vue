@@ -4,8 +4,7 @@
 
 <script setup>
 import { useStore } from 'vuex';
-// import { onMounted } from 'vue';
-// import router from '@/router';
+import { onMounted } from 'vue';
 import axios from 'axios';
 
 const store = useStore();
@@ -30,6 +29,16 @@ axios.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
+onMounted(async () => {
+  try {
+    store.commit('SET_LOADING', true);
+    const response = await import('@/data/analysis.json');
+    await store.dispatch('loadAnalysisData', response.default);
+  } catch (error) {
+    console.error('Error loading analysis data:', error);
+  }
+});
 
 // Commenting out the onMounted lifecycle hook
 // onMounted(async () => {

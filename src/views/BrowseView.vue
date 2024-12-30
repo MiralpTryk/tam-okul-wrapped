@@ -16,7 +16,7 @@
       <div class="absolute top-[15rem] left-[30rem] w-[30rem] h-[30rem] bg-violet-500/60 rounded-full mix-blend-multiply filter blur-[128px] animate-blob [animation-delay:4000ms]"></div>
     </div>
 
-    <AppHeader class="fixed top-0 left-0 right-0 z-50">
+    <AppHeader>
       <template #before-button>
         <button 
           @click="toggleSidebar" 
@@ -121,8 +121,10 @@
       ]" aria-label="Back to top">
         <ChevronUp class="w-6 h-6 text-white" />
       </button>
+    </div>
 
-      <!-- Add Content Modal -->
+    <!-- Content Modal Container -->
+    <div class="relative z-[100]">
       <ContentModal :show="showContentModal" @close="closeContentModal">
         <template v-if="selectedLesson">
           <LessonContent v-if="selectedLesson.type === 'video'" :lesson="selectedLesson" />
@@ -136,14 +138,16 @@
 import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import { ChevronDown, ChevronUp, Menu as MenuIcon, X as XIcon } from 'lucide-vue-next'
 import AppHeader from "@/components/AppHeader.vue"
-import analysis from '@/data/analysis.json'
-import ContentModal from "@/components/ContentModal.vue";
-import LessonContent from "@/components/LessonContent.vue";
+import { useAnalysisStore } from '@/composables/useAnalysisStore'
+import ContentModal from "@/components/ContentModal.vue"
+import LessonContent from "@/components/LessonContent.vue"
 import CourseCard from "@/components/CourseCard.vue"
 import { useRoute } from 'vue-router'
 
+const analysisStore = useAnalysisStore()
+
 const categories = computed(() => {
-  const courses = analysis?.data?.content?.courses;
+  const courses = analysisStore.courses.value;
   if (!courses) return [];
 
   return courses.map(course => {
@@ -156,7 +160,7 @@ const categories = computed(() => {
 });
 
 const generateVideos = (subjectName) => {
-  const course = analysis?.data?.content?.courses?.find(
+  const course = analysisStore.courses.value?.find(
     course => course.subjects && course.subjects[subjectName]
   );
 

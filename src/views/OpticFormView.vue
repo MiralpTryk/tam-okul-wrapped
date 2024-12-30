@@ -98,6 +98,9 @@
             <component :is="BookmarkPlusIcon" class="mx-auto w-12 h-12 mb-4 text-[#E50914]" />
             <p class="text-lg">Favori sorunuz yok. Favorilere eklemek için sorulardaki işarete tıklayın.</p>
           </div>
+          <div v-else-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20 sm:pb-24">
+            <QuestionSkeleton v-for="n in 8" :key="n" />
+          </div>
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20 sm:pb-24">
             <!-- Question Card -->
             <div v-for="question in currentPageQuestions" :key="question.id" :data-question-id="question.id"
@@ -329,17 +332,18 @@
 </template>
 
 <script setup>
-import AppHeader from "@/components/AppHeader.vue"
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import { useAnalysisStore } from '@/composables/useAnalysisStore';
 import { BookmarkPlusIcon, BookmarkMinusIcon, Search } from 'lucide-vue-next';
-import analysis from '@/data/analysis.json';
+import AppHeader from "@/components/AppHeader.vue";
+import QuestionSkeleton from "@/components/QuestionSkeleton.vue";
 
+const analysisStore = useAnalysisStore();
 const imageBaseUrl = process.env.VUE_APP_IMAGE_BASE_URL || '';
 const showQuestionImages = ref(process.env.VUE_APP_SHOW_QUESTION_IMAGES === 'true');
-// console.log('Image Base URL:', process.env.VUE_APP_IMAGE_BASE_URL);
 
 const questions = ref([]);
-const loading = ref(true);
+const loading = computed(() => analysisStore.isOpticDataLoading.value);
 const error = ref(null);
 const searchQuery = ref('');
 const activeTab = ref('all');
@@ -351,33 +355,32 @@ const showVideoModal = ref(false);
 const currentVideoUrl = ref('');
 const showWelcomeModal = ref(true);
 const dontShowWelcomeAgain = ref(false);
-// const isDevelopment = ref(process.env.NODE_ENV === 'development');
 
-/* const simulateError = (type) => {
-  switch(type) {
-    case 'network':
-      throw new Error('Ağ bağlantısı hatası');
-    case 'data':
-      throw new Error('Veri yapısı hatası');
-    case 'empty':
-      analysis.data.optic.courses = [];
-      break;
-    case 'null':
-      analysis.data.optic = null;
-      break;
-    default:
-      break;
+// Watch for opticData changes
+watch(() => analysisStore.opticData.value, (newData) => {
+  if (newData && !questions.value.length) {
+    loadQuestions();
   }
-}; */
+}, { immediate: true });
 
 const loadQuestions = () => {
+  error.value = null; // Reset error state
+  
   try {
-    loading.value = true;
+    if (analysisStore.isOpticDataLoading.value) {
+      return;
+    }
+
+    const opticData = analysisStore.opticData.value;
     
-    const opticData = analysis.data.optic;
+    if (!opticData) {
+      error.value = 'Veriler henüz yüklenmedi. Lütfen anasayfadan tekrar deneyin.';
+      return;
+    }
     
-    if (!opticData || !opticData.courses) {
-      throw new Error('Geçersiz veri yapısı');
+    if (!opticData.courses) {
+      error.value = 'Geçersiz veri yapısı';
+      return;
     }
 
     let allQuestions = [];
@@ -416,8 +419,6 @@ const loadQuestions = () => {
   } catch (err) {
     console.error('Error loading questions:', err);
     error.value = err.message || 'Sorular yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
-  } finally {
-    loading.value = false;
   }
 };
 
@@ -671,6 +672,7 @@ const simulateImageError = (imageUrl) => {
 onMounted(() => {
   loadQuestions();
   loadAnswers();
+
   window.addEventListener('keydown', handleKeyPress);
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && showVideoModal.value) {
