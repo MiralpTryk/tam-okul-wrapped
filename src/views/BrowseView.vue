@@ -7,13 +7,13 @@
 
     <div class="fixed inset-0 z-[1]">
       <!-- Purple gradient -->
-      <div class="absolute top-[-6rem] -left-[10rem] w-[30rem] h-[30rem] bg-sky-500/60 rounded-full mix-blend-multiply filter blur-[128px] animate-blob [animation-delay:2000ms]"></div>
+      <div class="absolute top-[-6rem] -left-[10rem] w-[15rem] h-[15rem] sm:w-[20rem] sm:h-[20rem] md:w-[25rem] md:h-[25rem] lg:w-[30rem] lg:h-[30rem] bg-sky-500/60 rounded-full mix-blend-multiply filter blur-[64px] sm:blur-[96px] md:blur-[112px] lg:blur-[128px] animate-blob [animation-delay:2000ms]"></div>
       
       <!-- Red gradient -->
-      <div class="absolute top-[-1rem] -right-[10rem] w-[30rem] h-[30rem] bg-red-500/60 rounded-full mix-blend-multiply filter blur-[128px] animate-blob [animation-delay:3000ms]"></div>
+      <div class="absolute top-[-1rem] -right-[10rem] w-[15rem] h-[15rem] sm:w-[20rem] sm:h-[20rem] md:w-[25rem] md:h-[25rem] lg:w-[30rem] lg:h-[30rem] bg-red-500/60 rounded-full mix-blend-multiply filter blur-[64px] sm:blur-[96px] md:blur-[112px] lg:blur-[128px] animate-blob [animation-delay:3000ms]"></div>
       
-      <!-- Blue gradient -->
-      <div class="absolute top-[15rem] left-[30rem] w-[30rem] h-[30rem] bg-violet-500/60 rounded-full mix-blend-multiply filter blur-[128px] animate-blob [animation-delay:4000ms]"></div>
+      <!-- violet gradient -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[15rem] h-[15rem] sm:w-[20rem] sm:h-[20rem] md:w-[25rem] md:h-[25rem] lg:w-[30rem] lg:h-[30rem] bg-violet-500/60 rounded-full mix-blend-multiply filter blur-[64px] sm:blur-[96px] md:blur-[112px] lg:blur-[128px] animate-blob [animation-delay:4000ms]"></div>
     </div>
 
     <AppHeader>

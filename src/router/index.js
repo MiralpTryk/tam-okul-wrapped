@@ -14,6 +14,8 @@ import SimpleTestView from "@/views/SimpleTestView.vue"; */
 import WrappedView from "@/views/WrappedView.vue";
 import OpticFormView from "@/views/OpticFormView.vue";
 import BrowseView from "@/views/BrowseView.vue";
+import NotFoundView from "@/views/NotFoundView.vue";
+import AnalysisView from "@/views/AnalysisView.vue";
 
 
 const routes = [
@@ -83,9 +85,17 @@ const routes = [
     props: true,
   }, */
   {
-    path: "/",
+    path: "/:code",
     name: "Wrapped",
     component: WrappedView,
+    beforeEnter: (to, from, next) => {
+      const codeRegex = /^[A-Z0-9]{8}$/;
+      if (codeRegex.test(to.params.code)) {
+        next();
+      } else {
+        next({ path: "/404" });
+      }
+    },
   },
   {
     path: "/optic-form",
@@ -96,6 +106,16 @@ const routes = [
     path: "/browse",
     name: "Browse",
     component: BrowseView,
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "NotFound",
+    component: NotFoundView,
+  },
+  {
+    path: "/analysis",
+    name: "Analysis",
+    component: AnalysisView,
   },
 ];
 

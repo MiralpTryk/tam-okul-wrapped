@@ -8,13 +8,13 @@
     <!-- Gradient Blobs -->
     <div class="fixed inset-0 z-[1]">
       <!-- sky gradient -->
-      <div class="absolute top-[-6rem] -left-[10rem] w-[30rem] h-[30rem] bg-sky-500/60 rounded-full mix-blend-multiply filter blur-[128px] animate-blob [animation-delay:2000ms]"></div>
+      <div class="absolute top-[-6rem] -left-[10rem] w-[15rem] h-[15rem] sm:w-[20rem] sm:h-[20rem] md:w-[25rem] md:h-[25rem] lg:w-[30rem] lg:h-[30rem] bg-sky-500/60 rounded-full mix-blend-multiply filter blur-[64px] sm:blur-[96px] md:blur-[112px] lg:blur-[128px] animate-blob [animation-delay:2000ms]"></div>
       
       <!-- Red gradient -->
-      <div class="absolute top-[-1rem] -right-[10rem] w-[30rem] h-[30rem] bg-red-500/60 rounded-full mix-blend-multiply filter blur-[128px] animate-blob [animation-delay:3000ms]"></div>
+      <div class="absolute top-[-1rem] -right-[10rem] w-[15rem] h-[15rem] sm:w-[20rem] sm:h-[20rem] md:w-[25rem] md:h-[25rem] lg:w-[30rem] lg:h-[30rem] bg-red-500/60 rounded-full mix-blend-multiply filter blur-[64px] sm:blur-[96px] md:blur-[112px] lg:blur-[128px] animate-blob [animation-delay:3000ms]"></div>
       
       <!-- violet gradient -->
-      <div class="absolute top-[15rem] left-[30rem] w-[30rem] h-[30rem] bg-violet-500/60 rounded-full mix-blend-multiply filter blur-[128px] animate-blob [animation-delay:4000ms]"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[15rem] h-[15rem] sm:w-[20rem] sm:h-[20rem] md:w-[25rem] md:h-[25rem] lg:w-[30rem] lg:h-[30rem] bg-violet-500/60 rounded-full mix-blend-multiply filter blur-[64px] sm:blur-[96px] md:blur-[112px] lg:blur-[128px] animate-blob [animation-delay:4000ms]"></div>
     </div>
 
     <!-- Header -->
@@ -58,6 +58,18 @@
               </option>
             </template>
           </select>
+          <button 
+            @click="handleSubmit" 
+            :disabled="!areAllPagesSaved"
+            :class="[
+              'px-6 py-2 rounded text-sm font-medium transition-colors',
+              areAllPagesSaved 
+                ? 'bg-green-600 hover:bg-green-700 text-white' 
+                : 'bg-gray-600 cursor-not-allowed text-gray-300'
+            ]"
+          >
+            Sınavı Bitir
+          </button>
         </div>
       </div>
 
@@ -132,25 +144,38 @@
 
               <!-- Answer Options -->
               <div class="grid grid-cols-5 gap-4 md:gap-6">
-                <button v-for="(option, index) in ['A', 'B', 'C', 'D', 'E']" :key="option"
-                  @click="selectAnswer(question.id, option)" :class="[
-                    'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border',
-                    {
-                      'border-[#E50914] bg-red-600 text-white': !question.saved && question.answer === index.toString(),
-                      'border-[#3F3F3F] hover:border-[#E50914] text-zinc-200': !question.saved && question.answer !== index.toString(),
-                      'border-green-500 bg-green-500 text-white': question.saved && question.correct_answer === index.toString(),
-                      'border-[#E50914] bg-[#E50914] text-white': question.saved && question.answer === index.toString() && question.answer !== question.correct_answer,
-                      'border-[#3F3F3F] text-zinc-200': question.saved && question.answer !== index.toString() && question.correct_answer !== index.toString(),
-                      'opacity-50 cursor-not-allowed': question.saved || isPageSaved(question.page)
-                    }
-                  ]">
-                  {{ option }}
-                </button>
+                <div v-for="(option, index) in ['A', 'B', 'C', 'D', 'E']" :key="option"
+                  class="relative flex items-center justify-center">
+                  <input 
+                    type="radio" 
+                    :name="`question-${question.id}`"
+                    :id="`question-${question.id}-${option}`"
+                    :value="index.toString()"
+                    v-model="question.answer"
+                    :disabled="question.saved || isPageSaved(question.page)"
+                    class="absolute opacity-0 w-full h-full cursor-pointer"
+                    @change="handleAnswerChange(question.id, index.toString())"
+                  >
+                  <label 
+                    :for="`question-${question.id}-${option}`"
+                    :class="[
+                      'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border cursor-pointer',
+                      {
+                        'border-[#E50914] bg-red-600 text-white': !question.saved && question.answer === index.toString(),
+                        'border-[#3F3F3F] hover:border-[#E50914] text-zinc-200': !question.saved && question.answer !== index.toString(),
+                        'border-[#E50914] bg-[#E50914] text-white': question.saved && question.answer === index.toString(),
+                        'border-[#3F3F3F] text-zinc-200': question.saved && question.answer !== index.toString(),
+                        'opacity-50 cursor-not-allowed': question.saved || isPageSaved(question.page)
+                      }
+                    ]">
+                    {{ option }}
+                  </label>
+                </div>
               </div>
 
 
               <!-- Solution Video Button -->
-              <div v-if="question.saved" class="mt-6">
+              <div v-if="question.saved && showSolutionVideos" class="mt-6">
                 <button @click="watchSolutionVideo(question.id)"
                   class="w-full bg-[#141414] hover:bg-[#3F3F3F] text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200 border border-[#3F3F3F]">
                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -329,6 +354,87 @@
       </button>
     </div>
   </div>
+
+  <!-- Submit Confirmation Modal -->
+  <div v-if="showSubmitModal"
+    class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+    <div class="bg-[#141414] text-white p-6 md:p-8 rounded-md max-w-4xl w-full border border-zinc-800 shadow-2xl overflow-y-auto max-h-[90vh]">
+      <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-[#E50914]">Sınavı Bitir</h2>
+      <div class="mb-6 space-y-4">
+        <p class="text-sm md:text-base text-gray-200 leading-relaxed">
+          Sınavınızı bitirmek üzeresiniz. Kaydedilen cevaplarınız aşağıdaki gibidir:
+        </p>
+        
+        <!-- Display saved answers -->
+        <div class="space-y-6">
+          <template v-for="(pages, subject) in allSavedAnswers" :key="subject">
+            <div class="border border-zinc-800 rounded-lg p-4">
+              <h3 class="text-lg font-semibold mb-4">{{ subject }}</h3>
+              <div class="space-y-4">
+                <template v-for="(questions, page) in pages" :key="page">
+                  <div class="border-t border-zinc-800 pt-4">
+                    <h4 class="text-sm font-medium mb-2">Sayfa {{ page }}</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      <div v-for="(question, questionIndex) in Object.values(questions)" 
+                        :key="question.id"
+                        class="bg-[#1F1F1F] p-3 rounded-lg text-sm">
+                        <div class="flex justify-between items-center">
+                          <span>Soru {{ 
+                            Object.entries(pages)
+                              .filter(([p]) => parseInt(p) < parseInt(page))
+                              .reduce((count, [_, pageQuestions]) => count + Object.keys(pageQuestions).length, 0) 
+                            + questionIndex + 1 
+                          }}</span>
+                          <span :class="question.answer === null ? 'text-yellow-500' : 'text-[#E50914]'">
+                            {{ question.answer === null ? 'Boş' : ['A', 'B', 'C', 'D', 'E'][question.answer] }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+        
+        <p class="text-yellow-500 text-sm mt-4">
+          <strong>Dikkat:</strong> Sınavı bitirdikten sonra cevaplarınızda değişiklik yapamazsınız.
+        </p>
+
+        <!-- Add error message display -->
+        <p v-if="submitError" class="text-red-500 text-sm mt-4">
+          {{ submitError }}
+        </p>
+      </div>
+      
+      <div class="flex justify-end space-x-4">
+        <button 
+          @click="closeSubmitModal"
+          :disabled="isSubmitting"
+          class="px-6 py-3 text-base font-medium bg-zinc-800 text-white rounded hover:bg-zinc-700 transition-colors disabled:opacity-50"
+        >
+          İptal
+        </button>
+        <button 
+          @click="confirmSubmit"
+          :disabled="isSubmitting"
+          class="px-6 py-3 text-base font-medium bg-[#E50914] text-white rounded hover:bg-[#E50914]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 min-w-[120px]"
+        >
+          <template v-if="isSubmitting">
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Gönderiliyor...
+          </template>
+          <template v-else>
+            Sınavı Bitir
+          </template>
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -337,10 +443,12 @@ import { useAnalysisStore } from '@/composables/useAnalysisStore';
 import { BookmarkPlusIcon, BookmarkMinusIcon, Search } from 'lucide-vue-next';
 import AppHeader from "@/components/AppHeader.vue";
 import QuestionSkeleton from "@/components/QuestionSkeleton.vue";
+// import axios from 'axios';
 
 const analysisStore = useAnalysisStore();
 const imageBaseUrl = process.env.VUE_APP_IMAGE_BASE_URL || '';
 const showQuestionImages = ref(process.env.VUE_APP_SHOW_QUESTION_IMAGES === 'true');
+const showSolutionVideos = ref(process.env.VUE_APP_SHOW_SOLUTION_VIDEOS === 'true');
 
 const questions = ref([]);
 const loading = computed(() => analysisStore.isOpticDataLoading.value);
@@ -355,6 +463,48 @@ const showVideoModal = ref(false);
 const currentVideoUrl = ref('');
 const showWelcomeModal = ref(true);
 const dontShowWelcomeAgain = ref(false);
+const allSavedAnswers = ref({});
+const showSubmitModal = ref(false);
+const isSubmitting = ref(false);
+const submitError = ref(null);
+
+const filteredQuestions = computed(() => {
+  let filtered = questions.value;
+
+  if (activeTab.value === 'bookmarked') {
+    filtered = filtered.filter(q => q.bookmarked);
+  }
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(q =>
+      q.id.toString().includes(query) ||
+      q.subject.toLowerCase().includes(query)
+    );
+  }
+
+  return filtered;
+});
+
+const groupedPages = computed(() => {
+  const grouped = {};
+  filteredQuestions.value.forEach(q => {
+    if (!grouped[q.title]) {
+      grouped[q.title] = new Set();
+    }
+    grouped[q.title].add(q.page);
+  });
+
+  for (const section in grouped) {
+    grouped[section] = Array.from(grouped[section]).sort((a, b) => a - b);
+  }
+
+  return grouped;
+});
+
+const availablePages = computed(() => {
+  return Object.values(groupedPages.value).flat();
+});
 
 const loadQuestions = () => {
   error.value = null; // Reset error state
@@ -404,11 +554,6 @@ const loadQuestions = () => {
       const existingQ = questions.value.find(q => q.id === newQ.id);
       return existingQ ? { ...newQ, answer: existingQ.answer, bookmarked: existingQ.bookmarked, saved: existingQ.saved } : newQ;
     });
-
-    if (availablePages.value.length > 0) {
-      currentPage.value = availablePages.value[0];
-    }
-
   } catch (err) {
     console.error('Error loading questions:', err);
     error.value = err.message || 'Sorular yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
@@ -422,43 +567,12 @@ watch(() => analysisStore.opticData.value, (newData) => {
   }
 }, { immediate: true });
 
-const filteredQuestions = computed(() => {
-  let filtered = questions.value;
-
-  if (activeTab.value === 'bookmarked') {
-    filtered = filtered.filter(q => q.bookmarked);
+// Watch for availablePages changes
+watch(availablePages, (newPages) => {
+  if (newPages.length > 0 && !newPages.includes(currentPage.value)) {
+    currentPage.value = newPages[0];
   }
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(q =>
-      q.id.toString().includes(query) ||
-      q.subject.toLowerCase().includes(query)
-    );
-  }
-
-  return filtered;
-});
-
-const availablePages = computed(() => {
-  return Object.values(groupedPages.value).flat();
-});
-
-const groupedPages = computed(() => {
-  const grouped = {};
-  filteredQuestions.value.forEach(q => {
-    if (!grouped[q.title]) {
-      grouped[q.title] = new Set();
-    }
-    grouped[q.title].add(q.page);
-  });
-
-  for (const section in grouped) {
-    grouped[section] = Array.from(grouped[section]).sort((a, b) => a - b);
-  }
-
-  return grouped;
-});
+}, { immediate: true });
 
 const currentPageQuestions = computed(() => {
   const questions = filteredQuestions.value.filter(q => q.page === currentPage.value);
@@ -525,6 +639,26 @@ const loadAnswers = () => {
       const savedQuestion = parsedAnswers.find(sq => sq.id === q.id);
       return savedQuestion ? { ...q, answer: savedQuestion.answer, bookmarked: savedQuestion.bookmarked, saved: savedQuestion.saved } : q;
     });
+    
+    // Reconstruct allSavedAnswers from saved questions
+    const savedQuestions = questions.value.filter(q => q.saved);
+    const reconstructedAnswers = { answers: {} };
+    
+    savedQuestions.forEach(q => {
+      if (!reconstructedAnswers.answers[q.title]) {
+        reconstructedAnswers.answers[q.title] = {};
+      }
+      if (!reconstructedAnswers.answers[q.title][q.page]) {
+        reconstructedAnswers.answers[q.title][q.page] = {};
+      }
+      reconstructedAnswers.answers[q.title][q.page][q.id] = {
+        id: q.id,
+        correct: parseInt(q.correct_answer),
+        answer: q.answer !== null ? parseInt(q.answer) : null
+      };
+    });
+    
+    allSavedAnswers.value = mergeAndSortAnswers(reconstructedAnswers);
   }
 };
 
@@ -607,14 +741,22 @@ const confirmSave = () => {
 
 const saveCurrentPageAnswers = () => {
   let unsavedAnswersExist = false;
+  const currentAnswers = getCurrentPageAnswers();
+  
   currentPageQuestions.value.forEach(question => {
     if (!question.saved) {
       question.saved = true;
       unsavedAnswersExist = true;
     }
   });
+  
   if (unsavedAnswersExist) {
+    // Merge and sort the answers
+    allSavedAnswers.value = mergeAndSortAnswers(currentAnswers);
+    
     saveAnswers();
+    // Here you can send the allSavedAnswers array to your backend
+    console.log('All answers to be sent:', allSavedAnswers.value);
     alert('Cevaplar kaydedildi!');
   }
 };
@@ -668,6 +810,156 @@ const closeWelcomeModal = () => {
 const simulateImageError = (imageUrl) => {
   return Math.random() > 0.5 ? imageUrl : 'invalid-url';
 };
+
+const handleAnswerChange = (questionId, answer) => {
+  const question = questions.value.find(q => q.id === questionId);
+  if (question && !question.saved && !isPageSaved(question.page)) {
+    question.answer = answer;
+  }
+};
+
+const getCurrentPageAnswers = () => {
+  const answers = {};
+  
+  currentPageQuestions.value.forEach(question => {
+    // Initialize the subject if it doesn't exist
+    if (!answers[question.title]) {
+      answers[question.title] = {};
+    }
+    
+    // Initialize the page if it doesn't exist
+    if (!answers[question.title][question.page]) {
+      answers[question.title][question.page] = {};
+    }
+    
+    // Add the question with its ID as the key
+    answers[question.title][question.page][question.id] = {
+      id: question.id,
+      correct: parseInt(question.correct_answer),
+      answer: question.answer !== null ? parseInt(question.answer) : null
+    };
+  });
+  
+  return { answers };
+};
+
+const mergeAndSortAnswers = (currentAnswers) => {
+  const mergedAnswers = { ...allSavedAnswers.value };
+  
+  // Handle undefined/null cases
+  if (!currentAnswers || !currentAnswers.answers) {
+    return mergedAnswers;
+  }
+  
+  // Merge new answers
+  Object.entries(currentAnswers.answers).forEach(([subject, pages]) => {
+    if (!mergedAnswers[subject]) {
+      mergedAnswers[subject] = {};
+    }
+    
+    Object.entries(pages).forEach(([page, answers]) => {
+      if (!mergedAnswers[subject][page]) {
+        mergedAnswers[subject][page] = {};
+      }
+      Object.assign(mergedAnswers[subject][page], answers);
+    });
+  });
+  
+  // Sort subjects and pages
+  const sortedAnswers = {};
+  
+  // Get all subjects and sort them based on their order in questions
+  const subjectOrder = [...new Set(questions.value.map(q => q.title))];
+  
+  subjectOrder.forEach(subject => {
+    if (mergedAnswers[subject]) {
+      sortedAnswers[subject] = {};
+      
+      // Get all pages for this subject and sort them numerically
+      const pages = Object.keys(mergedAnswers[subject]).map(Number);
+      pages.sort((a, b) => a - b);
+      
+      pages.forEach(page => {
+        sortedAnswers[subject][page] = mergedAnswers[subject][page];
+      });
+    }
+  });
+  
+  return sortedAnswers;
+};
+
+const showResults = ref(false);
+
+const handleSubmit = () => {
+  if (!areAllPagesSaved.value) {
+    alert('Lütfen tüm sayfaları kaydediniz!');
+    return;
+  }
+  showSubmitModal.value = true;
+};
+
+const closeSubmitModal = () => {
+  showSubmitModal.value = false;
+};
+
+const confirmSubmit = async () => {
+  try {
+    isSubmitting.value = true;
+    submitError.value = null;
+    
+    /* API Entegrasyonu için hazır kodlar:
+    
+    const response = await axios.post(
+      `${process.env.VUE_APP_API_URL}/api/optic/submit`, 
+      allSavedAnswers.value,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Eğer token kullanıyorsanız
+        }
+      }
+    );
+
+    if (response.data.success) {
+      // Başarılı yanıt
+      showResults.value = true;
+      showSubmitModal.value = false;
+      
+      // LocalStorage'i temizle
+      localStorage.removeItem('optikFormAnswers');
+      
+      // Kullanıcıyı sonuç sayfasına yönlendir
+      // router.push('/results');
+      
+      // Veya başarı mesajı göster
+      alert('Sınavınız başarıyla tamamlandı!');
+    } else {
+      throw new Error(response.data.message || 'Bir hata oluştu');
+    }
+    */
+
+    // Şimdilik sadece console.log
+    console.log('Final answers to be submitted:', allSavedAnswers.value);
+    
+    // Simüle edilmiş API gecikmesi
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    showSubmitModal.value = false;
+    showResults.value = true;
+    alert('Sınavınız başarıyla tamamlandı!');
+    
+  } catch (error) {
+    console.error('Submit error:', error);
+    submitError.value = error.response?.data?.message || error.message || 'Bir hata oluştu. Lütfen tekrar deneyiniz.';
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+const areAllPagesSaved = computed(() => {
+  const allPages = [...new Set(questions.value.map(q => q.page))];
+  return allPages.every(page => isPageSaved(page));
+});
 
 onMounted(() => {
   loadQuestions();
