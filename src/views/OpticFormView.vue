@@ -28,33 +28,29 @@
     <div class="mx-auto px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10">
       <!-- Tabs and Search -->
       <div class="py-4 sm:py-6">
-        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 xl:max-w-[50%] text-nowrap">
-          <div class="flex gap-3 sm:gap-4">
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:max-w-[50%]">
+          <div class="flex gap-3 sm:gap-4 flex-1">
             <button @click="activeTab = 'all'" :class="[
-              'px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-medium transition-colors w-1/2',
+              'px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-medium transition-colors w-full',
               activeTab === 'all' ? 'bg-[#E50914] text-white shadow-lg shadow-[#E50914]/20' : 'bg-[#141414] text-zinc-200 hover:bg-[#3F3F3F]'
             ]">
               Tüm Sorular
             </button>
             <button @click="activeTab = 'bookmarked'" :class="[
-              'px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-medium transition-colors w-1/2',
+              'px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-medium transition-colors w-full',
               activeTab === 'bookmarked' ? 'bg-[#E50914] text-white shadow-lg shadow-[#E50914]/20' : 'bg-[#141414] text-zinc-200 hover:bg-[#3F3F3F]'
             ]">
               Favori Sorular
             </button>
           </div>
-          <div class="relative flex-1 sm:w-[30%]">
-            <input v-model="searchQuery" type="text" placeholder="Soru ara..."
-              class="w-full bg-[#141414] text-white rounded pl-10 pr-3 py-2 text-xs sm:text-sm min-w-0 border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
-            <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </div>
           <select v-model="currentPage"
-            class="bg-[#141414] text-zinc-200 rounded px-2 py-2 text-xs sm:text-sm w-full sm:w-[30%] border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
+            @change="scrollToSelectedPage"
+            class="bg-[#141414] text-zinc-200 rounded px-2 py-2 text-xs sm:text-sm w-full sm:w-1/4 border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
             <template v-for="(pages, title) in groupedPages" :key="title">
               <option disabled class="font-semibold bg-[#1F1F1F] text-[#E50914]">{{ title }}</option>
               <option v-for="page in pages" :key="page" :value="page"
                 :class="['pl-4', { 'text-[#E50914]': isPageSaved(page) }]">
-                {{ title }} - Sayfa {{ page }} {{ isPageSaved(page) ? '✓' : '' }}
+                Sayfa {{ page }} {{ isPageSaved(page) ? '✓' : '' }}
               </option>
             </template>
           </select>
@@ -62,7 +58,7 @@
             @click="handleSubmit"
             :disabled="isFormCompleted"
             :class="[
-              'px-4 sm:px-6 py-2 rounded text-xs sm:text-sm font-medium transition-colors flex items-center gap-2',
+              'px-4 sm:px-6 py-2 rounded text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2 w-full sm:w-1/4',
               isFormCompleted 
                 ? 'bg-green-600 text-white cursor-not-allowed' 
                 : !areAllPagesSaved
@@ -74,10 +70,10 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
-              Optik Form Tamamlandı
+              Cevaplar Gözden Geçirildi
             </template>
             <template v-else>
-              Optik Formu Tamamla
+              Cevaplarını Gözden Geçir
             </template>
           </button>
         </div>
@@ -99,22 +95,12 @@
                   </div>
                 </div>
               </div>
-              <div>
-                <div class="flex justify-between text-sm mb-1 sm:max-w-[50%]">
-                  <span>Sayfa {{ currentPage }}</span>
-                  <span>{{ currentPageAnsweredOrSavedCount }} / {{ currentPageQuestions.length }}</span>
-                </div>
-                <div class="bg-[#141414] rounded-full h-2 sm:max-w-[50%]">
-                  <div class="bg-[#E50914] h-full rounded-full transition-all duration-300"
-                    :style="{ width: `${currentPageProgress}%` }"></div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
 
         <!-- Questions Grid -->
-        <div class="pt-4">
+        <div class="">
           <div v-if="activeTab === 'bookmarked' && !hasBookmarkedQuestions"
             class="text-center text-zinc-400 py-12 mb-36">
             <component :is="BookmarkPlusIcon" class="mx-auto w-12 h-12 mb-4 text-green-500" />
@@ -123,403 +109,333 @@
           <div v-else-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20 sm:pb-24">
             <QuestionSkeleton v-for="n in 8" :key="n" />
           </div>
-          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20 sm:pb-24">
-            <!-- Question Card -->
-            <div v-for="question in currentPageQuestions" :key="question.id" :data-question-id="question.id"
-              class="bg-[#141414]/70 backdrop-blur-sm rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#3F3F3F]">
-              <div class="flex justify-between items-center mb-2">
-                <span class="font-bold text-base">Soru {{ question.number }}</span>
-                <button @click="toggleBookmark(question.id)" :class="[
-                  'hover:scale-110 transition-transform duration-200',
-                  question.bookmarked ? 'text-[#E50914]' : 'text-green-500'
-                ]">
-                  <component :is="question.bookmarked ? BookmarkMinusIcon : BookmarkPlusIcon"
-                    class="w-5 h-5 md:w-6 md:h-6" />
-                </button>
-              </div>
-              <p class="text-sm text-zinc-400 mb-6 truncate">{{ question.subject }}</p>
+          <div v-else class="space-y-12 pb-20">
+            <!-- Group by Subject -->
+            <template v-for="(subjectQuestions, subject) in groupedQuestions" :key="subject">
+              <div class=" rounded-lg py-6">
+                <h2 class="text-xl font-bold text-[#E50914] mb-6">{{ subject }}</h2>
+                
+                <!-- Group by Page -->
+                <div class="space-y-8">
+                  <template v-for="(pageQuestions, page) in subjectQuestions" :key="page">
+                    <div class="pt-6 first:pt-0" :data-page="page">
+                      <h3 class="text-lg font-semibold text-zinc-200 mb-4">Sayfa {{ page }}</h3>
+                      
+                      <!-- Questions Grid for this page -->
+                      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        <div v-for="question in pageQuestions" :key="question.id" :data-question-id="question.id"
+                          class="bg-[#141414]/70 backdrop-blur-sm rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#3F3F3F]">
+                          <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-base">Soru {{ question.number }}</span>
+                            <button @click="toggleBookmark(question.id)" :class="[
+                              'hover:scale-110 transition-transform duration-200',
+                              question.bookmarked ? 'text-[#E50914]' : 'text-green-500'
+                            ]">
+                              <component :is="question.bookmarked ? BookmarkMinusIcon : BookmarkPlusIcon"
+                                class="w-5 h-5 md:w-6 md:h-6" />
+                            </button>
+                          </div>
+                          <p class="text-sm text-zinc-400 mb-6 truncate">{{ question.subject }}</p>
 
-              <!-- Question Image -->
-              <div v-if="showQuestionImages" class="mb-4 relative">
-                <div class="aspect-w-4 aspect-h-3 relative bg-zinc-800 rounded-md overflow-hidden">
-                  <img :src="showQuestionImages ? simulateImageError(imageBaseUrl + '/' + question.image) : ''"
-                    :alt="`Soru ${question.number} görseli`"
-                    class="w-full h-full object-cover absolute inset-0" @error="handleImageError" />
-                  <div v-if="imageLoadError"
-                    class="absolute inset-0 flex items-center justify-center bg-zinc-800 text-zinc-400 text-sm">
-                    Resim yüklenemedi
-                  </div>
-                </div>
-              </div>
+                          <!-- Question Image -->
+                          <div v-if="showQuestionImages" class="mb-4 relative">
+                            <div class="aspect-w-4 aspect-h-3 relative bg-zinc-800 rounded-md overflow-hidden">
+                              <img :src="showQuestionImages ? simulateImageError(imageBaseUrl + '/' + question.image) : ''"
+                                :alt="`Soru ${question.number} görseli`"
+                                class="w-full h-full object-cover absolute inset-0" @error="handleImageError" />
+                              <div v-if="imageLoadError"
+                                class="absolute inset-0 flex items-center justify-center bg-zinc-800 text-zinc-400 text-sm">
+                                Resim yüklenemedi
+                              </div>
+                            </div>
+                          </div>
 
-              <!-- Answer Options -->
-              <div class="grid grid-cols-5 gap-4 md:gap-6">
-                <div v-for="(option, index) in ['A', 'B', 'C', 'D', 'E']" :key="option"
-                  class="relative flex items-center justify-center">
-                  <input 
-                    type="radio" 
-                    :name="`question-${question.id}`"
-                    :id="`question-${question.id}-${option}`"
-                    :value="index.toString()"
-                    v-model="question.answer"
-                    class="absolute opacity-0 w-full h-full cursor-pointer"
-                    @change="handleAnswerChange(question.id, index.toString())"
-                    :disabled="isFormCompleted"
-                  >
-                  <label 
-                    :for="`question-${question.id}-${option}`"
-                    :class="[
-                      'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border cursor-pointer p-4',
-                      {
-                        'border-[#E50914] bg-red-600 text-white': question.answer === index.toString() && !isFormCompleted,
-                        'border-[#3F3F3F] hover:border-[#E50914] text-zinc-200': question.answer !== index.toString() && !isFormCompleted,
-                        'border-zinc-700 text-zinc-500 cursor-not-allowed': isFormCompleted && question.answer !== index.toString() && index.toString() !== question.correct_answer,
-                        'border-green-600 bg-green-600 text-white': isFormCompleted && index.toString() === question.correct_answer,
-                        'border-[#E50914] bg-red-600/50 text-white': isFormCompleted && question.answer === index.toString() && index.toString() !== question.correct_answer
-                      }
-                    ]">
-                    {{ option }}
-                  </label>
-                </div>
-              </div>
-              <!-- Clear Answer Button -->
-              <button 
-                v-if="question.answer !== null && !isFormCompleted" 
-                @click="handleAnswerChange(question.id, null)"
-                class="mt-4 flex items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded-md py-1.5 px-3 hover:border-zinc-700 w-full"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                <span class="text-sm">Cevabı Temizle</span>
-              </button>
+                          <!-- Answer Options -->
+                          <div class="grid grid-cols-5 gap-4 md:gap-6">
+                            <div v-for="(option, index) in ['A', 'B', 'C', 'D', 'E']" :key="option"
+                              class="relative flex items-center justify-center">
+                              <input 
+                                type="radio" 
+                                :name="`question-${question.id}`"
+                                :id="`question-${question.id}-${option}`"
+                                :value="index.toString()"
+                                v-model="question.answer"
+                                class="absolute opacity-0 w-full h-full cursor-pointer"
+                                @change="handleAnswerChange(question.id, index.toString())"
+                                :disabled="isPageSaved(question.page)"
+                              >
+                              <label 
+                                :for="`question-${question.id}-${option}`"
+                                :class="[
+                                  'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border cursor-pointer p-4',
+                                  {
+                                    'border-[#E50914] bg-red-600 text-white': question.answer === index.toString() && !isPageSaved(question.page),
+                                    'border-[#3F3F3F] hover:border-[#E50914] text-zinc-200': question.answer !== index.toString() && !isPageSaved(question.page),
+                                    'border-zinc-700 text-zinc-500 cursor-not-allowed': isPageSaved(question.page) && question.answer !== index.toString() && index.toString() !== question.correct_answer,
+                                    'border-green-600 bg-green-600 text-white': isPageSaved(question.page) && index.toString() === question.correct_answer,
+                                    'border-[#E50914] bg-red-600/50 text-white': isPageSaved(question.page) && question.answer === index.toString() && index.toString() !== question.correct_answer
+                                  }
+                                ]">
+                                {{ option }}
+                              </label>
+                            </div>
+                          </div>
+                          <!-- Clear Answer Button -->
+                          <button 
+                            v-if="question.answer !== null && !isFormCompleted" 
+                            @click="handleAnswerChange(question.id, null)"
+                            class="mt-4 flex items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded-md py-1.5 px-3 hover:border-zinc-700 w-full"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span class="text-sm">Cevabı Temizle</span>
+                          </button>
 
-              <!-- Solution Video Button -->
-              <div v-show="question.saved && showSolutionVideos" class="mt-6">
-                <button @click="watchSolutionVideo(question.id)"
-                  class="w-full bg-[#141414] hover:bg-[#3F3F3F] text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200 border border-[#3F3F3F]">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
-                  </svg>
-                  <span class="text-sm">Çözüm Videosu</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bottom Navigation Bar -->
-        <div v-if="activeTab !== 'bookmarked'"
-          class="fixed bottom-0 left-0 right-0 bg-[#141414]/95 backdrop-blur-sm border-t border-[#3F3F3F] z-40">
-          <div class="mx-auto flex justify-between items-center py-4 px-4 sm:px-6 lg:px-16 2xl:px-24">
-            <button @click="goToPreviousPage" :disabled="!hasPreviousPage"
-              class="px-3 sm:px-6 py-2.5 text-sm bg-[#141414] text-white rounded-md hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-[#3F3F3F] hover:border-[#E50914] flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
-              <span class="hidden sm:inline">Önceki Sayfa</span>
-            </button>
-            <button 
-              @click="showSaveConfirmation" 
-              :disabled="!hasUnsavedAnswers || isFormCompleted" 
-              :class="[
-                'px-6 py-2.5 text-sm rounded-md transition-colors flex items-center gap-2',
-                (!hasUnsavedAnswers || isFormCompleted)
-                  ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
-                  : 'bg-[#E50914] text-white hover:bg-[#E50914]/90'
-              ]"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              <span class="inline">Kaydet</span>
-            </button>
-            <button @click="goToNextPage" :disabled="!hasNextPage"
-              class="px-3 sm:px-6 py-2.5 text-sm bg-[#141414] text-white rounded-md hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-[#3F3F3F] hover:border-[#E50914] flex items-center gap-2"
-            >
-              <span class="hidden sm:inline">Sonraki Sayfa</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Save Confirmation Modal -->
-      <!-- <div v-if="showConfirmation"
-        class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-        <div class="bg-[#141414] text-white p-6 md:p-8 rounded-md max-w-xl w-full border border-zinc-800 shadow-2xl">
-          <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-[#E50914]">Cevapları Kaydet</h2>
-          <p class="mb-6 md:mb-8 text-sm md:text-base text-gray-200 leading-relaxed">
-            Cevapları kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını göreceğiniz için 
-            <span class="font-bold text-[#E50914]">tekrar işaretleme yapamayacaksınız.</span>
-            <br><br>
-            {{ currentPage }}. sayfa için cevapları kaydetmek istediğinize emin misiniz?
-          </p>
-          <div class="flex items-center mb-6 md:mb-8">
-            <input type="checkbox" id="dontShowAgain" v-model="dontShowConfirmationAgain"
-              class="mr-3 w-4 h-4 bg-[#141414] border-2 border-gray-600 text-[#E50914] rounded focus:ring-[#E50914] focus:ring-offset-[#141414]">
-            <label for="dontShowAgain" class="text-sm md:text-base text-gray-300 select-none hover:text-white transition-colors">
-              Bu uyarıyı tekrar gösterme
-            </label>
-          </div>
-          <div class="flex justify-end space-x-4">
-            <button @click="cancelSave"
-              class="px-8 py-3 text-base md:text-lg font-medium bg-zinc-800 text-white rounded hover:bg-zinc-700 transition-colors duration-300">
-              Hayır
-            </button>
-            <button @click="confirmSave"
-              class="px-8 py-3 text-base md:text-lg font-medium bg-[#E50914] text-white rounded hover:bg-[#E50914]/90 transition-colors duration-300 shadow-xl shadow-[#E50914]/20">
-              Evet
-            </button>
-          </div>
-        </div>
-      </div> -->
-      <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
-        <symbol id="pencil-circle" viewBox="0 0 49 49">
-          <g clip-path="url(#clip0_11_6)">
-            <path
-              d="M48.5453 30.6539C48.6256 29.3876 48.5838 28.1359 48.431 26.8902C48.3303 26.0681 48.1936 25.2573 47.9961 24.4611C47.8414 23.8376 47.6915 23.2134 47.4843 22.6224C47.2907 22.0699 47.1223 21.5028 46.882 20.9749C46.5706 20.2909 46.2919 19.5804 45.9625 18.9084C45.0372 17.0199 43.9815 15.2788 42.8085 13.6705C42.0686 12.6558 41.2678 11.7355 40.4106 10.9068C39.5451 10.0694 38.6412 9.31838 37.711 8.62645C37.1885 8.23799 36.6689 8.84023 36.1338 7.48564C35.6468 7.16291 35.1355 6.90925 34.6456 6.59583C34.0141 6.19209 33.3213 6.01612 32.6952 5.60508C32.2184 5.29232 31.7645 4.91581 31.3004 4.56653C30.3751 3.86995 29.4089 3.29954 28.4164 2.80683C27.6633 2.43297 26.902 2.09365 26.143 1.74636C25.4113 1.47211 24.6889 1.15271 23.9489 0.916974C22.8548 0.568354 21.7607 0.234343 20.6354 0.109504C19.9582 0.0344676 19.2805 -0.0080308 18.6033 0.00126574C17.4955 0.0165386 16.3994 0.199149 15.3131 0.510583C14.5167 0.739012 13.7295 1.01193 12.9633 1.37914C12.1187 1.78354 11.2912 2.24771 10.488 2.79554C9.58456 3.41243 8.73367 4.14088 7.91587 4.94304C6.97157 5.86937 6.11339 6.93382 5.30726 8.07796C4.69379 8.94785 4.14647 9.89078 3.63468 10.8709C3.35202 11.4114 3.10634 11.9891 2.85482 12.5589C2.28951 13.8392 1.80593 15.1798 1.4143 16.5717C1.15791 17.4814 0.982772 18.4356 0.844119 19.3991C0.713251 20.3082 0.64806 21.2266 0.596491 22.1463C0.568761 22.6403 0.59941 23.141 0.615951 23.6384C0.655844 24.8363 0.760441 26.0223 0.970123 27.189C1.17591 28.3324 1.47122 29.4308 1.83171 30.5005C1.98934 30.968 2.17372 31.4156 2.33864 31.8771C2.50941 32.2841 2.67968 32.6919 2.85044 33.0989C2.96331 33.3134 3.07618 33.5285 3.18856 33.743C3.38024 33.9715 3.49846 34.2796 3.65073 34.5505C4.47389 36.0127 5.37148 37.3753 6.39264 38.5905C6.9706 39.2784 7.60305 39.8615 8.20679 40.4989C8.2389 40.5328 8.27782 40.5534 8.31382 40.5806C8.5707 40.5288 8.76773 40.6178 8.89568 40.9618C8.93849 41.0767 9.06984 41.1152 9.17006 41.1371C9.26201 41.1577 9.33304 41.2095 9.40942 41.2732C9.68575 41.5016 9.96306 41.7294 10.2477 41.9372C10.6665 42.2434 11.0927 42.5296 11.5145 42.8284C12.1722 43.2945 12.8495 43.6936 13.5461 44.0449C14.5001 44.525 15.4668 44.952 16.4432 45.3298C17.6502 45.7966 18.8733 46.1831 20.1032 46.5238C20.8553 46.7323 21.6128 46.897 22.3712 47.0537C23.0144 47.1865 23.6614 47.2794 24.308 47.379C24.7521 47.4474 25.1987 47.4707 25.6415 47.5384C26.0394 47.5988 26.4398 47.565 26.8363 47.6593C27.0265 47.7044 27.2289 47.6433 27.4254 47.6493C27.9154 47.6626 28.4048 47.6991 28.8942 47.7044C29.5763 47.7117 30.2583 47.6984 30.9404 47.6951C30.9988 47.6951 31.0577 47.6998 31.1165 47.7323C30.1469 47.8824 29.173 47.8472 28.198 47.8545C28.3279 48.0006 28.503 47.8532 28.632 47.99C28.8056 47.982 28.9808 48.0285 29.1535 47.97C29.512 47.8731 29.8721 47.9528 30.2316 47.9594C30.3007 47.9607 30.3702 47.9627 30.4393 47.9641C30.6144 47.8651 30.7945 47.9501 30.972 47.9382C31.0859 47.8419 31.209 47.9156 31.3272 47.9043C31.405 47.8113 31.5077 47.8425 31.5938 47.8306C31.8249 47.7994 32.0589 47.81 32.2919 47.804C32.3133 47.804 32.3352 47.8027 32.3566 47.802C32.4714 47.7071 32.5945 47.7781 32.7137 47.7702H32.7127C32.8738 47.6785 33.0421 47.6719 33.2128 47.6938C33.677 47.6453 34.1377 47.561 34.596 47.4508C34.6986 47.3844 34.8061 47.3538 34.9195 47.3764C35.296 47.316 35.6638 47.1931 36.0355 47.0982C36.1722 47.063 36.3109 47.0377 36.4485 47.0072C36.9321 46.8345 37.4177 46.6725 37.8983 46.4872C38.937 46.0868 39.9426 45.5649 40.9185 44.9341C41.7018 44.4281 42.4398 43.8151 43.1681 43.179C43.2513 43.106 43.3247 43.0123 43.4026 42.9287C44.1712 42.1663 44.8767 41.3104 45.4833 40.3077C45.5149 40.2559 45.5334 40.1756 45.5976 40.1709C46.4067 38.8787 47.0153 37.4138 47.5709 35.9038C47.6755 35.5133 47.7747 35.1209 47.8856 34.7338C48.2612 33.421 48.4558 32.0597 48.5444 30.6559L48.5453 30.6539ZM46.6319 29.9653C46.5497 31.3923 46.3123 32.7649 45.9046 34.0863C45.6779 34.8208 45.4074 35.5233 45.1024 36.196C44.6821 37.1236 44.2102 38.0028 43.6585 38.7997C42.5006 40.4717 41.151 41.7573 39.5991 42.6564C38.4155 43.3417 37.1827 43.7893 35.926 44.1326C34.8742 44.4201 33.8117 44.5974 32.7439 44.7295C31.5758 44.8736 30.4072 44.9726 29.2328 44.9805C28.218 44.9878 27.2031 45.0011 26.1907 44.9254C24.9788 44.8344 23.7699 44.6884 22.5658 44.4619C21.0124 44.1691 19.4702 43.7952 17.9426 43.3185C16.3449 42.8198 14.7745 42.1856 13.2396 41.3941C11.711 40.6059 10.2861 39.5394 8.88643 38.4012C7.78403 37.5048 6.75119 36.4769 5.84192 35.2418C5.34715 34.5691 4.90444 33.8287 4.54832 32.9913C4.21653 32.2118 3.92998 31.4076 3.68333 30.5756C3.41527 29.6725 3.21775 28.7388 3.06985 27.7853C2.8592 26.4253 2.77114 25.0528 2.79741 23.6629C2.81931 22.5161 2.96671 21.3959 3.13407 20.275C3.33791 18.9111 3.66289 17.6062 4.1061 16.3565C4.38778 15.5617 4.69379 14.7827 5.03871 14.0344C5.32964 13.3783 5.63759 12.7382 5.96695 12.1166C6.39264 11.3125 6.87573 10.5741 7.35202 9.82836C7.40845 9.74004 7.46294 9.64243 7.54953 9.59993C7.54321 9.49502 7.60451 9.44787 7.65024 9.39143C7.83657 9.16366 8.00052 8.90269 8.20533 8.70282C8.22917 8.67161 8.25253 8.64106 8.27636 8.60985C8.38972 8.30705 8.59016 8.1085 8.77551 7.91062C9.29704 7.35217 9.81078 6.7791 10.3615 6.27111C10.8188 5.84878 11.2927 5.46763 11.78555 5.13295C12.1693 4.87198 12.5678 4.64953 12.9594 4.40981C13.0134 4.37661 13.0669 4.34208 13.1287 4.36732C13.1715 4.38458 13.1944 4.33677 13.2245 4.31286C13.2883 4.19135 13.3841 4.18802 13.4795 4.18338C13.5018 4.16877 13.5242 4.15482 13.5466 4.14021C13.6887 4.01006 13.8439 3.93237 14.0151 3.9171C14.0978 3.80421 14.2 3.77632 14.3119 3.78695C14.3824 3.76769 14.4534 3.74976 14.5133 3.688C14.6086 3.58508 14.7171 3.54524 14.8378 3.5625C14.9288 3.44497 15.0397 3.41708 15.1598 3.43036C15.2815 3.32212 15.4172 3.29622 15.5588 3.30353C15.6089 3.31681 15.6527 3.29821 15.6921 3.25505C15.8263 3.15146 15.9708 3.11228 16.1241 3.1322L16.1221 3.13353C16.2224 3.05318 16.3294 3.01998 16.4447 3.04854V3.05053C16.6733 2.88518 16.9312 2.89116 17.1754 2.84136C17.7947 2.71452 18.416 2.60031 19.0436 2.56711C19.0727 2.56578 19.1122 2.57176 19.1287 2.54984C19.3826 2.2072 19.712 2.34532 20.002 2.33337C20.5848 2.30946 21.1715 2.33005 21.7524 2.40043C22.4281 2.48211 23.1029 2.58304 23.7738 2.74308C24.4486 2.90444 25.1199 3.08838 25.7874 3.29224C26.2885 3.44563 26.7949 3.58574 27.2814 3.8228C27.4683 3.91378 27.6624 3.97752 27.8511 4.06252C27.8881 4.07912 27.9567 4.09639 27.9368 4.1847C27.9222 4.24845 27.8682 4.22853 27.8283 4.23584C27.5388 4.28697 27.2552 4.19002 26.9745 4.13689C26.7064 4.08643 26.4359 4.06783 26.1688 4.03662C24.9944 3.89917 23.8151 3.84007 22.6373 3.84405C21.9407 3.84671 21.2391 3.85667 20.5454 3.95096C19.7655 4.05721 18.9827 4.15084 18.2107 4.35271C18.1542 4.36732 18.0944 4.35935 18.036 4.362C17.4235 4.51274 16.811 4.66879 16.2228 4.953C15.6926 5.20932 15.1618 5.46696 14.6466 5.77773C14.381 5.98956 14.0973 6.15955 13.8507 6.41587C13.8122 6.58188 13.6887 6.62969 13.5996 6.68746C13.3155 6.8714 13.1803 7.21272 13.0528 7.56267C12.8694 8.06667 12.8748 8.06601 13.2829 8.08991C13.4114 8.09722 13.5393 8.1271 13.6668 8.15167C14.0774 8.23069 14.4568 8.02948 14.8422 7.9C15.7315 7.60118 16.6242 7.31764 17.5291 7.13303C18.1888 6.9989 18.847 6.83488 19.5164 6.79172C20.1372 6.75188 20.7517 6.58653 21.3763 6.62106C21.3851 6.62106 21.3948 6.60579 21.4148 6.58786C21.3496 6.47497 21.2323 6.57989 21.1482 6.46036C21.2328 6.43247 21.2995 6.38732 21.3627 6.39462C21.5875 6.42118 21.8093 6.37404 22.0316 6.36275C23.1214 6.30963 24.2107 6.32955 25.298 6.41189C26.018 6.46634 26.7336 6.60844 27.4532 6.6775C27.9577 6.72598 28.4524 6.85746 28.9521 6.94644C29.7368 7.08589 30.5089 7.31963 31.2771 7.57927C31.8521 7.77317 32.4301 7.95777 32.9881 8.2267C33.4906 8.46841 34.0131 8.63774 34.4938 8.96179C34.5916 9.02753 34.685 9.11452 34.7186 9.25463C34.7507 9.38943 34.8407 9.37615 34.8995 9.41666C35.368 9.74071 35.7115 10.2912 36.1445 10.675C36.2773 10.7925 36.4198 10.9373 36.5994 10.9214C36.6855 10.8211 36.8013 10.8437 36.8971 10.7866C36.9521 10.754 37.0246 10.762 37.0401 10.6398C37.0542 10.5276 37.1126 10.592 37.1486 10.6192C37.5184 10.9021 37.8876 11.1896 38.2661 11.4446C38.7054 11.7401 39.0922 12.1465 39.5271 12.4493C39.9285 12.7289 40.2943 13.0954 40.65 13.4766C40.8066 13.6439 40.9696 13.8 41.1301 13.96C41.1627 13.9919 41.2187 14.0191 41.19 14.0815C41.1613 14.1439 41.1184 14.0935 41.0849 14.0596C40.7871 13.7608 40.4899 13.4626 40.1917 13.1645C40.1163 13.0888 40.0472 12.9978 39.9552 12.9593C39.8944 12.9341 39.8643 12.962 39.8857 13.0543C40.775 13.9268 41.6575 14.81 42.4442 15.8592C43.1462 16.7961 43.7825 17.8061 44.324 18.925C44.3459 18.9702 44.3751 19.016 44.3639 19.0784C45.0941 20.5838 45.6614 22.1967 46.0666 23.9153C46.1299 24.1835 46.1941 24.4511 46.2578 24.7188C46.3702 25.0415 46.3867 25.3974 46.4427 25.7387C46.6718 27.1319 46.7146 28.5423 46.6334 29.9627L46.6319 29.9653ZM46.6319 29.9653Z" />
-          </g>
-          <defs>
-            <clipPath id="clip0_11_6">
-              <rect width="48" height="48" fill="white" transform="translate(0.585327)" />
-            </clipPath>
-          </defs>
-        </symbol>
-      </svg>
-    </div>
-  </div>
-
-  <!-- Video Modal -->
-  <div v-if="showVideoModal"
-    class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-[#141414] rounded-lg overflow-hidden w-full max-w-4xl mx-4">
-      <div class="p-3 sm:p-4 flex justify-between items-center border-b border-zinc-800">
-        <h3 class="text-base sm:text-lg font-medium text-zinc-200">Çözüm Videosu</h3>
-        <button @click="closeVideoModal" class="text-zinc-400 hover:text-white transition-colors">
-          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      <div class="aspect-w-16">
-        <iframe v-if="currentVideoUrl" :src="currentVideoUrl" class="w-full h-full" frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen></iframe>
-        <div v-else class="w-full h-full flex items-center justify-center text-zinc-400 text-sm sm:text-base">
-          Video bulunamadı
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Welcome Modal -->
-  <div v-if="showWelcomeModal"
-    class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-  <div class="bg-[#141414] text-white p-6 rounded-md max-w-lg w-full border border-zinc-800 shadow-2xl">
-    <h2 class="text-xl font-bold mb-4 text-[#E50914]">Kişiye Özel Kitap Optik Form</h2>
-    <div class="mb-4 text-sm text-gray-200 leading-relaxed space-y-3">
-      <div class="space-y-2">
-        <p class="flex items-start gap-2">
-          <span class="text-[#E50914] font-bold">1.</span>
-          <span>Her sayfadaki soruları cevaplayıp "Kaydet" butonuna basın. İstediğiniz soruları boş bırakabilirsiniz.</span>
-        </p>
-        
-        <p class="flex items-start gap-2">
-          <span class="text-[#E50914] font-bold">2.</span>
-          <span>Tüm sayfaları tamamladıktan sonra "Sınavı Bitir" butonuna basın. İşaretlenmemiş sorular boş sayılacaktır.</span>
-        </p>
-        
-        <p class="flex items-start gap-2">
-          <span class="text-[#E50914] font-bold">3.</span>
-          <span>Sınavı bitirdikten sonra cevaplarınızı değiştiremezsiniz.</span>
-        </p>
-      </div>
-
-      <div class="bg-[#E50914]/10 text-[#E50914] p-2 rounded space-y-1 text-xs">
-        <p class="font-semibold">İpuçları:</p>
-        <ul class="list-disc list-inside space-y-0.5">
-          <li>A, B, C, D, E tuşlarıyla hızlıca cevap verebilirsiniz</li>
-          <li><BookmarkPlusIcon class="w-4 h-4 inline-block text-green-500" /> işareti ile soruları favorilere ekleyebilirsiniz</li>
-          <li>"Cevabı Temizle" butonu ile cevabınızı kaldırabilirsiniz</li>
-          <li>Cevaplarınızı istediğiniz zaman değiştirebilirsiniz</li>
-        </ul>
-      </div>
-    </div>
-    
-    <div class="flex items-center mb-4">
-      <input type="checkbox" id="dontShowWelcomeAgain" v-model="dontShowWelcomeAgain"
-        class="mr-2 w-4 h-4 bg-[#141414] border-2 border-gray-600 text-[#E50914] rounded focus:ring-[#E50914] focus:ring-offset-[#141414]">
-      <label for="dontShowWelcomeAgain" class="text-xs text-gray-300 select-none hover:text-white transition-colors">
-        Bu bilgilendirmeyi tekrar gösterme
-      </label>
-    </div>
-    <div class="flex justify-end">
-      <button @click="closeWelcomeModal"
-        class="px-6 py-2 text-sm font-medium bg-[#E50914] text-white rounded hover:bg-[#E50914]/90 transition-colors duration-300 shadow-xl shadow-[#E50914]/20">
-        Anladım
-      </button>
-    </div>
-  </div>
-</div>
-
-  <!-- Error simulation buttons -->
-<!--   <div v-if="isDevelopment" class="fixed bottom-20 right-4 space-x-2 z-50">
-    <button @click="loadQuestions()" 
-      class="bg-green-600 text-white px-4 py-2 rounded">
-      Normal Yükleme
-    </button>
-    <button @click="() => { simulateError('network'); loadQuestions(); }"
-      class="bg-[#E50914] text-white px-4 py-2 rounded">
-      Ağ Hatası
-    </button>
-    <button @click="() => { simulateError('data'); loadQuestions(); }"
-      class="bg-yellow-600 text-white px-4 py-2 rounded">
-      Veri Hatası
-    </button>
-    <button @click="() => { simulateError('empty'); loadQuestions(); }"
-      class="bg-blue-600 text-white px-4 py-2 rounded">
-      Boş Veri
-    </button>
-    <button @click="() => { simulateError('null'); loadQuestions(); }"
-      class="bg-purple-600 text-white px-4 py-2 rounded">
-      Null Veri
-    </button>
-  </div>  -->
-
-  <!-- Error State -->
-  <div v-if="error" class="flex items-center justify-center min-h-screen">
-    <div class="text-[#E50914] text-center p-4">
-      <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-      <p class="text-xl mb-4">{{ error }}</p>
-      <p class="text-sm text-gray-400 mb-4">Hata Kodu: {{ Date.now() }}</p>
-      <button @click="loadQuestions" 
-        class="bg-[#E50914] text-white px-4 py-2 rounded hover:bg-[#E50914]/90 transition-colors">
-        Tekrar Dene
-      </button>
-    </div>
-  </div>
-
-  <!-- Submit Confirmation Modal -->
-  <div v-if="showSubmitModal"
-    class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-    <div class="bg-[#141414] text-white p-4 sm:p-6 md:p-8 rounded-md w-full max-w-4xl border border-zinc-800 shadow-2xl overflow-y-auto max-h-[90vh] mx-4">
-      <h2 class="text-xl sm:text-2xl md:text-3xl font-bold mb-4 text-[#E50914]">Optik Formu Tamamla</h2>
-      <div class="mb-6 space-y-4">
-        <p class="text-sm sm:text-base text-gray-200 leading-relaxed">
-          Sınavınızı bitirmek üzeresiniz. Kaydedilen cevaplarınız aşağıdaki gibidir:
-        </p>
-        
-        <!-- Display saved answers -->
-        <div class="space-y-4 sm:space-y-6">
-          <template v-for="(pages, subject) in allSavedAnswers" :key="subject">
-            <div class="border border-zinc-800 rounded-lg overflow-hidden">
-              <button 
-                @click="toggleAccordion(subject)"
-                class="w-full p-3 sm:p-4 flex justify-between items-center text-left hover:bg-zinc-900/50 transition-colors"
-              >
-                <h3 class="text-base sm:text-lg font-semibold text-[#E50914] flex items-center gap-2">
-                  <span>{{ subject }}</span>
-                  <span class="text-xs text-zinc-400 font-normal">
-                    ({{ Object.values(pages).reduce((total, page) => total + Object.keys(page).length, 0) }} Soru)
-                  </span>
-                </h3>
-                <svg 
-                  class="w-5 h-5 text-zinc-400 transition-transform duration-200"
-                  :class="{ 'rotate-180': openAccordions[subject] }"
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              <div v-show="openAccordions[subject]" class="border-t border-zinc-800">
-                <div class="p-3 sm:p-4 space-y-4">
-                  <template v-for="(questions, page) in pages" :key="page">
-                    <div class="border-t border-zinc-800 pt-3 sm:pt-4 first:border-t-0 first:pt-0">
-                      <h4 class="text-xs sm:text-sm font-medium mb-2 text-zinc-400">Sayfa {{ page }}</h4>
-                      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
-                        <div v-for="(question, questionIndex) in Object.values(questions)" 
-                          :key="question.id"
-                          class="bg-[#1F1F1F] p-2 sm:p-3 rounded-lg text-xs sm:text-sm"
-                        >
-                          <div class="flex justify-between items-center">
-                            <span class="text-zinc-300">Soru {{ 
-                              Object.entries(pages)
-                                .filter(([p]) => parseInt(p) < parseInt(page))
-                                .reduce((count, [_, pageQuestions]) => count + Object.keys(pageQuestions).length, 0) 
-                              + questionIndex + 1 
-                            }}</span>
-                            <span :class="question.answer === null ? 'text-yellow-500' : 'text-[#E50914] font-medium'">
-                              {{ question.answer === null ? 'Boş' : ['A', 'B', 'C', 'D', 'E'][question.answer] }}
-                            </span>
+                          <!-- Solution Video Button -->
+                          <div v-show="question.saved && showSolutionVideos" class="mt-6">
+                            <button @click="watchSolutionVideo(question.id)"
+                              class="w-full bg-[#141414] hover:bg-[#3F3F3F] text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200 border border-[#3F3F3F]">
+                              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
+                              </svg>
+                              <span class="text-sm">Çözüm Videosu</span>
+                            </button>
                           </div>
                         </div>
+                      </div>
+
+                      <!-- Save button moved to bottom -->
+                      <div class="flex justify-end mt-8">
+                        <button 
+                          @click="savePageAnswers(subject, page)"
+                          :disabled="isPageSaved(page)"
+                          :class="[
+                            'px-4 py-2 text-sm font-medium rounded transition-colors shadow-lg flex items-center gap-2',
+                            isPageSaved(page)
+                              ? 'bg-green-600 text-white cursor-not-allowed opacity-75'
+                              : 'bg-[#E50914] text-white hover:bg-[#E50914]/90 shadow-[#E50914]/20'
+                          ]"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{{ isPageSaved(page) ? 'Kaydedildi' : 'Kaydet' }}</span>
+                        </button>
                       </div>
                     </div>
                   </template>
                 </div>
               </div>
+            </template>
+
+            <!-- Loading Indicator -->
+            <div v-if="isLoadingMore" class="flex justify-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-2 border-[#E50914] border-t-transparent"></div>
             </div>
-          </template>
+
+            <!-- End of Questions Message -->
+            <div v-if="!isLoadingMore && visibleQuestionsCount >= filteredQuestions.length" class="text-center py-8 text-zinc-400">
+              Tüm sorular yüklendi
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video Modal -->
+      <div v-if="showVideoModal"
+        class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-[#141414] rounded-lg overflow-hidden w-full max-w-4xl mx-4">
+          <div class="p-3 sm:p-4 flex justify-between items-center border-b border-zinc-800">
+            <h3 class="text-base sm:text-lg font-medium text-zinc-200">Çözüm Videosu</h3>
+            <button @click="closeVideoModal" class="text-zinc-400 hover:text-white transition-colors">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="aspect-w-16">
+            <iframe v-if="currentVideoUrl" :src="currentVideoUrl" class="w-full h-full" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+            <div v-else class="w-full h-full flex items-center justify-center text-zinc-400 text-sm sm:text-base">
+              Video bulunamadı
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Welcome Modal -->
+      <div v-if="showWelcomeModal"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <div class="bg-[#141414] text-white p-6 rounded-md max-w-lg w-full border border-zinc-800 shadow-2xl">
+        <h2 class="text-xl font-bold mb-4 text-[#E50914]">Kişiye Özel Kitap Optik Form</h2>
+        <div class="mb-4 text-sm text-gray-200 leading-relaxed space-y-3">
+          <div class="space-y-2">
+            <p class="flex items-start gap-2">
+              <span class="text-[#E50914] font-bold">1.</span>
+              <span>Her sayfadaki soruları cevaplayıp "Kaydet" butonuna basın. İstediğiniz soruları boş bırakabilirsiniz.</span>
+            </p>
+            
+            <p class="flex items-start gap-2">
+              <span class="text-[#E50914] font-bold">2.</span>
+              <span>Tüm sayfaları tamamladıktan sonra "Sınavı Bitir" butonuna basın. İşaretlenmemiş sorular boş sayılacaktır.</span>
+            </p>
+            
+            <p class="flex items-start gap-2">
+              <span class="text-[#E50914] font-bold">3.</span>
+              <span>Sınavı bitirdikten sonra cevaplarınızı değiştiremezsiniz.</span>
+            </p>
+          </div>
+
+          <div class="bg-[#E50914]/10 text-[#E50914] p-2 rounded space-y-1 text-xs">
+            <p class="font-semibold">İpuçları:</p>
+            <ul class="list-disc list-inside space-y-0.5">
+              <li>A, B, C, D, E tuşlarıyla hızlıca cevap verebilirsiniz</li>
+              <li><BookmarkPlusIcon class="w-4 h-4 inline-block text-green-500" /> işareti ile soruları favorilere ekleyebilirsiniz</li>
+              <li>"Cevabı Temizle" butonu ile cevabınızı kaldırabilirsiniz</li>
+              <li>Cevaplarınızı istediğiniz zaman değiştirebilirsiniz</li>
+            </ul>
+          </div>
         </div>
         
-        <p class="text-yellow-500 text-xs sm:text-sm mt-4 bg-yellow-500/10 p-3 rounded-lg">
-          <strong>Dikkat:</strong> Sınavı bitirdikten sonra cevaplarınızda değişiklik yapamazsınız.
-        </p>
-
-        <p v-if="submitError" class="text-[#E50914] text-xs sm:text-sm mt-4 bg-[#E50914]/10 p-3 rounded-lg">
-          {{ submitError }}
-        </p>
+        <div class="flex items-center mb-4">
+          <input type="checkbox" id="dontShowWelcomeAgain" v-model="dontShowWelcomeAgain"
+            class="mr-2 w-4 h-4 bg-[#141414] border-2 border-gray-600 text-[#E50914] rounded focus:ring-[#E50914] focus:ring-offset-[#141414]">
+          <label for="dontShowWelcomeAgain" class="text-xs text-gray-300 select-none hover:text-white transition-colors">
+            Bu bilgilendirmeyi tekrar gösterme
+          </label>
+        </div>
+        <div class="flex justify-end">
+          <button @click="closeWelcomeModal"
+            class="px-6 py-2 text-sm font-medium bg-[#E50914] text-white rounded hover:bg-[#E50914]/90 transition-colors duration-300 shadow-xl shadow-[#E50914]/20">
+            Anladım
+          </button>
+        </div>
       </div>
-      
-      <div class="flex justify-end space-x-3 sm:space-x-4">
-        <button 
-          @click="closeSubmitModal"
-          :disabled="isSubmitting"
-          class="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium bg-zinc-800 text-white rounded hover:bg-zinc-700 transition-colors disabled:opacity-50 min-w-[100px]"
-        >
-          İptal
-        </button>
-        <button 
-          @click="confirmSubmit"
-          :disabled="isSubmitting"
-          class="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium bg-[#E50914] text-white rounded hover:bg-[#E50914]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 min-w-[140px]"
-        >
-          <template v-if="isSubmitting">
-            <svg class="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Tamamlanıyor...
-          </template>
-          <template v-else>
-            Tamamla
-          </template>
+    </div>
+
+    <!-- Error State -->
+    <div v-if="error" class="flex items-center justify-center min-h-screen">
+      <div class="text-[#E50914] text-center p-4">
+        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <p class="text-xl mb-4">{{ error }}</p>
+        <p class="text-sm text-gray-400 mb-4">Hata Kodu: {{ Date.now() }}</p>
+        <button @click="loadQuestions" 
+          class="bg-[#E50914] text-white px-4 py-2 rounded hover:bg-[#E50914]/90 transition-colors">
+          Tekrar Dene
         </button>
       </div>
     </div>
+
+    <!-- Submit Modal -->
+    <div v-if="showSubmitModal"
+      class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <div class="bg-[#141414] text-white p-4 sm:p-6 md:p-8 rounded-md w-full max-w-4xl border border-zinc-800 shadow-2xl overflow-y-auto max-h-[90vh] mx-4">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-[#E50914]">Cevaplarını Gözden Geçir</h2>
+          <button @click="showSubmitModal = false" class="text-zinc-400 hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="mb-6 space-y-4">
+          <template v-if="Object.keys(allSavedAnswers).length === 0">
+            <div class="text-center py-8 space-y-6">
+              <p class="text-sm sm:text-base text-gray-200 leading-relaxed">
+                Henüz hiç cevap kaydetmediniz. Cevaplarınızı kaydetmek için her sayfanın sonunda bulunan 
+                <span class="inline-flex items-center gap-1 px-2 py-1 bg-[#E50914] text-white text-sm rounded">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Kaydet</span>
+                </span>
+                butonuna basın.
+              </p>
+              <p class="text-xs text-yellow-500">
+                <strong>Not:</strong> Kaydedilen cevaplar daha sonra değiştirilemez.
+              </p>
+            </div>
+          </template>
+          <template v-else>
+            <p class="text-sm sm:text-base text-gray-200 leading-relaxed">
+              Kaydedilen cevaplarınız aşağıdaki gibidir:
+            </p>
+            
+            <!-- Display saved answers -->
+            <div class="space-y-4 sm:space-y-6">
+              <template v-for="(pages, subject) in allSavedAnswers" :key="subject">
+                <div class="border border-zinc-800 rounded-lg overflow-hidden">
+                  <button 
+                    @click="toggleAccordion(subject)"
+                    class="w-full p-3 sm:p-4 flex justify-between items-center text-left hover:bg-zinc-900/50 transition-colors"
+                  >
+                    <h3 class="text-base sm:text-lg font-semibold text-[#E50914] flex items-center gap-2">
+                      <span>{{ subject }}</span>
+                      <span class="text-xs text-zinc-400 font-normal">
+                        ({{ Object.values(pages).reduce((total, page) => total + Object.keys(page).length, 0) }} Soru)
+                      </span>
+                    </h3>
+                    <svg 
+                      class="w-5 h-5 text-zinc-400 transition-transform duration-200"
+                      :class="{ 'rotate-180': openAccordions[subject] }"
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  <div v-show="openAccordions[subject]" class="border-t border-zinc-800">
+                    <div class="p-3 sm:p-4 space-y-4">
+                      <template v-for="(questions, page) in pages" :key="page">
+                        <div class="border-t border-zinc-800 pt-3 sm:pt-4 first:border-t-0 first:pt-0">
+                          <h4 class="text-xs sm:text-sm font-medium mb-2 text-zinc-400">Sayfa {{ page }}</h4>
+                          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
+                            <div v-for="(question, questionIndex) in Object.values(questions)" 
+                              :key="question.id"
+                              class="bg-[#1F1F1F] p-2 sm:p-3 rounded-lg text-xs sm:text-sm"
+                            >
+                              <div class="flex justify-between items-center">
+                                <span class="text-zinc-300">Soru {{ 
+                                  Object.entries(pages)
+                                    .filter(([p]) => parseInt(p) < parseInt(page))
+                                    .reduce((count, [_, pageQuestions]) => count + Object.keys(pageQuestions).length, 0) 
+                                  + questionIndex + 1 
+                                }}</span>
+                                <span :class="question.answer === null ? 'text-yellow-500' : 'text-[#E50914] font-medium'">
+                                  {{ question.answer === null ? 'Boş' : ['A', 'B', 'C', 'D', 'E'][question.answer] }}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useAnalysisStore } from '@/composables/useAnalysisStore';
-import { BookmarkPlusIcon, BookmarkMinusIcon, Search } from 'lucide-vue-next';
+import { BookmarkPlusIcon, BookmarkMinusIcon } from 'lucide-vue-next';
 import AppHeader from "@/components/AppHeader.vue";
 import QuestionSkeleton from "@/components/QuestionSkeleton.vue";
-// import axios from 'axios';
-
-// Import SweetAlert2 at the top with other imports
 import Swal from 'sweetalert2';
 
 const analysisStore = useAnalysisStore();
@@ -530,7 +446,6 @@ const showSolutionVideos = ref(process.env.VUE_APP_SHOW_SOLUTION_VIDEOS === 'tru
 const questions = ref([]);
 const loading = computed(() => analysisStore.isOpticDataLoading.value);
 const error = ref(null);
-const searchQuery = ref('');
 const activeTab = ref('all');
 const currentPage = ref(1);
 const imageLoadError = ref(false);
@@ -540,8 +455,6 @@ const showWelcomeModal = ref(true);
 const dontShowWelcomeAgain = ref(false);
 const allSavedAnswers = ref({});
 const showSubmitModal = ref(false);
-const isSubmitting = ref(false);
-const submitError = ref(null);
 
 // Add this with other refs
 const savedPages = ref(new Set());
@@ -549,19 +462,39 @@ const savedPages = ref(new Set());
 // Add this with other refs at the top
 const isFormCompleted = ref(false);
 
+const QUESTIONS_PER_PAGE = 20;
+const visibleQuestionsCount = ref(QUESTIONS_PER_PAGE);
+const isLoadingMore = ref(false);
+
+const visibleQuestions = computed(() => {
+  const filtered = filteredQuestions.value;
+  return filtered.slice(0, visibleQuestionsCount.value);
+});
+
+const loadMoreQuestions = () => {
+  if (isLoadingMore.value) return;
+  
+  isLoadingMore.value = true;
+  setTimeout(() => {
+    visibleQuestionsCount.value += QUESTIONS_PER_PAGE;
+    isLoadingMore.value = false;
+  }, 300);
+};
+
+const handleScroll = () => {
+  const scrollContainer = document.documentElement;
+  const scrolledToBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop <= scrollContainer.clientHeight + 300;
+  
+  if (scrolledToBottom && visibleQuestionsCount.value < filteredQuestions.value.length) {
+    loadMoreQuestions();
+  }
+};
+
 const filteredQuestions = computed(() => {
   let filtered = questions.value;
 
   if (activeTab.value === 'bookmarked') {
     filtered = filtered.filter(q => q.bookmarked);
-  }
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(q =>
-      q.id.toString().includes(query) ||
-      q.subject.toLowerCase().includes(query)
-    );
   }
 
   return filtered;
@@ -609,8 +542,13 @@ const loadQuestions = () => {
 
     let allQuestions = [];
     
+    // Process courses in the order they come from API
     opticData.courses.forEach(course => {
-      Object.entries(course.pages).forEach(([pageNumber, pageQuestions]) => {
+      // Get all pages and sort them numerically
+      const pageNumbers = Object.keys(course.pages).map(Number).sort((a, b) => a - b);
+      
+      pageNumbers.forEach(pageNumber => {
+        const pageQuestions = course.pages[pageNumber];
         Object.values(pageQuestions).forEach(question => {
           allQuestions.push({
             id: question.id,
@@ -629,7 +567,18 @@ const loadQuestions = () => {
       });
     });
 
-    allQuestions.sort((a, b) => a.number - b.number);
+    // Sort questions only by page number within each subject
+    allQuestions.sort((a, b) => {
+      if (a.title !== b.title) {
+        // Keep subjects in their original order by finding their index in courses array
+        const subjectOrderA = opticData.courses.findIndex(c => c.title === a.title);
+        const subjectOrderB = opticData.courses.findIndex(c => c.title === b.title);
+        return subjectOrderA - subjectOrderB;
+      }
+      
+      // If same subject, sort by page number
+      return a.page - b.page;
+    });
 
     questions.value = allQuestions.map(newQ => {
       const existingQ = questions.value.find(q => q.id === newQ.id);
@@ -657,9 +606,6 @@ watch(availablePages, (newPages) => {
 
 const currentPageQuestions = computed(() => {
   const questions = filteredQuestions.value.filter(q => q.page === currentPage.value);
-/*   questions.forEach(q => {
-    console.log('Full image URL:', `${imageBaseUrl}/${q.image}`);
-  }); */
   return questions;
 });
 
@@ -667,31 +613,6 @@ const totalQuestions = computed(() => questions.value.length);
 const answeredOrSavedCount = computed(() => questions.value.filter(q => q.answer !== null || q.saved).length);
 const progress = computed(() => (answeredOrSavedCount.value / totalQuestions.value) * 100);
 const hasBookmarkedQuestions = computed(() => questions.value.some(q => q.bookmarked));
-
-const currentPageAnsweredOrSavedCount = computed(() => {
-  return currentPageQuestions.value.filter(q => q.answer !== null || q.saved).length;
-});
-
-const currentPageProgress = computed(() => {
-  return (currentPageAnsweredOrSavedCount.value / currentPageQuestions.value.length) * 100;
-});
-
-const hasPreviousPage = computed(() => {
-  const allPages = availablePages.value;
-  const currentIndex = allPages.indexOf(currentPage.value);
-  return currentIndex > 0;
-});
-
-const hasNextPage = computed(() => {
-  const allPages = availablePages.value;
-  const currentIndex = allPages.indexOf(currentPage.value);
-  return currentIndex < allPages.length - 1;
-});
-
-const hasUnsavedAnswers = computed(() => {
-  // Her zaman kaydetmeye izin ver
-  return true;
-});
 
 const selectAnswer = (questionId, option) => {
   const question = questions.value.find(q => q.id === questionId);
@@ -785,29 +706,7 @@ const handleKeyPress = (e) => {
     }
   }
 };
-
-const goToPreviousPage = () => {
-  if (hasPreviousPage.value) {
-    const allPages = availablePages.value;
-    const currentIndex = allPages.indexOf(currentPage.value);
-    currentPage.value = allPages[currentIndex - 1];
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-};
-
-const goToNextPage = () => {
-  if (hasNextPage.value) {
-    const allPages = availablePages.value;
-    const currentIndex = allPages.indexOf(currentPage.value);
-    currentPage.value = allPages[currentIndex + 1];
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-};
-
-const showSaveConfirmation = () => {
-  saveCurrentPageAnswers();
-};
-
+/* 
 const saveCurrentPageAnswers = () => {
   const currentAnswers = getCurrentPageAnswers();
   
@@ -840,10 +739,10 @@ const saveCurrentPageAnswers = () => {
     toast: true,
     position: 'top-end',
   });
-};
+}; */
 
 const isPageSaved = (page) => {
-  return questions.value.filter(q => q.page === page).every(q => q.saved);
+  return savedPages.value.has(parseInt(page));
 };
 
 const handleImageError = (event) => {
@@ -894,41 +793,9 @@ const simulateImageError = (imageUrl) => {
 
 const handleAnswerChange = (questionId, answer) => {
   const question = questions.value.find(q => q.id === questionId);
-  if (question) {
+  if (question && !isPageSaved(question.page)) {
     question.answer = answer;
-    
-    // If the question was previously saved, update allSavedAnswers
-    if (question.saved) {
-      const currentAnswers = getCurrentPageAnswers();
-      allSavedAnswers.value = mergeAndSortAnswers(currentAnswers);
-      saveAnswers();
-    }
   }
-};
-
-const getCurrentPageAnswers = () => {
-  const answers = {};
-  
-  currentPageQuestions.value.forEach(question => {
-    // Initialize the subject if it doesn't exist
-    if (!answers[question.title]) {
-      answers[question.title] = {};
-    }
-    
-    // Initialize the page if it doesn't exist
-    if (!answers[question.title][question.page]) {
-      answers[question.title][question.page] = {};
-    }
-    
-    // Add the question with its ID as the key
-    answers[question.title][question.page][question.id] = {
-      id: question.id,
-      correct: parseInt(question.correct_answer),
-      answer: question.answer !== null ? parseInt(question.answer) : null
-    };
-  });
-  
-  return { answers };
 };
 
 const mergeAndSortAnswers = (currentAnswers) => {
@@ -976,74 +843,8 @@ const mergeAndSortAnswers = (currentAnswers) => {
   return sortedAnswers;
 };
 
-const showResults = ref(false);
-
 const handleSubmit = () => {
-  if (isFormCompleted.value) {
-    Swal.fire({
-      title: 'Dikkat',
-      text: 'Optik form zaten tamamlandı. Tekrar gönderilemez.',
-      icon: 'warning',
-      confirmButtonText: 'Tamam',
-      confirmButtonColor: '#E50914',
-      background: '#141414',
-      color: '#fff',
-      iconColor: '#E50914'
-    });
-    return;
-  }
-
-  if (!areAllPagesSaved.value) {
-    Swal.fire({
-      title: 'Dikkat',
-      text: 'Lütfen tüm sayfaları kaydediniz!',
-      icon: 'warning',
-      confirmButtonText: 'Tamam',
-      confirmButtonColor: '#E50914',
-      background: '#141414',
-      color: '#fff',
-      iconColor: '#E50914'
-    });
-    return;
-  }
   showSubmitModal.value = true;
-};
-
-const closeSubmitModal = () => {
-  showSubmitModal.value = false;
-};
-
-const confirmSubmit = async () => {
-  try {
-    isSubmitting.value = true;
-    submitError.value = null;
-    
-    console.log('Final answers to be submitted:', allSavedAnswers.value);
-    
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    showSubmitModal.value = false;
-    showResults.value = true;
-    isFormCompleted.value = true; // Set form as completed
-    localStorage.setItem('optikFormCompleted', 'true'); // Save completion status
-    
-    Swal.fire({
-      title: 'Başarılı!',
-      text: 'Optik formunuz başarıyla tamamlandı.',
-      icon: 'success',
-      confirmButtonText: 'Tamam',
-      confirmButtonColor: '#E50914',
-      background: '#141414',
-      color: '#fff',
-      iconColor: '#E50914'
-    });
-    
-  } catch (error) {
-    console.error('Submit error:', error);
-    submitError.value = error.response?.data?.message || error.message || 'Bir hata oluştu. Lütfen tekrar deneyiniz.';
-  } finally {
-    isSubmitting.value = false;
-  }
 };
 
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -1054,6 +855,15 @@ const areAllPagesSaved = computed(() => {
   const allPages = [...new Set(questions.value.map(q => q.page))];
   return allPages.every(page => savedPages.value.has(page));
 });
+
+const scrollToSelectedPage = () => {
+  nextTick(() => {
+    const pageElement = document.querySelector(`[data-page="${currentPage.value}"]`);
+    if (pageElement) {
+      pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+};
 
 onMounted(() => {
   loadQuestions();
@@ -1075,6 +885,8 @@ onMounted(() => {
   if (localStorage.getItem('welcomeModalShown')) {
     showWelcomeModal.value = false;
   }
+
+  window.addEventListener('scroll', handleScroll);
 });
 
 onUnmounted(() => {
@@ -1084,6 +896,8 @@ onUnmounted(() => {
       closeVideoModal();
     }
   });
+
+  window.removeEventListener('scroll', handleScroll);
 });
 
 watch(questions, saveAnswers, { deep: true });
@@ -1098,6 +912,102 @@ const openAccordions = ref({});
 
 const toggleAccordion = (subject) => {
   openAccordions.value[subject] = !openAccordions.value[subject];
+};
+
+const groupedQuestions = computed(() => {
+  const grouped = {};
+  visibleQuestions.value.forEach(q => {
+    if (!grouped[q.title]) {
+      grouped[q.title] = {};
+    }
+    if (!grouped[q.title][q.page]) {
+      grouped[q.title][q.page] = [];
+    }
+    grouped[q.title][q.page].push(q);
+  });
+  return grouped;
+});
+
+const savePageAnswers = (subject, page) => {
+  // Show confirmation modal first
+  Swal.fire({
+    title: 'Emin misiniz?',
+    html: `
+      <div class="text-left space-y-2">
+        <p>Sayfa ${page} cevaplarınızı kaydetmek üzeresiniz.</p>
+        <p class="text-yellow-500"><strong>Dikkat:</strong> Kaydedilen cevaplar daha sonra değiştirilemez!</p>
+      </div>
+    `,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Evet, Kaydet',
+    cancelButtonText: 'İptal',
+    confirmButtonColor: '#E50914',
+    cancelButtonColor: '#3F3F3F',
+    background: '#141414',
+    color: '#fff',
+    iconColor: '#E50914'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Proceed with saving
+      console.log('Saving answers for:', { subject, page });
+      
+      // Get questions for this specific page
+      const pageQuestions = questions.value.filter(q => q.title === subject && q.page === parseInt(page));
+      console.log('Found questions:', pageQuestions);
+      
+      if (pageQuestions.length === 0) {
+        console.error('No questions found for this page');
+        return;
+      }
+
+      // Create answers object for just this page
+      const pageAnswers = {
+        answers: {
+          [subject]: {
+            [page]: {}
+          }
+        }
+      };
+      
+      // Add each question's answer to the structure
+      pageQuestions.forEach(question => {
+        pageAnswers.answers[subject][page][question.id] = {
+          id: question.id,
+          correct: parseInt(question.correct_answer),
+          answer: question.answer !== null ? parseInt(question.answer) : null
+        };
+        
+        // Mark question as saved and lock it
+        question.saved = true;
+      });
+      
+      // Add page to savedPages to lock it
+      savedPages.value.add(parseInt(page));
+      
+      // Save to localStorage
+      saveAnswers();
+      
+      console.log('Sending page answers:', pageAnswers);
+      
+      // Show success message
+      Swal.fire({
+        title: 'Başarılı!',
+        text: 'Cevaplarınız kaydedildi.',
+        icon: 'success',
+        confirmButtonText: 'Tamam',
+        confirmButtonColor: '#E50914',
+        background: '#141414',
+        color: '#fff',
+        iconColor: '#E50914',
+        showConfirmButton: true,
+        timer: 1500,
+        timerProgressBar: true,
+        toast: true,
+        position: 'top-end',
+      });
+    }
+  });
 };
 </script>
 
