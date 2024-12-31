@@ -27,55 +27,65 @@
     <!-- Main Content -->
     <div class="mx-auto px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10">
       <!-- Tabs and Search -->
-      <div class="py-6">
-        <div class="flex flex-col sm:flex-row gap-4 xl:max-w-[50%] text-nowrap">
-          <div class="flex gap-4">
+      <div class="py-4 sm:py-6">
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 xl:max-w-[50%] text-nowrap">
+          <div class="flex gap-3 sm:gap-4">
             <button @click="activeTab = 'all'" :class="[
-              'px-4 py-2 rounded text-sm font-medium transition-colors w-1/2',
-              activeTab === 'all' ? 'bg-[#E50914] text-white' : 'bg-[#141414] text-zinc-200 hover:bg-[#3F3F3F]'
+              'px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-medium transition-colors w-1/2',
+              activeTab === 'all' ? 'bg-[#E50914] text-white shadow-lg shadow-[#E50914]/20' : 'bg-[#141414] text-zinc-200 hover:bg-[#3F3F3F]'
             ]">
               Tüm Sorular
             </button>
             <button @click="activeTab = 'bookmarked'" :class="[
-              'px-4 py-2 rounded text-sm font-medium transition-colors w-1/2',
-              activeTab === 'bookmarked' ? 'bg-[#E50914] text-white' : 'bg-[#141414] text-zinc-200 hover:bg-[#3F3F3F]'
+              'px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-medium transition-colors w-1/2',
+              activeTab === 'bookmarked' ? 'bg-[#E50914] text-white shadow-lg shadow-[#E50914]/20' : 'bg-[#141414] text-zinc-200 hover:bg-[#3F3F3F]'
             ]">
               Favori Sorular
             </button>
           </div>
           <div class="relative flex-1 sm:w-[30%]">
             <input v-model="searchQuery" type="text" placeholder="Soru ara..."
-              class="w-full bg-[#141414] text-white rounded pl-10 pr-3 py-2 text-sm min-w-0 border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
-            <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+              class="w-full bg-[#141414] text-white rounded pl-10 pr-3 py-2 text-xs sm:text-sm min-w-0 border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
+            <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
           <select v-model="currentPage"
-            class="bg-[#141414] text-zinc-200 rounded px-2 py-2 text-sm w-full sm:w-[30%] border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
+            class="bg-[#141414] text-zinc-200 rounded px-2 py-2 text-xs sm:text-sm w-full sm:w-[30%] border border-transparent focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-colors">
             <template v-for="(pages, title) in groupedPages" :key="title">
-              <option disabled class="font-semibold bg-[#1F1F1F]">{{ title }}</option>
+              <option disabled class="font-semibold bg-[#1F1F1F] text-[#E50914]">{{ title }}</option>
               <option v-for="page in pages" :key="page" :value="page"
                 :class="['pl-4', { 'text-[#E50914]': isPageSaved(page) }]">
-                Sayfa {{ page }} {{ isPageSaved(page) ? '✓ (kaydedildi)' : '' }}
+                {{ title }} - Sayfa {{ page }} {{ isPageSaved(page) ? '✓' : '' }}
               </option>
             </template>
           </select>
           <button 
-            @click="handleSubmit" 
-            :disabled="!areAllPagesSaved"
+            @click="handleSubmit"
+            :disabled="isFormCompleted"
             :class="[
-              'px-6 py-2 rounded text-sm font-medium transition-colors',
-              areAllPagesSaved 
-                ? 'bg-green-600 hover:bg-green-700 text-white' 
-                : 'bg-gray-600 cursor-not-allowed text-gray-300'
+              'px-4 sm:px-6 py-2 rounded text-xs sm:text-sm font-medium transition-colors flex items-center gap-2',
+              isFormCompleted 
+                ? 'bg-green-600 text-white cursor-not-allowed' 
+                : !areAllPagesSaved
+                  ? 'bg-gray-600 cursor-not-allowed text-gray-300'
+                  : 'bg-[#E50914] text-white shadow-lg shadow-[#E50914]/20 hover:bg-[#E50914]/90'
             ]"
           >
-            Sınavı Bitir
+            <template v-if="isFormCompleted">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Optik Form Tamamlandı
+            </template>
+            <template v-else>
+              Optik Formu Tamamla
+            </template>
           </button>
         </div>
       </div>
 
       <!-- Progress Bars Container -->
       <div class="relative">
-        <div class="sticky top-16 -mx-4 sm:-mx-6 lg:-mx-16 2xl:-mx-24 backdrop-blur-sm z-40 py-4">
+        <div v-show="activeTab === 'all'" class="sticky top-16 -mx-4 sm:-mx-6 lg:-mx-16 2xl:-mx-24 backdrop-blur-sm z-40 py-4">
           <div class="mx-auto px-4 sm:px-6 lg:px-16 2xl:px-24">
             <div class="grid gap-2">
               <div>
@@ -107,7 +117,7 @@
         <div class="pt-4">
           <div v-if="activeTab === 'bookmarked' && !hasBookmarkedQuestions"
             class="text-center text-zinc-400 py-12 mb-36">
-            <component :is="BookmarkPlusIcon" class="mx-auto w-12 h-12 mb-4 text-[#E50914]" />
+            <component :is="BookmarkPlusIcon" class="mx-auto w-12 h-12 mb-4 text-green-500" />
             <p class="text-lg">Favori sorunuz yok. Favorilere eklemek için sorulardaki işarete tıklayın.</p>
           </div>
           <div v-else-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20 sm:pb-24">
@@ -152,30 +162,40 @@
                     :id="`question-${question.id}-${option}`"
                     :value="index.toString()"
                     v-model="question.answer"
-                    :disabled="question.saved || isPageSaved(question.page)"
                     class="absolute opacity-0 w-full h-full cursor-pointer"
                     @change="handleAnswerChange(question.id, index.toString())"
+                    :disabled="isFormCompleted"
                   >
                   <label 
                     :for="`question-${question.id}-${option}`"
                     :class="[
-                      'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border cursor-pointer',
+                      'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border cursor-pointer p-4',
                       {
-                        'border-[#E50914] bg-red-600 text-white': !question.saved && question.answer === index.toString(),
-                        'border-[#3F3F3F] hover:border-[#E50914] text-zinc-200': !question.saved && question.answer !== index.toString(),
-                        'border-[#E50914] bg-[#E50914] text-white': question.saved && question.answer === index.toString(),
-                        'border-[#3F3F3F] text-zinc-200': question.saved && question.answer !== index.toString(),
-                        'opacity-50 cursor-not-allowed': question.saved || isPageSaved(question.page)
+                        'border-[#E50914] bg-red-600 text-white': question.answer === index.toString() && !isFormCompleted,
+                        'border-[#3F3F3F] hover:border-[#E50914] text-zinc-200': question.answer !== index.toString() && !isFormCompleted,
+                        'border-zinc-700 text-zinc-500 cursor-not-allowed': isFormCompleted && question.answer !== index.toString() && index.toString() !== question.correct_answer,
+                        'border-green-600 bg-green-600 text-white': isFormCompleted && index.toString() === question.correct_answer,
+                        'border-[#E50914] bg-red-600/50 text-white': isFormCompleted && question.answer === index.toString() && index.toString() !== question.correct_answer
                       }
                     ]">
                     {{ option }}
                   </label>
                 </div>
               </div>
-
+              <!-- Clear Answer Button -->
+              <button 
+                v-if="question.answer !== null && !isFormCompleted" 
+                @click="handleAnswerChange(question.id, null)"
+                class="mt-4 flex items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded-md py-1.5 px-3 hover:border-zinc-700 w-full"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span class="text-sm">Cevabı Temizle</span>
+              </button>
 
               <!-- Solution Video Button -->
-              <div v-if="question.saved && showSolutionVideos" class="mt-6">
+              <div v-show="question.saved && showSolutionVideos" class="mt-6">
                 <button @click="watchSolutionVideo(question.id)"
                   class="w-full bg-[#141414] hover:bg-[#3F3F3F] text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200 border border-[#3F3F3F]">
                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -191,30 +211,45 @@
 
         <!-- Bottom Navigation Bar -->
         <div v-if="activeTab !== 'bookmarked'"
-          class="fixed bottom-0 left-0 right-0 bg-[#141414] backdrop-blur-sm border-t border-[#141414] z-40">
-          <div class="mx-auto flex justify-between items-center py-3 px-4 sm:px-6 lg:px-16 2xl:px-24">
+          class="fixed bottom-0 left-0 right-0 bg-[#141414]/95 backdrop-blur-sm border-t border-[#3F3F3F] z-40">
+          <div class="mx-auto flex justify-between items-center py-4 px-4 sm:px-6 lg:px-16 2xl:px-24">
             <button @click="goToPreviousPage" :disabled="!hasPreviousPage"
-              class="px-4 py-2 text-sm bg-[#141414] text-white rounded hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-              Önceki
+              class="px-3 sm:px-6 py-2.5 text-sm bg-[#141414] text-white rounded-md hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-[#3F3F3F] hover:border-[#E50914] flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              <span class="hidden sm:inline">Önceki Sayfa</span>
             </button>
-            <button @click="showSaveConfirmation" :disabled="!hasUnsavedAnswers || isPageSaved(currentPage)" :class="[
-              'px-4 py-2 text-sm rounded transition-colors',
-              isPageSaved(currentPage)
-                ? 'bg-[#141414] text-white opacity-50 cursor-not-allowed'
-                : 'bg-[#E50914] text-white hover:bg-[#E50914]/90 disabled:opacity-50 disabled:cursor-not-allowed'
-            ]">
-              {{ isPageSaved(currentPage) ? 'Kaydedildi' : 'Kaydet' }}
+            <button 
+              @click="showSaveConfirmation" 
+              :disabled="!hasUnsavedAnswers || isFormCompleted" 
+              :class="[
+                'px-6 py-2.5 text-sm rounded-md transition-colors flex items-center gap-2',
+                (!hasUnsavedAnswers || isFormCompleted)
+                  ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
+                  : 'bg-[#E50914] text-white hover:bg-[#E50914]/90'
+              ]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <span class="inline">Kaydet</span>
             </button>
             <button @click="goToNextPage" :disabled="!hasNextPage"
-              class="px-4 py-2 text-sm bg-[#141414] text-white rounded hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-              Sonraki
+              class="px-3 sm:px-6 py-2.5 text-sm bg-[#141414] text-white rounded-md hover:bg-[#3F3F3F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-[#3F3F3F] hover:border-[#E50914] flex items-center gap-2"
+            >
+              <span class="hidden sm:inline">Sonraki Sayfa</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           </div>
         </div>
       </div>
 
       <!-- Save Confirmation Modal -->
-      <div v-if="showConfirmation"
+      <!-- <div v-if="showConfirmation"
         class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
         <div class="bg-[#141414] text-white p-6 md:p-8 rounded-md max-w-xl w-full border border-zinc-800 shadow-2xl">
           <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-[#E50914]">Cevapları Kaydet</h2>
@@ -242,7 +277,7 @@
             </button>
           </div>
         </div>
-      </div>
+      </div> -->
       <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
         <symbol id="pencil-circle" viewBox="0 0 49 49">
           <g clip-path="url(#clip0_11_6)">
@@ -261,12 +296,12 @@
 
   <!-- Video Modal -->
   <div v-if="showVideoModal"
-    class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-zinc-900 rounded-lg overflow-hidden max-w-4xl w-full">
-      <div class="p-4 flex justify-between items-center border-b border-zinc-800">
-        <h3 class="text-lg font-medium text-zinc-200">Çözüm Videosu</h3>
-        <button @click="closeVideoModal" class="text-zinc-400 hover:text-white">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-[#141414] rounded-lg overflow-hidden w-full max-w-4xl mx-4">
+      <div class="p-3 sm:p-4 flex justify-between items-center border-b border-zinc-800">
+        <h3 class="text-base sm:text-lg font-medium text-zinc-200">Çözüm Videosu</h3>
+        <button @click="closeVideoModal" class="text-zinc-400 hover:text-white transition-colors">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -275,7 +310,7 @@
         <iframe v-if="currentVideoUrl" :src="currentVideoUrl" class="w-full h-full" frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen></iframe>
-        <div v-else class="w-full h-full flex items-center justify-center text-zinc-400">
+        <div v-else class="w-full h-full flex items-center justify-center text-zinc-400 text-sm sm:text-base">
           Video bulunamadı
         </div>
       </div>
@@ -285,31 +320,48 @@
   <!-- Welcome Modal -->
   <div v-if="showWelcomeModal"
     class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-  <div class="bg-[#141414] text-white p-6 md:p-8 rounded-md max-w-xl w-full border border-zinc-800 shadow-2xl">
-    <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-[#E50914]">Kişiye Özel Kitap Optik Form</h2>
-    <p class="mb-6 md:mb-8 text-sm md:text-base text-gray-200 leading-relaxed">
-      Bu ekran ile Kişiye Özel Kitap'ınızdan çözdüğünüz soruları cevaplandırabilir, favori sorularınızı işaretleyebilir ve cevaplarınızı kaydedebilirsiniz.
-      <br>
-      <br>
-      Ekranda gördüğünüz sayfalar, kitaptaki sayfalarla aynıdır.
-      <br>
-      <br>
-      Cevaplarınızı kaydettikten sonra, bu sayfadaki soruların doğru cevaplarını görüp kendi cevaplanırızla karşılaştırabilirsiniz.
-      <br>
-      <br>
-      <span class="font-bold text-xs bg-[#E50914]/10 text-[#E50914] py-1 px-2 rounded">Not: Klavyenizdeki A, B, C, D, E tuşlarını kullanarak hızlıca cevap verebilirsiniz.</span>
-    </p>
-    <div class="flex items-center mb-6 md:mb-8">
+  <div class="bg-[#141414] text-white p-6 rounded-md max-w-lg w-full border border-zinc-800 shadow-2xl">
+    <h2 class="text-xl font-bold mb-4 text-[#E50914]">Kişiye Özel Kitap Optik Form</h2>
+    <div class="mb-4 text-sm text-gray-200 leading-relaxed space-y-3">
+      <div class="space-y-2">
+        <p class="flex items-start gap-2">
+          <span class="text-[#E50914] font-bold">1.</span>
+          <span>Her sayfadaki soruları cevaplayıp "Kaydet" butonuna basın. İstediğiniz soruları boş bırakabilirsiniz.</span>
+        </p>
+        
+        <p class="flex items-start gap-2">
+          <span class="text-[#E50914] font-bold">2.</span>
+          <span>Tüm sayfaları tamamladıktan sonra "Sınavı Bitir" butonuna basın. İşaretlenmemiş sorular boş sayılacaktır.</span>
+        </p>
+        
+        <p class="flex items-start gap-2">
+          <span class="text-[#E50914] font-bold">3.</span>
+          <span>Sınavı bitirdikten sonra cevaplarınızı değiştiremezsiniz.</span>
+        </p>
+      </div>
+
+      <div class="bg-[#E50914]/10 text-[#E50914] p-2 rounded space-y-1 text-xs">
+        <p class="font-semibold">İpuçları:</p>
+        <ul class="list-disc list-inside space-y-0.5">
+          <li>A, B, C, D, E tuşlarıyla hızlıca cevap verebilirsiniz</li>
+          <li><BookmarkPlusIcon class="w-4 h-4 inline-block text-green-500" /> işareti ile soruları favorilere ekleyebilirsiniz</li>
+          <li>"Cevabı Temizle" butonu ile cevabınızı kaldırabilirsiniz</li>
+          <li>Cevaplarınızı istediğiniz zaman değiştirebilirsiniz</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="flex items-center mb-4">
       <input type="checkbox" id="dontShowWelcomeAgain" v-model="dontShowWelcomeAgain"
-        class="mr-3 w-4 h-4 bg-[#141414] border-2 border-gray-600 text-[#E50914] rounded focus:ring-[#E50914] focus:ring-offset-[#141414]">
-      <label for="dontShowWelcomeAgain" class="text-sm md:text-base text-gray-300 select-none hover:text-white transition-colors">
+        class="mr-2 w-4 h-4 bg-[#141414] border-2 border-gray-600 text-[#E50914] rounded focus:ring-[#E50914] focus:ring-offset-[#141414]">
+      <label for="dontShowWelcomeAgain" class="text-xs text-gray-300 select-none hover:text-white transition-colors">
         Bu bilgilendirmeyi tekrar gösterme
       </label>
     </div>
     <div class="flex justify-end">
       <button @click="closeWelcomeModal"
-        class="px-8 py-3 text-base md:text-lg font-medium bg-[#E50914] text-white rounded hover:bg-[#E50914]/90 transition-colors duration-300 shadow-xl shadow-[#E50914]/20">
-        Tamam
+        class="px-6 py-2 text-sm font-medium bg-[#E50914] text-white rounded hover:bg-[#E50914]/90 transition-colors duration-300 shadow-xl shadow-[#E50914]/20">
+        Anladım
       </button>
     </div>
   </div>
@@ -358,78 +410,100 @@
   <!-- Submit Confirmation Modal -->
   <div v-if="showSubmitModal"
     class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-    <div class="bg-[#141414] text-white p-6 md:p-8 rounded-md max-w-4xl w-full border border-zinc-800 shadow-2xl overflow-y-auto max-h-[90vh]">
-      <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-[#E50914]">Sınavı Bitir</h2>
+    <div class="bg-[#141414] text-white p-4 sm:p-6 md:p-8 rounded-md w-full max-w-4xl border border-zinc-800 shadow-2xl overflow-y-auto max-h-[90vh] mx-4">
+      <h2 class="text-xl sm:text-2xl md:text-3xl font-bold mb-4 text-[#E50914]">Optik Formu Tamamla</h2>
       <div class="mb-6 space-y-4">
-        <p class="text-sm md:text-base text-gray-200 leading-relaxed">
+        <p class="text-sm sm:text-base text-gray-200 leading-relaxed">
           Sınavınızı bitirmek üzeresiniz. Kaydedilen cevaplarınız aşağıdaki gibidir:
         </p>
         
         <!-- Display saved answers -->
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-6">
           <template v-for="(pages, subject) in allSavedAnswers" :key="subject">
-            <div class="border border-zinc-800 rounded-lg p-4">
-              <h3 class="text-lg font-semibold mb-4">{{ subject }}</h3>
-              <div class="space-y-4">
-                <template v-for="(questions, page) in pages" :key="page">
-                  <div class="border-t border-zinc-800 pt-4">
-                    <h4 class="text-sm font-medium mb-2">Sayfa {{ page }}</h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      <div v-for="(question, questionIndex) in Object.values(questions)" 
-                        :key="question.id"
-                        class="bg-[#1F1F1F] p-3 rounded-lg text-sm">
-                        <div class="flex justify-between items-center">
-                          <span>Soru {{ 
-                            Object.entries(pages)
-                              .filter(([p]) => parseInt(p) < parseInt(page))
-                              .reduce((count, [_, pageQuestions]) => count + Object.keys(pageQuestions).length, 0) 
-                            + questionIndex + 1 
-                          }}</span>
-                          <span :class="question.answer === null ? 'text-yellow-500' : 'text-[#E50914]'">
-                            {{ question.answer === null ? 'Boş' : ['A', 'B', 'C', 'D', 'E'][question.answer] }}
-                          </span>
+            <div class="border border-zinc-800 rounded-lg overflow-hidden">
+              <button 
+                @click="toggleAccordion(subject)"
+                class="w-full p-3 sm:p-4 flex justify-between items-center text-left hover:bg-zinc-900/50 transition-colors"
+              >
+                <h3 class="text-base sm:text-lg font-semibold text-[#E50914] flex items-center gap-2">
+                  <span>{{ subject }}</span>
+                  <span class="text-xs text-zinc-400 font-normal">
+                    ({{ Object.values(pages).reduce((total, page) => total + Object.keys(page).length, 0) }} Soru)
+                  </span>
+                </h3>
+                <svg 
+                  class="w-5 h-5 text-zinc-400 transition-transform duration-200"
+                  :class="{ 'rotate-180': openAccordions[subject] }"
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              <div v-show="openAccordions[subject]" class="border-t border-zinc-800">
+                <div class="p-3 sm:p-4 space-y-4">
+                  <template v-for="(questions, page) in pages" :key="page">
+                    <div class="border-t border-zinc-800 pt-3 sm:pt-4 first:border-t-0 first:pt-0">
+                      <h4 class="text-xs sm:text-sm font-medium mb-2 text-zinc-400">Sayfa {{ page }}</h4>
+                      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
+                        <div v-for="(question, questionIndex) in Object.values(questions)" 
+                          :key="question.id"
+                          class="bg-[#1F1F1F] p-2 sm:p-3 rounded-lg text-xs sm:text-sm"
+                        >
+                          <div class="flex justify-between items-center">
+                            <span class="text-zinc-300">Soru {{ 
+                              Object.entries(pages)
+                                .filter(([p]) => parseInt(p) < parseInt(page))
+                                .reduce((count, [_, pageQuestions]) => count + Object.keys(pageQuestions).length, 0) 
+                              + questionIndex + 1 
+                            }}</span>
+                            <span :class="question.answer === null ? 'text-yellow-500' : 'text-[#E50914] font-medium'">
+                              {{ question.answer === null ? 'Boş' : ['A', 'B', 'C', 'D', 'E'][question.answer] }}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </template>
+                  </template>
+                </div>
               </div>
             </div>
           </template>
         </div>
         
-        <p class="text-yellow-500 text-sm mt-4">
+        <p class="text-yellow-500 text-xs sm:text-sm mt-4 bg-yellow-500/10 p-3 rounded-lg">
           <strong>Dikkat:</strong> Sınavı bitirdikten sonra cevaplarınızda değişiklik yapamazsınız.
         </p>
 
-        <!-- Add error message display -->
-        <p v-if="submitError" class="text-red-500 text-sm mt-4">
+        <p v-if="submitError" class="text-[#E50914] text-xs sm:text-sm mt-4 bg-[#E50914]/10 p-3 rounded-lg">
           {{ submitError }}
         </p>
       </div>
       
-      <div class="flex justify-end space-x-4">
+      <div class="flex justify-end space-x-3 sm:space-x-4">
         <button 
           @click="closeSubmitModal"
           :disabled="isSubmitting"
-          class="px-6 py-3 text-base font-medium bg-zinc-800 text-white rounded hover:bg-zinc-700 transition-colors disabled:opacity-50"
+          class="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium bg-zinc-800 text-white rounded hover:bg-zinc-700 transition-colors disabled:opacity-50 min-w-[100px]"
         >
           İptal
         </button>
         <button 
           @click="confirmSubmit"
           :disabled="isSubmitting"
-          class="px-6 py-3 text-base font-medium bg-[#E50914] text-white rounded hover:bg-[#E50914]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 min-w-[120px]"
+          class="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium bg-[#E50914] text-white rounded hover:bg-[#E50914]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 min-w-[140px]"
         >
           <template v-if="isSubmitting">
-            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Gönderiliyor...
+            Tamamlanıyor...
           </template>
           <template v-else>
-            Sınavı Bitir
+            Tamamla
           </template>
         </button>
       </div>
@@ -445,6 +519,9 @@ import AppHeader from "@/components/AppHeader.vue";
 import QuestionSkeleton from "@/components/QuestionSkeleton.vue";
 // import axios from 'axios';
 
+// Import SweetAlert2 at the top with other imports
+import Swal from 'sweetalert2';
+
 const analysisStore = useAnalysisStore();
 const imageBaseUrl = process.env.VUE_APP_IMAGE_BASE_URL || '';
 const showQuestionImages = ref(process.env.VUE_APP_SHOW_QUESTION_IMAGES === 'true');
@@ -456,8 +533,6 @@ const error = ref(null);
 const searchQuery = ref('');
 const activeTab = ref('all');
 const currentPage = ref(1);
-const showConfirmation = ref(false);
-const dontShowConfirmationAgain = ref(false);
 const imageLoadError = ref(false);
 const showVideoModal = ref(false);
 const currentVideoUrl = ref('');
@@ -467,6 +542,12 @@ const allSavedAnswers = ref({});
 const showSubmitModal = ref(false);
 const isSubmitting = ref(false);
 const submitError = ref(null);
+
+// Add this with other refs
+const savedPages = ref(new Set());
+
+// Add this with other refs at the top
+const isFormCompleted = ref(false);
 
 const filteredQuestions = computed(() => {
   let filtered = questions.value;
@@ -608,7 +689,8 @@ const hasNextPage = computed(() => {
 });
 
 const hasUnsavedAnswers = computed(() => {
-  return currentPageQuestions.value.some(q => !q.saved);
+  // Her zaman kaydetmeye izin ver
+  return true;
 });
 
 const selectAnswer = (questionId, option) => {
@@ -656,6 +738,9 @@ const loadAnswers = () => {
         correct: parseInt(q.correct_answer),
         answer: q.answer !== null ? parseInt(q.answer) : null
       };
+      
+      // Add page to savedPages if it has saved questions
+      savedPages.value.add(q.page);
     });
     
     allSavedAnswers.value = mergeAndSortAnswers(reconstructedAnswers);
@@ -720,45 +805,41 @@ const goToNextPage = () => {
 };
 
 const showSaveConfirmation = () => {
-  if (localStorage.getItem('dontShowSaveConfirmation') === 'true') {
-    saveCurrentPageAnswers();
-  } else {
-    showConfirmation.value = true;
-  }
-};
-
-const cancelSave = () => {
-  showConfirmation.value = false;
-};
-
-const confirmSave = () => {
   saveCurrentPageAnswers();
-  showConfirmation.value = false;
-  if (dontShowConfirmationAgain.value) {
-    localStorage.setItem('dontShowSaveConfirmation', 'true');
-  }
 };
 
 const saveCurrentPageAnswers = () => {
-  let unsavedAnswersExist = false;
   const currentAnswers = getCurrentPageAnswers();
   
+  // Merge and sort the answers
+  allSavedAnswers.value = mergeAndSortAnswers(currentAnswers);
+  
+  // Mark current page as saved at least once
+  savedPages.value.add(currentPage.value);
+  
+  // Mark all questions on current page as saved
   currentPageQuestions.value.forEach(question => {
-    if (!question.saved) {
-      question.saved = true;
-      unsavedAnswersExist = true;
-    }
+    question.saved = true;
   });
   
-  if (unsavedAnswersExist) {
-    // Merge and sort the answers
-    allSavedAnswers.value = mergeAndSortAnswers(currentAnswers);
-    
-    saveAnswers();
-    // Here you can send the allSavedAnswers array to your backend
-    console.log('All answers to be sent:', allSavedAnswers.value);
-    alert('Cevaplar kaydedildi!');
-  }
+  saveAnswers();
+  console.log('All answers to be sent:', allSavedAnswers.value);
+  
+  Swal.fire({
+    title: 'Başarılı!',
+    text: 'Cevaplarınız kaydedildi.',
+    icon: 'success',
+    confirmButtonText: 'Tamam',
+    confirmButtonColor: '#E50914',
+    background: '#141414',
+    color: '#fff',
+    iconColor: '#E50914',
+    showConfirmButton: true,
+    timer: 1500,
+    timerProgressBar: true,
+    toast: true,
+    position: 'top-end',
+  });
 };
 
 const isPageSaved = (page) => {
@@ -813,8 +894,15 @@ const simulateImageError = (imageUrl) => {
 
 const handleAnswerChange = (questionId, answer) => {
   const question = questions.value.find(q => q.id === questionId);
-  if (question && !question.saved && !isPageSaved(question.page)) {
+  if (question) {
     question.answer = answer;
+    
+    // If the question was previously saved, update allSavedAnswers
+    if (question.saved) {
+      const currentAnswers = getCurrentPageAnswers();
+      allSavedAnswers.value = mergeAndSortAnswers(currentAnswers);
+      saveAnswers();
+    }
   }
 };
 
@@ -891,8 +979,31 @@ const mergeAndSortAnswers = (currentAnswers) => {
 const showResults = ref(false);
 
 const handleSubmit = () => {
+  if (isFormCompleted.value) {
+    Swal.fire({
+      title: 'Dikkat',
+      text: 'Optik form zaten tamamlandı. Tekrar gönderilemez.',
+      icon: 'warning',
+      confirmButtonText: 'Tamam',
+      confirmButtonColor: '#E50914',
+      background: '#141414',
+      color: '#fff',
+      iconColor: '#E50914'
+    });
+    return;
+  }
+
   if (!areAllPagesSaved.value) {
-    alert('Lütfen tüm sayfaları kaydediniz!');
+    Swal.fire({
+      title: 'Dikkat',
+      text: 'Lütfen tüm sayfaları kaydediniz!',
+      icon: 'warning',
+      confirmButtonText: 'Tamam',
+      confirmButtonColor: '#E50914',
+      background: '#141414',
+      color: '#fff',
+      iconColor: '#E50914'
+    });
     return;
   }
   showSubmitModal.value = true;
@@ -907,46 +1018,25 @@ const confirmSubmit = async () => {
     isSubmitting.value = true;
     submitError.value = null;
     
-    /* API Entegrasyonu için hazır kodlar:
-    
-    const response = await axios.post(
-      `${process.env.VUE_APP_API_URL}/api/optic/submit`, 
-      allSavedAnswers.value,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Eğer token kullanıyorsanız
-        }
-      }
-    );
-
-    if (response.data.success) {
-      // Başarılı yanıt
-      showResults.value = true;
-      showSubmitModal.value = false;
-      
-      // LocalStorage'i temizle
-      localStorage.removeItem('optikFormAnswers');
-      
-      // Kullanıcıyı sonuç sayfasına yönlendir
-      // router.push('/results');
-      
-      // Veya başarı mesajı göster
-      alert('Sınavınız başarıyla tamamlandı!');
-    } else {
-      throw new Error(response.data.message || 'Bir hata oluştu');
-    }
-    */
-
-    // Şimdilik sadece console.log
     console.log('Final answers to be submitted:', allSavedAnswers.value);
     
-    // Simüle edilmiş API gecikmesi
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     showSubmitModal.value = false;
     showResults.value = true;
-    alert('Sınavınız başarıyla tamamlandı!');
+    isFormCompleted.value = true; // Set form as completed
+    localStorage.setItem('optikFormCompleted', 'true'); // Save completion status
+    
+    Swal.fire({
+      title: 'Başarılı!',
+      text: 'Optik formunuz başarıyla tamamlandı.',
+      icon: 'success',
+      confirmButtonText: 'Tamam',
+      confirmButtonColor: '#E50914',
+      background: '#141414',
+      color: '#fff',
+      iconColor: '#E50914'
+    });
     
   } catch (error) {
     console.error('Submit error:', error);
@@ -956,14 +1046,24 @@ const confirmSubmit = async () => {
   }
 };
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 const areAllPagesSaved = computed(() => {
+  if (isDevelopment) return true; // Development modunda her zaman true dön
+  
   const allPages = [...new Set(questions.value.map(q => q.page))];
-  return allPages.every(page => isPageSaved(page));
+  return allPages.every(page => savedPages.value.has(page));
 });
 
 onMounted(() => {
   loadQuestions();
   loadAnswers();
+  
+  // Load completion status
+  const completed = localStorage.getItem('optikFormCompleted');
+  if (completed === 'true') {
+    isFormCompleted.value = true;
+  }
 
   window.addEventListener('keydown', handleKeyPress);
   window.addEventListener('keydown', (e) => {
@@ -993,6 +1093,12 @@ watch(availablePages, (newPages) => {
     currentPage.value = newPages[0];
   }
 }, { immediate: true });
+
+const openAccordions = ref({});
+
+const toggleAccordion = (subject) => {
+  openAccordions.value[subject] = !openAccordions.value[subject];
+};
 </script>
 
 <style scoped>
