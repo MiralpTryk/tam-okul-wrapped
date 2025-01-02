@@ -62,7 +62,17 @@ const props = defineProps({
 const emit = defineEmits(['click'])
 
 const handleClick = () => {
-  emit('click', props.item, props.type)
+  console.log('ContentCard - Click event triggered');
+  console.log('ContentCard - Props:', props);
+  
+  // Loading durumunda tıklamayı engelle
+  if (props.type === 'lesson' && props.item.isLoading) {
+    console.log('ContentCard - Click ignored because item is loading');
+    return;
+  }
+  
+  console.log('ContentCard - Emitting click event with:', props.item, props.type);
+  emit('click', props.item, props.type);
 }
 
 const thumbnailUrl = computed(() => {

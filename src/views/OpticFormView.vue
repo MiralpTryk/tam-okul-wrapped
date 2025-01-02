@@ -118,7 +118,7 @@
                 <!-- Group by Page -->
                 <div class="space-y-8">
                   <template v-for="(pageQuestions, page) in subjectQuestions" :key="page">
-                    <div class="pt-6 first:pt-0" :data-page="page">
+                    <div class="" :data-page="page">
                       <h3 class="text-lg font-semibold text-zinc-200 mb-4">Sayfa {{ page }}</h3>
                       
                       <!-- Questions Grid for this page -->
@@ -182,7 +182,7 @@
                           </div>
                           <!-- Clear Answer Button -->
                           <button 
-                            v-if="question.answer !== null && !isFormCompleted" 
+                            v-if="question.answer !== null && !isPageSaved(question.page)" 
                             @click="handleAnswerChange(question.id, null)"
                             class="mt-4 flex items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded-md py-1.5 px-3 hover:border-zinc-700 w-full"
                           >
@@ -1001,7 +1001,7 @@ const savePageAnswers = (subject, page) => {
         color: '#fff',
         iconColor: '#E50914',
         showConfirmButton: true,
-        timer: 1500,
+        timer: 5000,
         timerProgressBar: true,
         toast: true,
         position: 'top-end',

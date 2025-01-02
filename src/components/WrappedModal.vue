@@ -432,7 +432,10 @@ import LogoBack from '@/assets/tam-okul-ai-logo-back.svg';
 import LogoFront from '@/assets/tam-okul-ai-logo-front.svg';
 
 const props = defineProps({
-  show: Boolean,
+  show: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const emit = defineEmits(["close"]);
@@ -450,17 +453,17 @@ const totalSlides = 8;
 const transitionName = ref("slide-right");
 const showInitialSubtext = ref(false);
 const longestStreak = ref(10);
-const name = computed(() => analysisStore.userName.value);
+const name = computed(() => analysisStore.userName?.value || 'Misafir');
 
-const total_questions_solved = computed(() => analysisStore.totalQuestionsSolved.value);
-const total_questions_solved_percentage = computed(() => analysisStore.totalQuestionsSolvedPercentage.value ?? 0);
+const total_questions_solved = computed(() => analysisStore.totalQuestionsSolved?.value || 0);
+const total_questions_solved_percentage = computed(() => analysisStore.totalQuestionsSolvedPercentage?.value || 0);
 
-const topCourses = computed(() => analysisStore.bestCourses.value);
-const topCourse = computed(() => analysisStore.bestCourse.value ?? '—');
+const topCourses = computed(() => analysisStore.bestCourses?.value || []);
+const topCourse = computed(() => analysisStore.bestCourse?.value || '');
 const bestSubjects = computed(() => {
-  const subjects = analysisStore.bestSubjects.value ?? [];
-  return subjects.map(subjectObj => {
-    const [course, name] = Object.entries(subjectObj)[0];
+  const subjects = analysisStore.bestSubjects?.value || [];
+  return subjects.map(subject => {
+    const [course, name] = Object.entries(subject)[0];
     return {
       course,
       name
@@ -468,7 +471,7 @@ const bestSubjects = computed(() => {
   });
 });
 
-const totalStudyHours = computed(() => analysisStore.totalHoursSpent.value);
+const totalStudyHours = computed(() => analysisStore.totalHoursSpent?.value || 0);
 
 const moviesWatched = computed(() =>
   Math.floor(totalStudyHours.value / 1.67)

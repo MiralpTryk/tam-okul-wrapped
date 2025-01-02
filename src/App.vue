@@ -30,79 +30,10 @@ axios.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-onMounted(async () => {
-  try {
-    store.commit('SET_LOADING', true);
-    const response = await import('@/data/analysis.json');
-    await store.dispatch('loadAnalysisData', response.default);
-  } catch (error) {
-    console.error('Error loading analysis data:', error);
-  }
+// Uygulama başladığında local storage'dan verileri yükle
+onMounted(() => {
+  store.dispatch('initializeStore');
 });
-
-// Commenting out the onMounted lifecycle hook
-// onMounted(async () => {
-//   const userTokenStudent = localStorage.getItem('userTokenStudent');
-//   const cookieToken = getCookie('XSRF-TOKEN');
-//   const isLocal = process.env.VUE_APP_ENV === 'local';
-
-//   console.log('Initial Tokens:', { userTokenStudent, cookieToken });
-
-//   try {
-//     if (userTokenStudent && userTokenStudent !== 'undefined') {
-//       console.log('Using localStorage token');
-//       store.commit('setToken', userTokenStudent);
-//       console.log('Token set in store:', store.state.token);
-//       await router.push('/');
-//     } else if (cookieToken && cookieToken !== 'undefined') {
-//       console.log('Using cookie token');
-//       const baseURL = axios.defaults.baseURL;
-//       const requestUrl = `${baseURL}/user_details_for_vue`;
-//       const response = await axios.get(requestUrl);
-//       const token = response?.data?.success?.data;
-//       console.log('Token received from API:', token);
-//       await store.dispatch("setTokenAction", token);
-//       console.log('Token set in store:', store.state.token);
-//       await router.push('/');
-//     } else {
-//       console.log('No valid token found, redirecting to login');
-//       if (isLocal) {
-//         // await router.push('/login');
-//       } else {
-//         window.location.href = axios.defaults.trialReportURL + "/okul-login?type=student";
-//       }
-//     }
-//   } catch (error) {
-//     console.error("Error during authentication:", error);
-//     if (isLocal) {
-//       // await router.push('/login');
-//     } else {
-//       window.location.href = axios.defaults.trialReportURL + "/okul-login?type=student";
-//     }
-//   }
-// });
-
-// Commenting out the router.beforeResolve navigation guard
-// router.beforeResolve(async (to, from, next) => {
-//   const isLocal = process.env.VUE_APP_ENV === 'local';
-//   const isAuthenticated = store.getters.isAuthenticated;
-
-//   console.log("Is authenticated:", isAuthenticated);
-
-//   if (isAuthenticated) {
-//     next();
-//   } else {
-//     if (to.path !== '/login') {
-//       if (isLocal) {
-//         // next('/login');
-//       } else {
-//         window.location.href = axios.defaults.trialReportURL + "/okul-login?type=student";
-//       }
-//     } else {
-//       next();
-//     }
-//   }
-// });
 </script>
 
 <style></style>

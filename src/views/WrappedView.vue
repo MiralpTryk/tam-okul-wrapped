@@ -2,328 +2,360 @@
   <div class="text-white min-h-screen overflow-x-hidden">
     <AppHeader />
 
-    <!-- Analysis Modal -->
-    <Transition name="modal">
-      <div v-if="showAnalysisModal" class="fixed inset-0 z-[60]">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-0 sm:p-4" @click="closeAnalysisModal">
-            <div
-              class="max-w-3xl relative transform sm:rounded-2xl bg-zinc-900 p-4 sm:p-6 text-left shadow-xl transition-all overflow-y-auto z-50 sm:max-h-[80vh] md:rounded-2xl sm:m-4 h-screen w-screen m-0 rounded-none sm:h-auto sm:w-auto">
-              <div class="absolute top-0 right-0">
-                <button v-if="isMobile" @click="showAnalysisModal = false"
-                  class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-gray-200 z-50 w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-xl sm:text-3xl">
-                  &times;
-                </button>
-              </div>
-              <h3 class="text-base sm:text-lg font-medium leading-6 text-white mb-4">
-                {{ selectedCourse }} Dersi Analizi
-              </h3>
-              <div class="mt-2">
-                <p class="text-xs sm:text-sm text-zinc-300">
-                  Tam Okul'da yapılan detaylı analizler sonucunda, öğrenme stilinize ve akademik ihtiyaçlarınıza en
-                  uygun içerikler sizin için özel olarak seçildi. Bu içerikler, başarınızı artırmak ve öğrenme
-                  sürecinizi desteklemek için özenle hazırlandı.
-                </p>
-              </div>
-              <table class="table-auto w-full mt-1 mb-1 sm:mt-4 sm:mb-4 overflow-auto">
-                <thead>
-                  <tr class="border-b border-zinc-700">
-                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-left text-xs sm:text-sm font-medium text-zinc-400">Konu
-                    </th>
-                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">Doğru
-                    </th>
-                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">
-                      Yanlış</th>
-                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">Boş
-                    </th>
-                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">Net
-                    </th>
-                    <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">
-                      Başarı Oranı</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Çok İyi (>= 80%) -->
-                  <tr class="bg-green-500/5">
-                    <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-green-500">Çok
-                      İyi</td>
-                  </tr>
-                  <tr v-for="(item, itemIndex) in sortedData.excellent" :key="`excellent-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
-                      item.correct ?? '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
-                      '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
-                      '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
-                      '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
-                      <span v-if="item.successRate != null"
-                        class="px-2 py-1 rounded-full text-xs bg-green-500/20 text-green-500">
-                        %{{ item.successRate }}
-                      </span>
-                      <span v-else class="text-zinc-400">—</span>
-                    </td>
-                  </tr>
+    <!-- Loading State -->
+    <div v-if="loading" :class="loadingClasses">
+      <div class="animate-spin rounded-full h-12 w-12 border-2 border-red-600 border-t-transparent mb-4"></div>
+      <p class="text-zinc-400">Verileriniz yükleniyor...</p>
+    </div>
 
-                  <!-- Daha İyi Olabilir (50-80%) -->
-                  <tr class="bg-yellow-500/5">
-                    <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-yellow-500">
-                      Daha İyi Olabilir</td>
-                  </tr>
-                  <tr v-for="(item, itemIndex) in sortedData.good" :key="`good-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
-                      item.correct ?? '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
-                      '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
-                      '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
-                      '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
-                      <span v-if="item.successRate != null"
-                        class="px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-500">
-                        %{{ item.successRate }}
-                      </span>
-                      <span v-else class="text-zinc-400">—</span>
-                    </td>
-                  </tr>
+    <!-- Error State -->
+    <div v-else-if="error" :class="errorClasses">
+      <div class="text-center max-w-md">
+        <svg class="w-12 h-12 text-red-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <h2 class="text-xl font-bold mb-2">Bir Hata Oluştu</h2>
+        <p class="text-zinc-400 mb-4">{{ error }}</p>
+        <button @click="window.location.reload()" 
+          class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">
+          Tekrar Dene
+        </button>
+      </div>
+    </div>
 
-                  <!-- Geliştirilmeli (< 50%) -->
-                  <tr class="bg-red-600/5">
-                    <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-red-600">
-                      Geliştirilmeli</td>
-                  </tr>
-                  <tr v-for="(item, itemIndex) in sortedData.needsImprovement" :key="`needs-improvement-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
-                      item.correct ?? '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
-                      '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
-                      '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
-                      '—' }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
-                      <span v-if="item.successRate != null"
-                        class="px-2 py-1 rounded-full text-xs bg-red-600/20 text-red-600">
-                        %{{ item.successRate }}
-                      </span>
-                      <span v-else class="text-zinc-400">—</span>
-                    </td>
-                  </tr>
+    <!-- Main Content -->
+    <template v-else>
+      <!-- Content Modal -->
+      <ContentModal :show="showContentModal" @close="closeContentModal">
+        <template v-if="selectedLesson">
+          <LessonContent v-if="selectedLesson.type === 'lesson'" :lesson="selectedLesson" />
+          <MusicContent v-else-if="selectedLesson.type === 'music'" :music="selectedLesson" />
+          <QuoteContent v-else-if="selectedLesson.type === 'quote'" :quote="selectedLesson" />
+          <BookContent v-else-if="selectedLesson.type === 'book'" :book="selectedLesson" />
+          <StoryContent v-else-if="selectedLesson.type === 'story'" :story="selectedLesson" />
+        </template>
+      </ContentModal>
 
-                  <!-- Veri Yok -->
-                  <tr class="bg-zinc-500/5">
-                    <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-zinc-400">Veri
-                      Yok</td>
-                  </tr>
-                  <tr v-for="(item, itemIndex) in sortedData.noData" :key="`no-data-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
-                    <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
-                      <span class="text-zinc-400">—</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <div class="mt-6">
-                <button type="button"
-                  class="inline-flex items-center justify-center rounded-md bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
-                  @click="closeAnalysisModal">
-                  Anladım
-                </button>
+      <!-- Analysis Modal -->
+      <Transition name="modal">
+        <div v-if="showAnalysisModal" class="fixed inset-0 z-[60]">
+          <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+          <div class="fixed inset-0 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-0 sm:p-4" @click="closeAnalysisModal">
+              <div
+                class="max-w-3xl relative transform sm:rounded-2xl bg-zinc-900 p-4 sm:p-6 text-left shadow-xl transition-all overflow-y-auto z-50 sm:max-h-[80vh] md:rounded-2xl sm:m-4 h-screen w-screen m-0 rounded-none sm:h-auto sm:w-auto">
+                <div class="absolute top-0 right-0">
+                  <button v-if="isMobile" @click="showAnalysisModal = false"
+                    class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-gray-200 z-50 w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-xl sm:text-3xl">
+                    &times;
+                  </button>
+                </div>
+                <h3 class="text-base sm:text-lg font-medium leading-6 text-white mb-4">
+                  {{ selectedCourse }} Dersi Analizi
+                </h3>
+                <div class="mt-2">
+                  <p class="text-xs sm:text-sm text-zinc-300">
+                    Tam Okul'da yapılan detaylı analizler sonucunda, öğrenme stilinize ve akademik ihtiyaçlarınıza en
+                    uygun içerikler sizin için özel olarak seçildi. Bu içerikler, başarınızı artırmak ve öğrenme
+                    sürecinizi desteklemek için özenle hazırlandı.
+                  </p>
+                </div>
+                <table class="table-auto w-full mt-1 mb-1 sm:mt-4 sm:mb-4 overflow-auto">
+                  <thead>
+                    <tr class="border-b border-zinc-700">
+                      <th class="sm:px-4 sm:py-2 px-2 py-1 text-left text-xs sm:text-sm font-medium text-zinc-400">Konu
+                      </th>
+                      <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">Doğru
+                      </th>
+                      <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">
+                        Yanlış</th>
+                      <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">Boş
+                      </th>
+                      <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">Net
+                      </th>
+                      <th class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm font-medium text-zinc-400">
+                        Başarı Oranı</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Çok İyi (>= 80%) -->
+                    <tr class="bg-green-500/5">
+                      <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-green-500">Çok
+                        İyi</td>
+                    </tr>
+                    <tr v-for="(item, itemIndex) in sortedData.excellent" :key="`excellent-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
+                        item.correct ?? '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
+                        '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
+                        '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
+                        '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                        <span v-if="item.successRate != null"
+                          class="px-2 py-1 rounded-full text-xs bg-green-500/20 text-green-500">
+                          %{{ item.successRate }}
+                        </span>
+                        <span v-else class="text-zinc-400">—</span>
+                      </td>
+                    </tr>
+
+                    <!-- Daha İyi Olabilir (50-80%) -->
+                    <tr class="bg-yellow-500/5">
+                      <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-yellow-500">
+                        Daha İyi Olabilir</td>
+                    </tr>
+                    <tr v-for="(item, itemIndex) in sortedData.good" :key="`good-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
+                        item.correct ?? '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
+                        '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
+                        '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
+                        '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                        <span v-if="item.successRate != null"
+                          class="px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-500">
+                          %{{ item.successRate }}
+                        </span>
+                        <span v-else class="text-zinc-400">—</span>
+                      </td>
+                    </tr>
+
+                    <!-- Geliştirilmeli (< 50%) -->
+                    <tr class="bg-red-600/5">
+                      <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-red-600">
+                        Geliştirilmeli</td>
+                    </tr>
+                    <tr v-for="(item, itemIndex) in sortedData.needsImprovement" :key="`needs-improvement-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
+                        item.correct ?? '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
+                        '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
+                        '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
+                        '—' }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                        <span v-if="item.successRate != null"
+                          class="px-2 py-1 rounded-full text-xs bg-red-600/20 text-red-600">
+                          %{{ item.successRate }}
+                        </span>
+                        <span v-else class="text-zinc-400">—</span>
+                      </td>
+                    </tr>
+
+                    <!-- Veri Yok -->
+                    <tr class="bg-zinc-500/5">
+                      <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-zinc-400">Veri
+                        Yok</td>
+                    </tr>
+                    <tr v-for="(item, itemIndex) in sortedData.noData" :key="`no-data-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                        <span class="text-zinc-400">—</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="mt-6">
+                  <button type="button"
+                    class="inline-flex items-center justify-center rounded-md bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+                    @click="closeAnalysisModal">
+                    Anladım
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
 
-    <!-- Hero Section -->
-    <section class="relative h-screen flex items-center">
-      <img :src="HeroImage" alt="Hero"
-        class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center" />
-      <div class="absolute inset-0 bg-red-600 mix-blend-multiply opacity-60"></div>
-      <!--       <div
-        class="absolute inset-x-0 bottom-0 h-12 sm:h-16 md:h-24 bg-gradient-to-t from-30% from-[#141414] via-[#141414]/70 to-transparent overflow-hidden">
-<div class="flex gap-4 pr-4 w-[200%] h-full animate-marquee" style="--marquee-duration: 5000ms;">
-          <div class="flex flex-1 h-full">
-            <div
-              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-              Bu içerikler senin için özenle hazırlandı</div>
-            <div
-              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-              Bu içerikler senin için özenle hazırlandı</div>
-            <div
-              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-              Bu içerikler senin için özenle hazırlandı</div>
-          </div>
-          <div class="flex flex-1 h-full">
-            <div
-              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-              Bu içerikler senin için özenle hazırlandı</div>
-            <div
-              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-              Bu içerikler senin için özenle hazırlandı</div>
-            <div
-              class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-              Bu içerikler senin için özenle hazırlandı</div>
-          </div>
-        </div>
-      </div> -->
-      <div class="absolute inset-0"></div>
-      <div class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full">
-        <div class="max-w-[720px] mb-8">
-          <h1 class="text-2xl sm:text-3xl font-bold mb-4">
-            Merhaba
-            <span class="inline-flex items-center -mr-2">
-              <DecodeText :text="userName" :interval="5000" />
-            </span>
-            , senin için tasarlanan eşsiz öğrenme deneyimine hoş geldin!
-          </h1>
-          <p class="text-sm sm:text-base bg-black/50 sm:bg-transparent rounded-lg px-4 py-2 sm:px-0">
-            Tam Okul ile öğrenme yolculuğun tamamen sana özel.
-            Başarı durumuna göre YouTube'dan seçilen konu anlatım videoları ile eksiklerini tamamla, kişisel duvarında
-            müzik dinle, kitap önerilerini keşfet ve motivasyon sözleriyle ilham al.
-            <br />
-            <br />
-            Videolar hakkında daha fazla bilgi almak için konu başlığının yanındaki
-            <Info class="w-5 h-5 inline" />
-            butonuna tıklayabilirsin.
-          </p>
-        </div>
-        <div>
-          <div class="relative inline-flex">
-            <button @click="openWrappedModal"
-              class="relative inline-flex items-center justify-center px-6 py-2 text-base sm:text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-600 active:scale-95 rounded"
-              role="button">
-              <Play class="w-6 h-6 mr-2 fill-black" /> {{ new Date().getFullYear() }} Öğrenme Yolculuğun
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Content Sections -->
-    <div class="sm:-mt-[3.5rem] relative z-10 bg-gradient-to-t from-[#141414] from-95% to-transparent">
-      <section v-for="(section, index) in sections" :key="`section-${section.title}-${index}`" class="pb-8 pt-0 sm:pt-4">
-        <div class="px-4 sm:px-6 lg:px-16 2xl:px-24">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2">
-              <h2 class="text-sm sm:text-xl font-semibold tracking-wide">{{ section.title }}</h2>
-
-              <!-- Mobile Button -->
-              <button v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
-                class="sm:hidden b   text-white rounded-full w-8 h-8 flex items-center justify-center z-10"
-                @click="showAnalysisForCourse(section.title)">
-                <span class="text-sm flex-shrink-0 flex items-center justify-center">
-                  <Info class="w-4 h-4" />
-                </span>
-              </button>
-
-              <!-- Desktop Button -->
-              <button 
-                v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
-                class="hidden sm:flex text-[#54b9c5] font-semibold rounded-full items-center justify-end transition-all duration-500 ease-in-out overflow-hidden z-10 relative"
-                :class="{ 
-                  'w-8': !hoveredSection[index], 
-                  'w-[250px]': hoveredSection[index] 
-                }"
-                @mouseenter="hoveredSection[index] = true" 
-                @mouseleave="hoveredSection[index] = false"
-                @click="showAnalysisForCourse(section.title)"
-              >
-                <div class="absolute inset-0 bg-[#54b9c5]/20 transition-transform duration-500 ease-in-out origin-right"
-                  :class="{ 'scale-x-0': !hoveredSection[index] }">
-                </div>
-                
-                <div class="flex items-center w-full h-8 justify-end relative">
-                  <span 
-                    class="whitespace-nowrap text-xs overflow-hidden transition-all duration-500 ease-in-out absolute"
-                    :class="{ 
-                      'opacity-0 translate-x-4 right-8': !hoveredSection[index], 
-                      'opacity-100 translate-x-0 right-10': hoveredSection[index] 
-                    }"
-                  >
-                    Neden bu videoları görüyorum?
-                  </span>
-                  <span class="text-sm flex-shrink-0 mr-2 flex items-center justify-center relative">
-                    <Info class="w-4 h-4" />
-                  </span>
-                </div>
-              </button>
+      <!-- Hero Section -->
+      <section class="relative h-screen flex items-center">
+        <img :src="HeroImage" alt="Hero"
+          class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center" />
+        <div class="absolute inset-0 bg-red-600 mix-blend-multiply opacity-60"></div>
+        <!--       <div
+            class="absolute inset-x-0 bottom-0 h-12 sm:h-16 md:h-24 bg-gradient-to-t from-30% from-[#141414] via-[#141414]/70 to-transparent overflow-hidden">
+    <div class="flex gap-4 pr-4 w-[200%] h-full animate-marquee" style="--marquee-duration: 5000ms;">
+              <div class="flex flex-1 h-full">
+                <div
+                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+                  Bu içerikler senin için özenle hazırlandı</div>
+                <div
+                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+                  Bu içerikler senin için özenle hazırlandı</div>
+                <div
+                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+                  Bu içerikler senin için özenle hazırlandı</div>
+              </div>
+              <div class="flex flex-1 h-full">
+                <div
+                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+                  Bu içerikler senin için özenle hazırlandı</div>
+                <div
+                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+                  Bu içerikler senin için özenle hazırlandı</div>
+                <div
+                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
+                  Bu içerikler senin için özenle hazırlandı</div>
+              </div>
             </div>
-            
-            <RouterLink v-if="section.type === 'lesson'" :to="`/browse?section=${section.title}`">
-              <button class="text-xs sm:text-sm text-white hover:text-zinc-300">
-                Daha Fazla Göster
-              </button>
-            </RouterLink>
+          </div> -->
+        <div class="absolute inset-0"></div>
+        <div class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full">
+          <div class="max-w-[720px] mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold mb-4">
+              Merhaba
+              <span class="inline-flex items-center -mr-2">
+                <DecodeText :text="userName" :interval="5000" />
+              </span>
+              , senin için tasarlanan eşsiz öğrenme deneyimine hoş geldin!
+            </h1>
+            <p class="text-sm sm:text-base bg-black/50 sm:bg-transparent rounded-lg px-4 py-2 sm:px-0">
+              Tam Okul ile öğrenme yolculuğun tamamen sana özel.
+              Başarı durumuna göre YouTube'dan seçilen konu anlatım videoları ile eksiklerini tamamla, kişisel duvarında
+              müzik dinle, kitap önerilerini keşfet ve motivasyon sözleriyle ilham al.
+              <br />
+              <br />
+              Videolar hakkında daha fazla bilgi almak için konu başlığının yanındaki
+              <Info class="w-5 h-5 inline" />
+              butonuna tıklayabilirsin.
+            </p>
           </div>
-        </div>
-
-        <div class="relative w-screen -ml-[50vw] left-1/2">
-          <!-- Left scroll button -->
-          <button 
-            v-show="showLeftScrollButton[index]"
-            @click="() => handleCarouselScroll(index, 'left')"
-            class="absolute h-full top-1/2 transform -translate-y-1/2 bg-black bg-opacity-75 text-white px-4 py-2 z-10 hidden sm:block">
-            <ChevronLeftIcon class="w-6 h-6" />
-          </button>
-
-          <!-- Right scroll button -->
-          <button 
-            v-show="showRightScrollButton[index]"
-            @click="() => handleCarouselScroll(index, 'right')"
-            class="absolute right-0 h-full top-1/2 transform -translate-y-1/2 bg-black bg-opacity-75 text-white px-4 py-2 z-10 hidden sm:block">
-            <ChevronRightIcon class="w-6 h-6" />
-          </button>
-
-          <!-- Content container -->
-          <div 
-            :ref="(el) => { if (el) scrollContainers[index] = el }"
-            class="flex space-x-2 overflow-x-auto scrollbar-hide select-none pl-4 sm:pl-6 lg:pl-16 2xl:pl-24 pr-4 sm:pr-6 lg:pr-16 2xl:pr-24"
-            @scroll="() => checkScrollPosition(index)"
-            @touchstart.passive="startDrag" 
-            @touchmove.passive="drag" 
-            @touchend.passive="endDrag">
-            <div v-for="(item, itemIndex) in section.items" :key="`${section.type}-${item.id}-${itemIndex}`">
-              <ContentCard :item="item" :type="section.type" @click="openContentModal" />
+          <div>
+            <div class="relative inline-flex">
+              <button @click="openWrappedModal"
+                class="relative inline-flex items-center justify-center px-6 py-2 text-base sm:text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-600 active:scale-95 rounded"
+                role="button">
+                <Play class="w-6 h-6 mr-2 fill-black" /> {{ new Date().getFullYear() }} Öğrenme Yolculuğun
+              </button>
             </div>
           </div>
         </div>
       </section>
-    </div>
 
-    <!-- Footer -->
-    <footer class="bg-[#141414] text-zinc-400 py-6 px-4 sm:px-6 lg:px-8">
-      <div class="container mx-auto">
-        <p class="text-center text-sm">
-          &copy; {{ new Date().getFullYear() }} Tam Okul. Tüm hakları saklıdır.
-        </p>
+      <!-- Content Sections -->
+      <div class="sm:-mt-[3.5rem] relative z-10 bg-gradient-to-t from-[#141414] from-95% to-transparent">
+        <section v-for="(section, index) in sections" :key="`section-${section.title}-${index}`" class="pb-8 pt-0 sm:pt-4">
+          <div class="px-4 sm:px-6 lg:px-16 2xl:px-24">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <h2 class="text-sm sm:text-xl font-semibold tracking-wide">{{ section.title }}</h2>
+
+                <!-- Mobile Button -->
+                <button v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
+                  class="sm:hidden b   text-white rounded-full w-8 h-8 flex items-center justify-center z-10"
+                  @click="showAnalysisForCourse(section.title)">
+                  <span class="text-sm flex-shrink-0 flex items-center justify-center">
+                    <Info class="w-4 h-4" />
+                  </span>
+                </button>
+
+                <!-- Desktop Button -->
+                <button 
+                  v-if="!['music', 'quote', 'story', 'book'].includes(section.type)"
+                  class="hidden sm:flex text-[#54b9c5] font-semibold rounded-full items-center justify-end transition-all duration-500 ease-in-out overflow-hidden z-10 relative"
+                  :class="{ 
+                    'w-8': !hoveredSection[index], 
+                    'w-[250px]': hoveredSection[index] 
+                  }"
+                  @mouseenter="hoveredSection[index] = true" 
+                  @mouseleave="hoveredSection[index] = false"
+                  @click="showAnalysisForCourse(section.title)"
+                >
+                  <div class="absolute inset-0 bg-[#54b9c5]/20 transition-transform duration-500 ease-in-out origin-right"
+                    :class="{ 'scale-x-0': !hoveredSection[index] }">
+                  </div>
+                  
+                  <div class="flex items-center w-full h-8 justify-end relative">
+                    <span 
+                      class="whitespace-nowrap text-xs overflow-hidden transition-all duration-500 ease-in-out absolute"
+                      :class="{ 
+                        'opacity-0 translate-x-4 right-8': !hoveredSection[index], 
+                        'opacity-100 translate-x-0 right-10': hoveredSection[index] 
+                      }"
+                    >
+                      Neden bu videoları görüyorum?
+                    </span>
+                    <span class="text-sm flex-shrink-0 mr-2 flex items-center justify-center relative">
+                      <Info class="w-4 h-4" />
+                    </span>
+                  </div>
+                </button>
+              </div>
+              
+              <RouterLink v-if="section.type === 'lesson'" :to="{ name: 'browse', params: { code: route.params.code }, query: { section: section.title } }">
+                <button class="text-xs sm:text-sm text-white hover:text-zinc-300">
+                  Daha Fazla Göster
+                </button>
+              </RouterLink>
+            </div>
+          </div>
+
+          <div class="relative w-screen -ml-[50vw] left-1/2">
+            <!-- Left scroll button -->
+            <button 
+              v-show="showLeftScrollButton[index]"
+              @click="() => handleCarouselScroll(index, 'left')"
+              class="absolute h-full top-1/2 transform -translate-y-1/2 bg-black bg-opacity-75 text-white px-4 py-2 z-10 hidden sm:block">
+              <ChevronLeftIcon class="w-6 h-6" />
+            </button>
+
+            <!-- Right scroll button -->
+            <button 
+              v-show="showRightScrollButton[index]"
+              @click="() => handleCarouselScroll(index, 'right')"
+              class="absolute right-0 h-full top-1/2 transform -translate-y-1/2 bg-black bg-opacity-75 text-white px-4 py-2 z-10 hidden sm:block">
+              <ChevronRightIcon class="w-6 h-6" />
+            </button>
+
+            <!-- Content container -->
+            <div 
+              :ref="(el) => { if (el) scrollContainers[index] = el }"
+              class="flex space-x-2 overflow-x-auto scrollbar-hide select-none pl-4 sm:pl-6 lg:pl-16 2xl:pl-24 pr-4 sm:pr-6 lg:pr-16 2xl:pr-24"
+              @scroll="() => checkScrollPosition(index)"
+              @touchstart.passive="startDrag" 
+              @touchmove.passive="drag" 
+              @touchend.passive="endDrag">
+              <div v-for="(item, itemIndex) in section.items" :key="`${section.type}-${item.id}-${itemIndex}`">
+                <ContentCard 
+                  :item="item" 
+                  :type="section.type" 
+                  @click="() => {
+                    console.log('WrappedView - Card clicked:', item);
+                    openContentModal(item, section.type);
+                  }" 
+                />
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
-    </footer>
 
-    <!-- Spotify Wrapped Style Modal -->
-    <WrappedModal :show="showModal" @close="closeModal" />
+      <!-- Footer -->
+      <footer class="bg-[#141414] text-zinc-400 py-6 px-4 sm:px-6 lg:px-8">
+        <div class="container mx-auto">
+          <p class="text-center text-sm">
+            &copy; {{ new Date().getFullYear() }} Tam Okul. Tüm hakları saklıdır.
+          </p>
+        </div>
+      </footer>
 
-    <!-- Content Modal -->
-    <ContentModal :show="showContentModal" @close="closeContentModal">
-      <template v-if="selectedLesson">
-        <LessonContent v-if="selectedLesson.type === 'lesson'" :lesson="selectedLesson" />
-        <MusicContent v-else-if="selectedLesson.type === 'music'" :music="selectedLesson" />
-        <QuoteContent v-else-if="selectedLesson.type === 'quote'" :quote="selectedLesson" />
-        <BookContent v-else-if="selectedLesson.type === 'book'" :book="selectedLesson" />
-        <StoryContent v-else-if="selectedLesson.type === 'story'" :story="selectedLesson" />
-      </template>
-    </ContentModal>
+      <!-- Spotify Wrapped Style Modal -->
+      <WrappedModal :show="showModal" @close="closeModal" />
+    </template>
   </div>
 </template>
 
@@ -331,6 +363,7 @@
 import { ref, onMounted, onUnmounted, computed, nextTick } from "vue"
 import { ChevronLeftIcon, ChevronRightIcon, Info } from "lucide-vue-next"
 import { useAnalysisStore } from '@/composables/useAnalysisStore'
+import { useLoading } from '@/composables/useLoading'
 import AppHeader from "@/components/AppHeader.vue"
 import WrappedModal from "@/components/WrappedModal.vue"
 import ContentModal from "@/components/ContentModal.vue"
@@ -346,44 +379,55 @@ import ContentCard from '@/components/ContentCard.vue'
 import { useContent } from '@/composables/useContent'
 import { useScroll } from '@/composables/useScroll'
 import { useModal } from '@/composables/useModal'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const analysisStore = useAnalysisStore()
 const isMobile = ref(false)
 const hoveredSection = ref({})
 const showLeftScrollButton = ref({})
 const showRightScrollButton = ref({})
-const userName = computed(() => analysisStore.userName.value || 'Misafir')
+const userName = ref('')
 
-// Loading states
-const isCoursesLoading = computed(() => analysisStore.isCoursesLoading.value)
+// Loading state yönetimini useLoading composable'ından al
+const { 
+  loading, 
+  error, 
+  isCoursesLoading,
+  startLoading,
+  stopLoading,
+  setError,
+  loadingClasses,
+  errorClasses
+} = useLoading()
 
 const loadWrappedData = () => {
-  checkMobile();
-  window.addEventListener('resize', checkMobile);
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
 
   const setVH = () => {
-    let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty("--vh", `${vh}px`);
-  };
-  setVH();
-  window.addEventListener("resize", setVH);
+    let vh = window.innerHeight * 0.01
+    document.documentElement.style.setProperty("--vh", `${vh}px`)
+  }
+  setVH()
+  window.addEventListener("resize", setVH)
 
-  const lastShownTime = localStorage.getItem('wrappedModalLastShown');
-  const currentTime = Date.now();
-  const tenMinutes = 10 * 60 * 1000;
+  const lastShownTime = localStorage.getItem('wrappedModalLastShown')
+  const currentTime = Date.now()
+  const tenMinutes = 10 * 60 * 1000
 
   if (!lastShownTime || currentTime - parseInt(lastShownTime) > tenMinutes) {
-    openWrappedModal();
-    localStorage.setItem('wrappedModalLastShown', currentTime.toString());
+    openWrappedModal()
+    localStorage.setItem('wrappedModalLastShown', currentTime.toString())
   }
 
   // Her section için başlangıç scroll durumunu kontrol et
   nextTick(() => {
     sections.value.forEach((_, index) => {
-      checkScrollPosition(index);
-    });
-  });
-};
+      checkScrollPosition(index)
+    })
+  })
+}
 
 const { otherSections } = useContent()
 const {
@@ -392,8 +436,10 @@ const {
   startDrag,
   drag,
   endDrag,
-  cleanup
+  cleanup: scrollCleanup
 } = useScroll()
+
+// Modal yönetimini useModal composable'ından al
 const {
   showModal,
   showContentModal,
@@ -402,10 +448,11 @@ const {
   selectedCourse,
   openWrappedModal,
   closeModal,
-  openContentModal,
+  openContentModal: originalOpenContentModal,
   closeContentModal,
   showAnalysisForCourse,
-  closeAnalysisModal
+  closeAnalysisModal,
+  cleanup: modalCleanup
 } = useModal()
 
 const formatTitle = (title) => {
@@ -429,23 +476,34 @@ const formatTitle = (title) => {
 }
 
 const generateVideos = (subjectName, subjectData) => {
+  console.log('WrappedView - Subject:', subjectName);
+  console.log('WrappedView - Subject data:', subjectData);
+
   if (!subjectData?.videos?.length) {
-    return [{
+    const defaultVideo = {
       id: `default-${subjectName}-${Date.now()}`,
       title: subjectName,
       channel_title: 'Eğitim Kanalı',
       video_id: "dQw4w9WgXcQ",
       thumbnail_url: `https://picsum.photos/seed/${subjectName}/300/200`,
-      type: "lesson"
-    }]
+      type: "lesson",
+      subjectName
+    };
+    console.log('WrappedView - Generated default video:', defaultVideo);
+    return [defaultVideo];
   }
 
-  return subjectData.videos.map((video, index) => ({
-    ...video,
-    id: `${video.id || video.video_id}-${subjectName}-${index}`,
-    type: "lesson",
-    subjectName
-  }))
+  const videos = subjectData.videos.map((video, index) => {
+    const processedVideo = {
+      ...video,
+      id: `${video.id || video.video_id}-${subjectName}-${index}`,
+      type: "lesson",
+      subjectName
+    };
+    console.log('WrappedView - Processed video:', processedVideo);
+    return processedVideo;
+  });
+  return videos;
 }
 
 const generateItemsFromSubjects = (subjects) => {
@@ -590,14 +648,34 @@ const checkScrollPosition = (index) => {
   }
 }
 
-onMounted(() => {
-  // Sadece store'dan veriyi kullan
-  loadWrappedData();
-});
+// openContentModal'ı wrap edelim
+const openContentModal = (video, type) => {
+  console.log('WrappedView - Opening modal with video:', video);
+  console.log('WrappedView - Modal type:', type);
+  originalOpenContentModal(video, type);
+  console.log('WrappedView - Selected lesson after open:', selectedLesson.value);
+  console.log('WrappedView - Modal visibility after open:', showContentModal.value);
+};
+
+onMounted(async () => {
+  const code = route.params.code
+  try {
+    startLoading()
+    const data = await analysisStore.fetchAnalysisData(code)
+    userName.value = data.data.user.name
+    loadWrappedData()
+  } catch (err) {
+    setError(err)
+    console.error('Error loading data:', err)
+  } finally {
+    stopLoading()
+  }
+})
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkMobile)
-  cleanup()
+  scrollCleanup()
+  modalCleanup()
 })
 </script>
 

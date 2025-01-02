@@ -50,7 +50,7 @@
               class="bg-zinc-800/60 backdrop-blur-md rounded-xl border border-zinc-700 transition-all duration-300 [padding:12px]">
               <div class="flex items-center justify-center gap-1">
                 <span class="text-lg">⭐</span>
-                <span class="text-sm font-bold text-red-600 text-left">{{ best_subjects }}</span>
+                <span class="text-sm font-bold text-red-600 text-left">{{ best_subject }}</span>
               </div>
               <div class="text-[10px] text-zinc-200 [margin-top:4px]">
                 En İyi Konu
@@ -98,20 +98,22 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import { useAnalysisStore } from '@/composables/useAnalysisStore';
 import tamOkulLogo from "@/assets/tam-okul-logo-dark.webp";
 import koksisLogo from "@/assets/koksis-card-logo_5.webp";
 import dahi from "@/assets/dahi.png";
-import analysis from '@/data/analysis.json';
 
+const analysisStore = useAnalysisStore();
 const logoLoaded = ref(false);
 const cardRef = ref(null);
 
-const full_name = computed(() => analysis.data.user.full_name);
-const total_questions_solved = computed(() => analysis.data.user.student.learning_journey.total_questions_solved);
-const total_questions_solved_percentage = computed(() => analysis.data.user.student.learning_journey.total_questions_solved_percentage);
-const best_course = computed(() => analysis.data.user.student.learning_journey.best_course);
-const best_subjects = computed(() => analysis.data.user.student.learning_journey.best_subject);
-const total_hours_spent = computed(() => analysis.data.user.student.learning_journey.total_hours_spent);
+// Store'dan verileri al - varsayılan değerlerle
+const full_name = computed(() => analysisStore.userName || 'Öğrenci');
+const total_questions_solved = computed(() => analysisStore.totalQuestionsSolved || 0);
+const total_questions_solved_percentage = computed(() => analysisStore.totalQuestionsSolvedPercentage || 0);
+const best_course = computed(() => analysisStore.bestCourse || 'Henüz veri yok');
+const best_subject = computed(() => analysisStore.bestSubject || 'Henüz veri yok');
+const total_hours_spent = computed(() => analysisStore.totalHoursSpent || 0);
 
 onMounted(() => {
   const preloadImages = [koksisLogo, tamOkulLogo].map(src => {
@@ -126,7 +128,6 @@ onMounted(() => {
   Promise.all(preloadImages)
     .then(() => {
       logoLoaded.value = true;
-      // console.log('Tüm logolar yüklendi');
     })
     .catch(error => {
       console.error('Logo yükleme hatası:', error);
@@ -168,8 +169,8 @@ const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
 
 const badges = computed(() =>
   calculateBadges(
-    total_questions_solved.value, 
-    total_questions_solved_percentage.value, 
+    total_questions_solved.value,
+    total_questions_solved_percentage.value,
     total_hours_spent.value
   )
 );

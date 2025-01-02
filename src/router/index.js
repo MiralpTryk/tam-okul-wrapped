@@ -1,122 +1,86 @@
 import { createRouter, createWebHashHistory } from "vue-router";
-/* import LoginView from "@/views/LoginView.vue";
-import QuestionView from "@/views/QuestionView.vue";
-import RecordView from "@/views/RecordView.vue";
-import StudentDashboardView from "@/views/StudentDashboardView.vue";
-import StudentTestDetailsView from "@/views/StudentTestDetailsView.vue";
-import StudentTestsView from "@/views/StudentTestsView.vue";
-import StudentQuestionDetailsView from "@/views/StudentQuestionDetailsView.vue";
-import StudentMessagesView from "@/views/StudentMessagesView.vue";
-import StudentQuestionDetails from "@/components/StudentQuestionDetails.vue";
-import StudentTrialsView from "@/views/StudentTrialsView.vue";
-import StudentTrialDetailsView from "@/views/StudentTrialDetailsView.vue";
-import SimpleTestView from "@/views/SimpleTestView.vue"; */
 import WrappedView from "@/views/WrappedView.vue";
 import OpticFormView from "@/views/OpticFormView.vue";
 import BrowseView from "@/views/BrowseView.vue";
 import NotFoundView from "@/views/NotFoundView.vue";
 import AnalysisView from "@/views/AnalysisView.vue";
-
+import store from '@/store';
 
 const routes = [
-  /* {
+  {
     path: "/",
-    name: "student-dashboard",
-    component: StudentDashboardView,
+    redirect: "/404"
   },
-  {
-    path: "/login",
-    name: "login",
-    component: LoginView,
-  },
-  {
-    path: "/canvas",
-    name: "canvas",
-    component: QuestionView,
-    props: true,
-  },
-  {
-    path: "/simple-test",
-    name: "simple-test",
-    component: SimpleTestView,
-  },
-  {
-    path: "/record",
-    name: "record",
-    component: RecordView,
-  },
-  {
-    path: "/tests/:testId",
-    name: "StudentTestDetails",
-    component: StudentTestDetailsView,
-    props: true,
-  },
-  {
-    path: "/tests",
-    name: "StudentTests",
-    component: StudentTestsView,
-    props: true,
-  },
-  {
-    path: "/trials",
-    name: "StudentTrials",
-    component: StudentTrialsView,
-    props: true,
-  },
-  {
-    path: "/student-test/:testId/question/:questionId",
-    name: "QuestionDetails",
-    component: StudentQuestionDetailsView,
-  },
-  {
-    path: "/messages",
-    name: "StudentMessages",
-    component: StudentMessagesView,
-  },
-  {
-    path: "/question-details",
-    name: "question-details",
-    component: StudentQuestionDetails,
-  },
-  {
-    path: "/trials/:trialId",
-    name: "StudentTrialDetails",
-    component: StudentTrialDetailsView,
-    props: true,
-  }, */
   {
     path: "/:code",
-    name: "Wrapped",
+    name: "wrapped",
     component: WrappedView,
     beforeEnter: (to, from, next) => {
       const codeRegex = /^[A-Z0-9]{8}$/;
       if (codeRegex.test(to.params.code)) {
         next();
       } else {
-        next({ path: "/404" });
+        next({ name: "NotFound" });
       }
     },
   },
   {
-    path: "/optic-form",
-    name: "OpticForm",
+    path: "/optic-form/:code",
+    name: "optic-form",
     component: OpticFormView,
+    meta: { requiresAnalysis: true },
+    beforeEnter: (to, from, next) => {
+      const codeRegex = /^[A-Z0-9]{8}$/;
+      if (codeRegex.test(to.params.code)) {
+        next();
+      } else {
+        next({ name: "NotFound" });
+      }
+    },
   },
   {
-    path: "/browse",
-    name: "Browse",
+    path: "/browse/:code",
+    name: "browse",
     component: BrowseView,
+    meta: { requiresAnalysis: true },
+    beforeEnter: (to, from, next) => {
+      const codeRegex = /^[A-Z0-9]{8}$/;
+      if (codeRegex.test(to.params.code)) {
+        if (from.query.section) {
+          to.query.section = from.query.section;
+        }
+        next();
+      } else {
+        next({ name: "NotFound" });
+      }
+    },
+    props: route => ({ 
+      section: route.query.section 
+    })
   },
   {
-    path: "/:pathMatch(.*)*",
+    path: "/analysis/:code",
+    name: "analysis",
+    component: AnalysisView,
+    meta: { requiresAnalysis: true },
+    beforeEnter: (to, from, next) => {
+      const codeRegex = /^[A-Z0-9]{8}$/;
+      if (codeRegex.test(to.params.code)) {
+        next();
+      } else {
+        next({ name: "NotFound" });
+      }
+    },
+  },
+  {
+    path: "/404",
     name: "NotFound",
     component: NotFoundView,
   },
   {
-    path: "/analysis",
-    name: "Analysis",
-    component: AnalysisView,
-  },
+    path: "/:pathMatch(.*)*",
+    redirect: { name: "NotFound" }
+  }
 ];
 
 const domain = window.location.hostname;
@@ -133,6 +97,25 @@ if (isLocal) {
 const router = createRouter({
   history: createWebHashHistory(baseURL),
   routes,
+});
+
+// Global navigation guard
+router.beforeEach((to, from, next) => {
+  // If route requires analysis data
+  if (to.meta.requiresAnalysis) {
+    // Check if we have the analysis data in store
+    if (!store.state.userDetails || !store.state.courses) {
+      // If no analysis data, redirect to NotFound with a custom message
+      next({ 
+        name: "NotFound",
+        query: { 
+          message: "Bu sayfaya erişmek için önce QR kodunuzu taratmanız gerekmektedir." 
+        }
+      });
+      return;
+    }
+  }
+  next();
 });
 
 export default router;

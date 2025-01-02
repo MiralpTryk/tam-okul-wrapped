@@ -1,5 +1,55 @@
 import { createStore } from 'vuex';
 
+// Local storage işlemleri için yardımcı fonksiyonlar
+const STORAGE_KEY = 'tamokul_wrapped_data';
+const SESSION_KEY = 'tamokul_wrapped_session';
+
+const saveToLocalStorage = (data) => {
+  try {
+    // 6 ay sonrası için tarih oluştur
+    const expiryDate = new Date();
+    expiryDate.setMonth(expiryDate.getMonth() + 6);
+    
+    // Session bilgisini kaydet
+    localStorage.setItem(SESSION_KEY, expiryDate.toISOString());
+    
+    // Verileri kaydet
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error('Error saving to localStorage:', error);
+  }
+};
+
+const loadFromLocalStorage = () => {
+  try {
+    // Session süresini kontrol et
+    const sessionExpiry = localStorage.getItem(SESSION_KEY);
+    if (!sessionExpiry) return null;
+
+    const expiryDate = new Date(sessionExpiry);
+    const now = new Date();
+
+    // Session süresi dolmuşsa verileri temizle
+    if (now > expiryDate) {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+
+    // Verileri yükle
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Error loading from localStorage:', error);
+    return null;
+  }
+};
+
+const clearLocalStorage = () => {
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(SESSION_KEY);
+};
+
 export default createStore({
   state: {
     analysisData: null,
@@ -57,6 +107,15 @@ export default createStore({
       state.learningJourney = data?.data?.user?.student?.learning_journey;
       state.courses = data?.data?.content?.courses;
       state.opticData = data?.data?.optic;
+      
+      // Verileri local storage'a kaydet
+      saveToLocalStorage({
+        analysisData: data,
+        userDetails: data?.data?.user,
+        learningJourney: data?.data?.user?.student?.learning_journey,
+        courses: data?.data?.content?.courses,
+        opticData: data?.data?.optic
+      });
     },
     SET_LOADING(state, status) {
       state.isLoading = status;
@@ -71,6 +130,18 @@ export default createStore({
       state.courses = null;
       state.opticData = null;
       state.error = null;
+      
+      // Local storage'ı temizle
+      clearLocalStorage();
+    },
+    RESTORE_DATA(state, data) {
+      if (data) {
+        state.analysisData = data.analysisData;
+        state.userDetails = data.userDetails;
+        state.learningJourney = data.learningJourney;
+        state.courses = data.courses;
+        state.opticData = data.opticData;
+      }
     }
   },
 
@@ -90,6 +161,13 @@ export default createStore({
 
     clearAnalysisData({ commit }) {
       commit('CLEAR_ANALYSIS_DATA');
+    },
+
+    initializeStore({ commit }) {
+      const savedData = loadFromLocalStorage();
+      if (savedData) {
+        commit('RESTORE_DATA', savedData);
+      }
     }
   }
 });

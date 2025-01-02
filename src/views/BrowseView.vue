@@ -94,17 +94,42 @@
               </h3>
               <!-- Responsive grid for video cards -->
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <div 
-                  v-for="video in generateVideos(subcategory)"
-                  :key="video.id"
-                  class="aspect-video"
-                >
-                  <CourseCard
-                    :item="video"
-                    @click="openContentModal(video)"
-                    class="w-full h-full"
-                  />
-                </div>
+                <template v-if="isCoursesLoading">
+                  <div v-for="n in 8" :key="n" class="aspect-video">
+                    <ContentCard
+                      :item="{ isLoading: true }"
+                      :type="'lesson'"
+                      class="w-full h-full"
+                    />
+                  </div>
+                </template>
+                <template v-else>
+                  <div 
+                    v-for="video in generateVideos(subcategory)"
+                    :key="video.id"
+                    class="aspect-video"
+                  >
+                    <ContentCard
+                      :item="video"
+                      :type="'lesson'"
+                      @click="(item, type) => {
+                        console.log('BrowseView - Card clicked with full details:', {
+                          item,
+                          type,
+                          showContentModal: showContentModal.value,
+                          selectedLesson: selectedLesson.value,
+                          isLoading: isCoursesLoading.value
+                        });
+                        if (!isCoursesLoading.value) {
+                          openContentModal(item, type);
+                        } else {
+                          console.log('BrowseView - Still loading, click ignored');
+                        }
+                      }"
+                      class="w-full h-full"
+                    />
+                  </div>
+                </template>
               </div>
             </div>
           </div>
@@ -127,7 +152,7 @@
     <div class="relative z-[100]">
       <ContentModal :show="showContentModal" @close="closeContentModal">
         <template v-if="selectedLesson">
-          <LessonContent v-if="selectedLesson.type === 'video'" :lesson="selectedLesson" />
+          <LessonContent v-if="selectedLesson.type === 'lesson'" :lesson="selectedLesson" />
         </template>
       </ContentModal>
     </div>
@@ -139,52 +164,91 @@ import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import { ChevronDown, ChevronUp, Menu as MenuIcon, X as XIcon } from 'lucide-vue-next'
 import AppHeader from "@/components/AppHeader.vue"
 import { useAnalysisStore } from '@/composables/useAnalysisStore'
+import { useLoading } from '@/composables/useLoading'
 import ContentModal from "@/components/ContentModal.vue"
 import LessonContent from "@/components/LessonContent.vue"
-import CourseCard from "@/components/CourseCard.vue"
-import { useRoute } from 'vue-router'
+import ContentCard from "@/components/ContentCard.vue"
+import { useRoute, useRouter } from 'vue-router'
+import { useModal } from '@/composables/useModal'
 
+// Route'u en üstte tanımla
+const route = useRoute()
+const router = useRouter()
 const analysisStore = useAnalysisStore()
 
+// Loading state yönetimini useLoading composable'ından al
+const { isCoursesLoading } = useLoading()
+
+// Loading durumunu kontrol edelim
+watch(isCoursesLoading, (newValue) => {
+  console.log('BrowseView - Loading state changed:', newValue)
+})
+
 const categories = computed(() => {
+  console.log('BrowseView - Courses:', analysisStore.courses.value)
+  console.log('BrowseView - Is Loading:', isCoursesLoading.value)
+  
   const courses = analysisStore.courses.value;
-  if (!courses) return [];
+  if (!courses) {
+    console.log('BrowseView - No courses found')
+    return [];
+  }
 
   return courses.map(course => {
-    return {
+    const category = {
       id: course.title || course.title_uppercase,
       name: course.title || course.title_uppercase,
       subcategories: Object.keys(course.subjects || {})
     }
+    console.log('BrowseView - Generated category:', category)
+    return category
   });
 });
 
 const generateVideos = (subjectName) => {
+  if (isCoursesLoading.value) {
+    console.log('BrowseView - Still loading, returning empty array');
+    return [];
+  }
+
   const course = analysisStore.courses.value?.find(
     course => course.subjects && course.subjects[subjectName]
   );
 
+  console.log('BrowseView - Course found:', course);
+  console.log('BrowseView - Subject:', subjectName);
+  console.log('BrowseView - Loading state:', isCoursesLoading.value);
+
   if (!course?.subjects?.[subjectName]?.videos?.length) {
-    return [{
-      id: `${subjectName}-default`,
+    const defaultVideo = {
+      id: `default-${subjectName}-${Date.now()}`,
       title: subjectName,
       channel_title: 'Eğitim Kanalı',
       video_id: "dQw4w9WgXcQ",
-      thumbnail_url: `https://picsum.photos/seed/${subjectName}/300/450`,
-      type: "video"
-    }];
+      thumbnail_url: `https://picsum.photos/seed/${subjectName}/300/200`,
+      type: "lesson",
+      subjectName,
+      description: 'Bu ders için henüz video eklenmemiş.',
+      summary: 'Bu ders için henüz video eklenmemiş.'
+    };
+    console.log('BrowseView - Generated default video:', defaultVideo);
+    return [defaultVideo];
   }
 
-  return course.subjects[subjectName].videos.map(video => ({
-    id: video.id,
-    title: video.title,
-    channel_title: video.channel_title,
-    thumbnail_url: video.thumbnail_url,
-    video_id: video.video_id,
-    description: video.description,
-    summary: video.summary,
-    type: "video"
-  }));
+  const videos = course.subjects[subjectName].videos.map((video, index) => {
+    const processedVideo = {
+      ...video,
+      id: `${video.id || video.video_id}-${subjectName}-${index}`,
+      type: "lesson",
+      subjectName,
+      description: video.description || '',
+      summary: video.summary || '',
+      channel_title: video.channel_title || 'Eğitim Kanalı'
+    };
+    console.log('BrowseView - Processed video:', processedVideo);
+    return processedVideo;
+  });
+  return videos;
 };
 
 const openCategories = ref([])
@@ -202,6 +266,10 @@ const toggleCategory = (categoryId) => {
 }
 
 const scrollToSection = (categoryId, subcategory) => {
+  // Önce yönlendirme yap
+  navigateToSection(categoryId, subcategory);
+
+  // Sonra scroll işlemini gerçekleştir
   const targetRef = subcategoryRefs.value[`${categoryId}-${subcategory}`]
   if (targetRef) {
     if (window.innerWidth < 1280) {
@@ -216,7 +284,6 @@ const scrollToSection = (categoryId, subcategory) => {
         })
       }, 300)
     } else {
-
       const headerOffset = 80
       const elementPosition = targetRef.getBoundingClientRect().top + window.pageYOffset
       window.scrollTo({
@@ -276,37 +343,54 @@ const scrollToTop = () => {
   })
 }
 
-const showContentModal = ref(false);
-const selectedLesson = ref(null);
+const { 
+  showContentModal, 
+  selectedLesson, 
+  openContentModal: originalOpenContentModal, 
+  closeContentModal,
+  cleanup: modalCleanup 
+} = useModal();
 
-const openContentModal = (video) => {
-  selectedLesson.value = {
-    title: video.title,
-    channel_title: video.channel_title,
-    video_id: video.video_id,
-    description: video.description,
-    summary: video.summary,
-    type: "video"
+const openContentModal = (video, type) => {
+  console.log('BrowseView - Opening modal with full details:', {
+    video,
+    type,
+    currentShowContentModal: showContentModal.value,
+    currentSelectedLesson: selectedLesson.value
+  });
+  
+  const fullVideo = {
+    ...video,
+    type: type || video.type,
+    description: video.description || '',
+    summary: video.summary || '',
+    channel_title: video.channel_title || 'Eğitim Kanalı'
   };
-  showContentModal.value = true;
+  
+  originalOpenContentModal(fullVideo, type);
+  
+  console.log('BrowseView - After opening modal:', {
+    showContentModal: showContentModal.value,
+    selectedLesson: selectedLesson.value
+  });
 };
-
-const closeContentModal = () => {
-  showContentModal.value = false;
-  selectedLesson.value = null;
-};
-
-const route = useRoute()
 
 const scrollToSectionByTitle = (sectionTitle) => {
+  if (!sectionTitle) return;
+  
+  console.log('BrowseView - Scrolling to section:', sectionTitle);
+  
   const normalizedSearch = sectionTitle.toLowerCase().trim();
   
+  // Önce kategorileri kontrol et
   const category = categories.value.find(cat => {
     const normalizedName = (cat.name || cat.title || cat.title_uppercase || '').toLowerCase().trim();
     return normalizedName === normalizedSearch;
   });
 
   if (category) {
+    console.log('BrowseView - Found matching category:', category.id);
+    
     if (!openCategories.value.includes(category.id)) {
       toggleCategory(category.id);
     }
@@ -322,20 +406,66 @@ const scrollToSectionByTitle = (sectionTitle) => {
         });
       }
     });
-  } else {
-    // console.log('Category not found:', sectionTitle);
+    return;
   }
+
+  // Eğer kategori bulunamadıysa, alt kategorileri kontrol et
+  for (const category of categories.value) {
+    const subcategory = category.subcategories.find(sub => 
+      sub.toLowerCase().trim() === normalizedSearch
+    );
+
+    if (subcategory) {
+      console.log('BrowseView - Found matching subcategory:', subcategory, 'in category:', category.id);
+      
+      if (!openCategories.value.includes(category.id)) {
+        toggleCategory(category.id);
+      }
+
+      nextTick(() => {
+        const element = subcategoryRefs.value[`${category.id}-${subcategory}`];
+        if (element) {
+          const headerOffset = 80;
+          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+          window.scrollTo({
+            top: elementPosition - headerOffset,
+            behavior: 'smooth'
+          });
+        }
+      });
+      return;
+    }
+  }
+
+  console.log('BrowseView - No matching section found for:', sectionTitle);
 };
+
+// Section parametresini props olarak al
+defineProps({
+  section: {
+    type: String,
+    default: ''
+  }
+});
 
 watch(
   () => route.query.section,
   (newSection) => {
     if (newSection) {
-      scrollToSectionByTitle(newSection)
+      scrollToSectionByTitle(newSection);
     }
   },
   { immediate: true }
-)
+);
+
+// Yönlendirme fonksiyonunu güncelle
+const navigateToSection = (categoryId, subcategory) => {
+  router.push({
+    name: 'browse',
+    params: { code: route.params.code },
+    query: { section: subcategory }
+  });
+};
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
@@ -375,6 +505,8 @@ onUnmounted(() => {
   Object.values(observers.value).forEach(observer => {
     observer.disconnect()
   })
+
+  modalCleanup()
 })
 </script>
 

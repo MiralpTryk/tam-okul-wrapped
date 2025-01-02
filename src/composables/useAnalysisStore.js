@@ -1,82 +1,82 @@
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 
 export function useAnalysisStore() {
   const store = useStore()
+  const isOpticDataLoading = ref(false)
 
-  // Loading states
-  const isLoading = computed(() => store.getters.isAnalysisLoading)
-  const isCoursesLoading = computed(() => store.getters.isCoursesLoading)
-  const isOpticDataLoading = computed(() => store.getters.isOpticDataLoading)
-  const error = computed(() => store.getters.getAnalysisError)
+  // Store getters as computed properties with null checks
+  const opticData = computed(() => store.state.opticData)
+  const userName = computed(() => store.state.userDetails?.name || '')
+  const totalQuestionsSolved = computed(() => store.state.learningJourney?.total_questions_solved || 0)
+  const totalQuestionsSolvedPercentage = computed(() => store.state.learningJourney?.total_questions_solved_percentage || 0)
+  const totalHoursSpent = computed(() => store.state.learningJourney?.total_hours_spent || 0)
+  const bestCourses = computed(() => store.state.learningJourney?.best_courses || [])
+  const bestCourse = computed(() => store.state.learningJourney?.best_course || '')
+  const bestSubject = computed(() => {
+    const rawSubject = store.state.learningJourney?.best_subject
+    if (!rawSubject) return ''
+    
+    // Eğer rawSubject bir obje ise
+    if (typeof rawSubject === 'object') {
+      const values = Object.values(rawSubject)
+      return values[0] || ''
+    }
+    
+    // Eğer string ise ve ":" içeriyorsa
+    if (typeof rawSubject === 'string' && rawSubject.includes(':')) {
+      const parts = rawSubject.split(':')
+      if (parts.length > 1) {
+        return parts[1].replace(/["{}]/g, '').trim()
+      }
+    }
+    
+    return rawSubject
+  })
+  const bestSubjects = computed(() => store.state.learningJourney?.best_subjects || [])
+  const courses = computed(() => store.state.courses || [])
+  const isCoursesLoading = computed(() => store.state.isLoading)
 
-  // User related getters
-  const userName = computed(() => store.getters.getUserName)
-  const userFullName = computed(() => store.getters.getUserFullName)
-  const schoolName = computed(() => store.getters.getSchoolName)
-  const academicYear = computed(() => store.getters.getAcademicYear)
-
-  // Learning journey getters
-  const totalQuestionsSolved = computed(() => store.getters.getTotalQuestionsSolved)
-  const totalQuestionsSolvedPercentage = computed(() => store.getters.getTotalQuestionsSolvedPercentage)
-  const totalHoursSpent = computed(() => store.getters.getTotalHoursSpent)
-  const bestCourses = computed(() => store.getters.getBestCourses)
-  const bestSubjects = computed(() => store.getters.getBestSubjects)
-  const bestCourse = computed(() => store.getters.getBestCourse)
-
-  // Course content getters
-  const courses = computed(() => store.getters.getCourses)
-  const getCourseByTitle = (title) => store.getters.getCourseByTitle(title)
-
-  // Optic form getters
-  const opticData = computed(() => store.getters.getOpticData)
-  const opticCourses = computed(() => store.getters.getOpticCourses)
-
-  // Actions
-  const loadAnalysisData = async (data) => {
+  const fetchAnalysisData = async (code) => {
+    isOpticDataLoading.value = true
     try {
+      const apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+      const response = await fetch(`${apiBaseUrl}/koksis/${code}`)
+      if (!response.ok) {
+        throw new Error('Veri yüklenirken bir hata oluştu')
+      }
+      const data = await response.json()
+      if (!data.success) {
+        throw new Error(data.message || 'Veri yüklenirken bir hata oluştu')
+      }
       await store.dispatch('loadAnalysisData', data)
+      return data
     } catch (error) {
-      console.error('Error loading analysis data:', error)
+      console.error('Error fetching analysis data:', error)
       throw error
+    } finally {
+      isOpticDataLoading.value = false
     }
   }
 
-  const clearAnalysisData = () => {
-    store.dispatch('clearAnalysisData')
-  }
-
   return {
-    // Loading states
-    isLoading,
-    isCoursesLoading,
-    isOpticDataLoading,
-    error,
-
-    // User
+    // Data
+    opticData,
     userName,
-    userFullName,
-    schoolName,
-    academicYear,
-
-    // Learning journey
     totalQuestionsSolved,
     totalQuestionsSolvedPercentage,
     totalHoursSpent,
     bestCourses,
-    bestSubjects,
     bestCourse,
-
-    // Course content
+    bestSubject,
+    bestSubjects,
     courses,
-    getCourseByTitle,
-
-    // Optic form
-    opticData,
-    opticCourses,
-
-    // Actions
-    loadAnalysisData,
-    clearAnalysisData,
+    isCoursesLoading,
+    
+    // Loading state
+    isOpticDataLoading,
+    
+    // Methods
+    fetchAnalysisData
   }
 } 
