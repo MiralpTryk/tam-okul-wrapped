@@ -19,7 +19,7 @@
       <div class="text-center max-w-3xl">
         <blockquote class="mb-6">
           <p class="text-2xl md:text-4xl font-serif italic text-white leading-relaxed">
-            "{{ quote.text }}"
+            "{{ quote.quote }}"
           </p>
         </blockquote>
         <cite class="text-lg md:text-xl text-gray-300 not-italic">
