@@ -34,32 +34,15 @@ export function useModal() {
   }
 
   const openContentModal = (item, type) => {
-    console.log('useModal - Opening content modal with:', { item, type });
-    
-    if (!item) {
-      console.log('useModal - No item provided, returning');
-      return;
-    }
+    if (!item) return;
 
-    // İçerik tipine göre veriyi hazırla
     const modalContent = {
       ...item,
-      type: type || item.type
-    }
+      type
+    };
 
-    // Quote tipi için özel dönüşüm
-    if (type === "quote") {
-      modalContent.text = item.quote
-    }
-
-    console.log('useModal - Setting selected lesson:', modalContent);
     selectedLesson.value = modalContent;
-    console.log('useModal - Setting show content modal to true');
     showContentModal.value = true;
-    console.log('useModal - Modal state after open:', {
-      showContentModal: showContentModal.value,
-      selectedLesson: selectedLesson.value
-    });
   }
 
   const closeContentModal = () => {

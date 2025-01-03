@@ -15,18 +15,12 @@ export function useScroll() {
   const scroll = (index, direction) => {
     const container = scrollContainers.value[index]
     if (container) {
-      // console.log('Container found:', container)
-      // console.log('Container scrollLeft before:', container.scrollLeft)
-      
       const card = container.querySelector('div > div')
       if (!card) {
         console.error('No card element found')
         return
       }
 
-      // console.log('Card found:', card)
-      // console.log('Card width:', card.offsetWidth)
-      
       const cardWidth = card.offsetWidth
       const gap = 8
       const cardsToScroll = 5
@@ -34,14 +28,10 @@ export function useScroll() {
         ? -(cardWidth + gap) * cardsToScroll 
         : (cardWidth + gap) * cardsToScroll
       
-      // console.log('Scroll amount:', scrollAmount)
-      
       container.scrollBy({ 
         left: scrollAmount, 
         behavior: "smooth" 
       })
-
-      // console.log('Container scrollLeft after:', container.scrollLeft)
     } else {
       console.error('No container found for index:', index)
     }

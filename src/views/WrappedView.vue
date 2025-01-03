@@ -196,7 +196,7 @@
               <button @click="openWrappedModal"
                 class="relative inline-flex items-center justify-center px-6 py-2 text-base sm:text-lg text-black transition-all bg-white hover:bg-white/70 focus:ring-red-600 active:scale-95 rounded"
                 role="button">
-                <Play class="w-6 h-6 mr-2 fill-black" /> {{ new Date().getFullYear() }} Öğrenme Yolculuğun
+                <Play class="w-6 h-6 mr-2 fill-black" />Öğrenme Yolculuğun
               </button>
             </div>
           </div>
@@ -295,7 +295,6 @@
                   :item="item" 
                   :type="section.type" 
                   @click="() => {
-                    console.log('WrappedView - Card clicked:', item);
                     openContentModal(item, section.type);
                   }" 
                 />
@@ -357,7 +356,6 @@ const {
   startLoading,
   stopLoading,
   setError,
-  isCoursesLoading
 } = useLoading();
 
 const loadWrappedData = () => {
@@ -435,11 +433,8 @@ const formatTitle = (title) => {
 }
 
 const generateVideos = (subjectName, subjectData) => {
-  console.log('WrappedView - Subject:', subjectName);
-  console.log('WrappedView - Subject data:', subjectData);
 
   const subjectVideos = subjectData?.videos;
-  console.log('WrappedView - Subject videos:', subjectVideos);
 
   // videos array ise ve dolu ise
   if (Array.isArray(subjectVideos)) {
@@ -455,7 +450,6 @@ const generateVideos = (subjectName, subjectData) => {
           summary: video.summary || 'Video özeti bulunmuyor.',
           channel_title: video.channel_title || 'Tam Okul'
         };
-        console.log('WrappedView - Processed video:', processedVideo);
         return processedVideo;
       });
 
@@ -491,9 +485,7 @@ const generateItemsFromSubjects = (subjects) => {
 }
 
 const lessonSections = computed(() => {
-  console.log('WrappedView - Loading state:', loading.value);
-  console.log('WrappedView - Courses loading state:', isCoursesLoading.value);
-  console.log('WrappedView - Available courses:', analysisStore.courses.value);
+
 
   // Eğer courses verisi varsa ve loading false ise
   const courses = analysisStore.courses.value;
@@ -523,22 +515,16 @@ const sections = computed(() => [...lessonSections.value, ...otherSections.value
 
 const analysisData = computed(() => {
   if (!selectedCourse.value) return [];
-
-  console.log('Selected Course:', selectedCourse.value);
   
-  // courses.value'dan direkt olarak ders bilgisini al
   const course = analysisStore.courses.value?.find(course => 
     (course.title || course.title_uppercase || '').toLowerCase() === selectedCourse.value.toLowerCase()
   );
   
-  console.log('Found Course:', course);
   if (!course) return [];
 
   const transformedData = [];
 
-  // Eğer subjects verisi yoksa boş bir dizi döndür
   if (!course.subjects || Object.keys(course.subjects).length === 0) {
-    console.log('No subjects found for course:', selectedCourse.value);
     return [{
       subject: 'Henüz veri yok',
       correct: null,
@@ -550,10 +536,6 @@ const analysisData = computed(() => {
   }
 
   Object.entries(course.subjects).forEach(([subjectName, data]) => {
-    // API yanıtındaki analysis yapısını kontrol et
-    console.log('Subject Data:', data);
-    
-    // analysis bir array ise ilk elemanı al, değilse direkt kendisini kullan
     const analysis = Array.isArray(data.analysis) ? data.analysis[0] : data.analysis;
     
     if (analysis) {
@@ -568,7 +550,6 @@ const analysisData = computed(() => {
     }
   });
 
-  console.log('Transformed Data:', transformedData);
   return transformedData;
 });
 
@@ -603,7 +584,6 @@ const checkMobile = () => {
 }
 
 const handleCarouselScroll = (index, direction) => {
-  // console.log('Scrolling carousel:', index, direction)
   scroll(index, direction)
   setTimeout(() => checkScrollPosition(index), 100)
 }
@@ -615,31 +595,15 @@ const checkScrollPosition = (index) => {
     const clientWidth = Math.round(container.clientWidth)
     const scrollWidth = Math.round(container.scrollWidth)
     
-    // Sol buton kontrolü
     showLeftScrollButton.value[index] = scrollLeft > 0
     
-    // Sağ buton kontrolü - 1 piksellik tolerans ekledik
     const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 1
     showRightScrollButton.value[index] = !isAtEnd && scrollWidth > clientWidth
-
-    console.log(`Section ${index}:`, {
-      scrollLeft,
-      clientWidth,
-      scrollWidth,
-      isAtEnd,
-      showLeft: showLeftScrollButton.value[index],
-      showRight: showRightScrollButton.value[index]
-    })
   }
 }
 
-// openContentModal'ı wrap edelim
 const openContentModal = (video, type) => {
-  console.log('WrappedView - Opening modal with video:', video);
-  console.log('WrappedView - Modal type:', type);
   originalOpenContentModal(video, type);
-  console.log('WrappedView - Selected lesson after open:', selectedLesson.value);
-  console.log('WrappedView - Modal visibility after open:', showContentModal.value);
 };
 
 onMounted(async () => {

@@ -79,14 +79,10 @@ export default createStore({
     // Course content getters
     getCourses: state => state.courses,
     getCourseByTitle: state => title => {
-      console.log('Searching for course title:', title)
-      console.log('Available courses:', state.courses?.map(c => ({ title: c.title, uppercase: c.title_uppercase })))
-      const course = state.courses?.find(course => 
+      return state.courses?.find(course => 
         course.title?.toLowerCase() === title?.toLowerCase() || 
         course.title_uppercase?.toLowerCase() === title?.toLowerCase()
-      )
-      console.log('Found course:', course)
-      return course
+      );
     },
     
     // Optic form getters
@@ -172,8 +168,6 @@ export default createStore({
             return acc;
           }, {})
         }));
-
-        console.log('Processed courses:', processedCourses);
 
         // İşlenmiş veriyi state'e kaydet
         commit('SET_ANALYSIS_DATA', {

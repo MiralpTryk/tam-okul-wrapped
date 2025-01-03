@@ -8,19 +8,34 @@ import {
 } from '@/utils/contentGenerators'
 
 export function useContent() {
+  // Shuffle array helper function
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+
   const generateItems = (count, prefix, type = "course") => {
+    let items;
     switch (type) {
       case "music":
-        return generateMusicItems(count, prefix)
+        items = generateMusicItems(count, prefix)
+        break;
       case "quote":
-        return generateQuoteItems(count, prefix)
+        items = generateQuoteItems(count, prefix)
+        break;
       case "story":
-        return generateStoryItems(count, prefix)
+        items = generateStoryItems(count, prefix)
+        break;
       case "book":
-        return generateBookItems(count, prefix)
+        items = generateBookItems(count, prefix)
+        break;
       default:
-        return generateCourseItems(count, prefix)
+        items = generateCourseItems(count, prefix)
     }
+    return shuffleArray(items);
   }
 
   const otherSections = computed(() => [
@@ -35,16 +50,11 @@ export function useContent() {
       items: generateItems(100, "Quote", "quote")
     },
     {
-      title: "İlham Veren Hikayeler 📝",
-      type: "story",
-      items: generateItems(10, "Story", "story")
-    },
-    {
       title: "Kitap Önerileri 📚",
       type: "book",
       items: generateItems(100, "Book", "book")
     }
-  ])
+  ]);
 
   return {
     generateItems,

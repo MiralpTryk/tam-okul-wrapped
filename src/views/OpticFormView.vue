@@ -58,7 +58,7 @@
             @click="handleSubmit"
             :disabled="isFormCompleted"
             :class="[
-              'px-4 sm:px-6 py-2 rounded text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2 w-full sm:w-1/4',
+              'px-4 sm:px-6 py-2 rounded text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2 w-full sm:w-1/4 whitespace-nowrap',
               isFormCompleted 
                 ? 'bg-green-600 text-white cursor-not-allowed' 
                 : !areAllPagesSaved
@@ -73,7 +73,7 @@
               Cevaplar Gözden Geçirildi
             </template>
             <template v-else>
-              Cevaplarını Gözden Geçir
+              Cevap Anahtarı
             </template>
           </button>
         </div>
@@ -119,7 +119,7 @@
                 <div class="space-y-8">
                   <template v-for="(pageQuestions, page) in subjectQuestions" :key="page">
                     <div class="" :data-page="page">
-                      <h3 class="text-lg font-semibold text-zinc-200 mb-4">Sayfa {{ page }}</h3>
+                      <h3 class="text-lg font-semibold text-zinc-200 mb-4 w-fit">Sayfa {{ page }}</h3>
                       
                       <!-- Questions Grid for this page -->
                       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -409,9 +409,29 @@
                                     .reduce((count, [_, pageQuestions]) => count + Object.keys(pageQuestions).length, 0) 
                                   + questionIndex + 1 
                                 }}</span>
-                                <span :class="question.answer === null ? 'text-yellow-500' : 'text-[#E50914] font-medium'">
-                                  {{ question.answer === null ? 'Boş' : ['A', 'B', 'C', 'D', 'E'][question.answer] }}
-                                </span>
+                                <div class="flex items-center gap-2">
+                                  <!-- Öğrenci Cevabı -->
+                                  <span :class="[
+                                    'font-medium px-2 py-0.5 rounded',
+                                    question.answer === null 
+                                      ? 'text-yellow-500 bg-yellow-500/10' 
+                                      : question.answer === parseInt(question.correct)
+                                        ? 'text-green-500 bg-green-500/10'
+                                        : 'text-[#E50914] bg-[#E50914]/10'
+                                  ]">
+                                    {{ question.answer === null ? 'Boş' : ['A', 'B', 'C', 'D', 'E'][question.answer] }}
+                                    {{ 
+                                      question.answer !== null && 
+                                      question.answer === parseInt(question.correct) 
+                                        ? '✓' 
+                                        : question.answer !== null ? '✗' : ''
+                                    }}
+                                  </span>
+                                  <!-- Doğru Cevap -->
+                                  <span class="text-green-500 bg-green-500/10 px-2 py-0.5 rounded font-medium">
+                                    {{ ['A', 'B', 'C', 'D', 'E'][parseInt(question.correct)] }}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -456,10 +476,8 @@ const dontShowWelcomeAgain = ref(false);
 const allSavedAnswers = ref({});
 const showSubmitModal = ref(false);
 
-// Add this with other refs
 const savedPages = ref(new Set());
 
-// Add this with other refs at the top
 const isFormCompleted = ref(false);
 
 const QUESTIONS_PER_PAGE = 20;
@@ -521,7 +539,7 @@ const availablePages = computed(() => {
 });
 
 const loadQuestions = () => {
-  error.value = null; // Reset error state
+  error.value = null;
   
   try {
     if (analysisStore.isOpticDataLoading.value) {
@@ -542,9 +560,7 @@ const loadQuestions = () => {
 
     let allQuestions = [];
     
-    // Process courses in the order they come from API
     opticData.courses.forEach(course => {
-      // Get all pages and sort them numerically
       const pageNumbers = Object.keys(course.pages).map(Number).sort((a, b) => a - b);
       
       pageNumbers.forEach(pageNumber => {
@@ -567,16 +583,13 @@ const loadQuestions = () => {
       });
     });
 
-    // Sort questions only by page number within each subject
     allQuestions.sort((a, b) => {
       if (a.title !== b.title) {
-        // Keep subjects in their original order by finding their index in courses array
         const subjectOrderA = opticData.courses.findIndex(c => c.title === a.title);
         const subjectOrderB = opticData.courses.findIndex(c => c.title === b.title);
         return subjectOrderA - subjectOrderB;
       }
       
-      // If same subject, sort by page number
       return a.page - b.page;
     });
 
@@ -590,14 +603,12 @@ const loadQuestions = () => {
   }
 };
 
-// Watch for opticData changes
 watch(() => analysisStore.opticData.value, (newData) => {
   if (newData && !questions.value.length) {
     loadQuestions();
   }
 }, { immediate: true });
 
-// Watch for availablePages changes
 watch(availablePages, (newPages) => {
   if (newPages.length > 0 && !newPages.includes(currentPage.value)) {
     currentPage.value = newPages[0];
@@ -643,7 +654,6 @@ const loadAnswers = () => {
       return savedQuestion ? { ...q, answer: savedQuestion.answer, bookmarked: savedQuestion.bookmarked, saved: savedQuestion.saved } : q;
     });
     
-    // Reconstruct allSavedAnswers from saved questions
     const savedQuestions = questions.value.filter(q => q.saved);
     const reconstructedAnswers = { answers: {} };
     
@@ -660,7 +670,6 @@ const loadAnswers = () => {
         answer: q.answer !== null ? parseInt(q.answer) : null
       };
       
-      // Add page to savedPages if it has saved questions
       savedPages.value.add(q.page);
     });
     
@@ -706,40 +715,7 @@ const handleKeyPress = (e) => {
     }
   }
 };
-/* 
-const saveCurrentPageAnswers = () => {
-  const currentAnswers = getCurrentPageAnswers();
-  
-  // Merge and sort the answers
-  allSavedAnswers.value = mergeAndSortAnswers(currentAnswers);
-  
-  // Mark current page as saved at least once
-  savedPages.value.add(currentPage.value);
-  
-  // Mark all questions on current page as saved
-  currentPageQuestions.value.forEach(question => {
-    question.saved = true;
-  });
-  
-  saveAnswers();
-  console.log('All answers to be sent:', allSavedAnswers.value);
-  
-  Swal.fire({
-    title: 'Başarılı!',
-    text: 'Cevaplarınız kaydedildi.',
-    icon: 'success',
-    confirmButtonText: 'Tamam',
-    confirmButtonColor: '#E50914',
-    background: '#141414',
-    color: '#fff',
-    iconColor: '#E50914',
-    showConfirmButton: true,
-    timer: 1500,
-    timerProgressBar: true,
-    toast: true,
-    position: 'top-end',
-  });
-}; */
+
 
 const isPageSaved = (page) => {
   return savedPages.value.has(parseInt(page));
@@ -757,21 +733,14 @@ const handleImageError = (event) => {
 };
 
 const watchSolutionVideo = (questionId) => {
-  // console.log('watchSolutionVideo called with questionId:', questionId);
 
   const question = questions.value.find(q => q.id === questionId);
-  // console.log('Found question:', question);
 
   if (question) {
     const videoUrl = question.video_url || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
-    // console.log('Video URL:', videoUrl);
     currentVideoUrl.value = videoUrl;
-    // console.log('Set currentVideoUrl to:', currentVideoUrl.value);
 
     showVideoModal.value = true;
-    // console.log('Set showVideoModal to:', showVideoModal.value);
-  } else {
-    // console.error('Question not found for id:', questionId);
   }
 };
 
@@ -793,7 +762,7 @@ const simulateImageError = (imageUrl) => {
 
 const handleAnswerChange = (questionId, answer) => {
   const question = questions.value.find(q => q.id === questionId);
-  if (question && !isPageSaved(question.page)) {
+  if (question && !isPageSaved(question.page) && !isFormCompleted.value) {
     question.answer = answer;
   }
 };
@@ -801,12 +770,10 @@ const handleAnswerChange = (questionId, answer) => {
 const mergeAndSortAnswers = (currentAnswers) => {
   const mergedAnswers = { ...allSavedAnswers.value };
   
-  // Handle undefined/null cases
   if (!currentAnswers || !currentAnswers.answers) {
     return mergedAnswers;
   }
   
-  // Merge new answers
   Object.entries(currentAnswers.answers).forEach(([subject, pages]) => {
     if (!mergedAnswers[subject]) {
       mergedAnswers[subject] = {};
@@ -820,17 +787,14 @@ const mergeAndSortAnswers = (currentAnswers) => {
     });
   });
   
-  // Sort subjects and pages
   const sortedAnswers = {};
   
-  // Get all subjects and sort them based on their order in questions
   const subjectOrder = [...new Set(questions.value.map(q => q.title))];
   
   subjectOrder.forEach(subject => {
     if (mergedAnswers[subject]) {
       sortedAnswers[subject] = {};
       
-      // Get all pages for this subject and sort them numerically
       const pages = Object.keys(mergedAnswers[subject]).map(Number);
       pages.sort((a, b) => a - b);
       
@@ -847,10 +811,7 @@ const handleSubmit = () => {
   showSubmitModal.value = true;
 };
 
-const isDevelopment = process.env.NODE_ENV === 'development';
-
 const areAllPagesSaved = computed(() => {
-  if (isDevelopment) return true; // Development modunda her zaman true dön
   
   const allPages = [...new Set(questions.value.map(q => q.page))];
   return allPages.every(page => savedPages.value.has(page));
@@ -869,7 +830,6 @@ onMounted(() => {
   loadQuestions();
   loadAnswers();
   
-  // Load completion status
   const completed = localStorage.getItem('optikFormCompleted');
   if (completed === 'true') {
     isFormCompleted.value = true;
@@ -928,8 +888,31 @@ const groupedQuestions = computed(() => {
   return grouped;
 });
 
+const savedAnswersData = ref({
+  code: '',
+  answers: []
+});
+
+const subjectOrder = computed(() => {
+  if (!analysisStore.opticData.value?.courses) return [];
+  return analysisStore.opticData.value.courses.map(course => course.title);
+});
+
 const savePageAnswers = (subject, page) => {
-  // Show confirmation modal first
+  if (isPageSaved(page) || isFormCompleted.value) {
+    Swal.fire({
+      title: 'Hata!',
+      text: 'Bu sayfa zaten kaydedilmiş veya form tamamlanmış.',
+      icon: 'error',
+      confirmButtonText: 'Tamam',
+      confirmButtonColor: '#E50914',
+      background: '#141414',
+      color: '#fff',
+      iconColor: '#E50914'
+    });
+    return;
+  }
+
   Swal.fire({
     title: 'Emin misiniz?',
     html: `
@@ -949,66 +932,159 @@ const savePageAnswers = (subject, page) => {
     iconColor: '#E50914'
   }).then((result) => {
     if (result.isConfirmed) {
-      // Proceed with saving
-      console.log('Saving answers for:', { subject, page });
-      
-      // Get questions for this specific page
-      const pageQuestions = questions.value.filter(q => q.title === subject && q.page === parseInt(page));
-      console.log('Found questions:', pageQuestions);
-      
-      if (pageQuestions.length === 0) {
-        console.error('No questions found for this page');
+      if (isPageSaved(page) || isFormCompleted.value) {
         return;
       }
 
-      // Create answers object for just this page
-      const pageAnswers = {
-        answers: {
+      const pageQuestions = questions.value.filter(q => q.title === subject && q.page === parseInt(page));
+      
+      const hash = window.location.hash;
+      const code = hash.split('/').pop() || '';
+      
+      savedAnswersData.value.code = code;
+      
+      let existingSubjectIndex = savedAnswersData.value.answers.findIndex(ans => ans[subject]);
+      
+      if (existingSubjectIndex === -1) {
+        const targetIndex = subjectOrder.value.indexOf(subject);
+        let insertIndex = 0;
+        
+        while (insertIndex < savedAnswersData.value.answers.length) {
+          const currentSubject = Object.keys(savedAnswersData.value.answers[insertIndex])[0];
+          if (subjectOrder.value.indexOf(currentSubject) > targetIndex) {
+            break;
+          }
+          insertIndex++;
+        }
+        
+        const newAnswerData = {
           [subject]: {
             [page]: {}
           }
-        }
-      };
-      
-      // Add each question's answer to the structure
-      pageQuestions.forEach(question => {
-        pageAnswers.answers[subject][page][question.id] = {
-          id: question.id,
-          correct: parseInt(question.correct_answer),
-          answer: question.answer !== null ? parseInt(question.answer) : null
         };
         
-        // Mark question as saved and lock it
-        question.saved = true;
-      });
+        pageQuestions.forEach(question => {
+          newAnswerData[subject][page][question.id] = {
+            id: question.id,
+            correct: parseInt(question.correct_answer),
+            answer: question.answer !== null ? parseInt(question.answer) : null
+          };
+          
+          question.saved = true;
+        });
+        
+        savedAnswersData.value.answers.splice(insertIndex, 0, newAnswerData);
+      } else {
+        const newPageData = {};
+        pageQuestions.forEach(question => {
+          newPageData[question.id] = {
+            id: question.id,
+            correct: parseInt(question.correct_answer),
+            answer: question.answer !== null ? parseInt(question.answer) : null
+          };
+          
+          question.saved = true;
+        });
+        savedAnswersData.value.answers[existingSubjectIndex][subject][page] = newPageData;
+      }
       
-      // Add page to savedPages to lock it
       savedPages.value.add(parseInt(page));
       
-      // Save to localStorage
       saveAnswers();
       
-      console.log('Sending page answers:', pageAnswers);
+      const answersArray = savedAnswersData.value.answers;
+      const cleanAnswers = JSON.parse(JSON.stringify(answersArray));
+      const dataToSend = {
+        code: savedAnswersData.value.code,
+        answers: JSON.stringify(cleanAnswers)
+      };
       
-      // Show success message
-      Swal.fire({
-        title: 'Başarılı!',
-        text: 'Cevaplarınız kaydedildi.',
-        icon: 'success',
-        confirmButtonText: 'Tamam',
-        confirmButtonColor: '#E50914',
-        background: '#141414',
-        color: '#fff',
-        iconColor: '#E50914',
-        showConfirmButton: true,
-        timer: 5000,
-        timerProgressBar: true,
-        toast: true,
-        position: 'top-end',
+      console.log('Data to be sent to API:', dataToSend);
+      
+      const apiUrl = `${process.env.VUE_APP_API_BASE_URL}/koksis/submit-optic-form`;
+      
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToSend)
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('API Response:', data);
+        
+        Swal.fire({
+          title: 'Başarılı!',
+          text: 'Cevaplarınız kaydedildi.',
+          icon: 'success',
+          confirmButtonText: 'Tamam',
+          confirmButtonColor: '#E50914',
+          background: '#242424',
+          color: '#fff',
+          iconColor: '#E50914',
+          showConfirmButton: false,
+          timer: 5000,
+          timerProgressBar: true,
+          toast: true,
+          position: 'top',
+          didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+          }
+        });
+      })
+      .catch(error => {
+        console.error('API Error:', error);
+        
+        Swal.fire({
+          title: 'Hata!',
+          text: 'Cevaplarınız kaydedilirken bir hata oluştu.',
+          icon: 'error',
+          confirmButtonText: 'Tamam',
+          confirmButtonColor: '#E50914',
+          background: '#242424',
+          color: '#fff',
+          iconColor: '#E50914'
+        });
       });
     }
   });
 };
+
+watch(isFormCompleted, (newValue) => {
+  if (newValue) {
+    localStorage.setItem('optikFormCompleted', 'true');
+    questions.value.forEach(q => {
+      q.saved = true;
+    });
+  }
+});
+
+onMounted(() => {
+  
+  const completed = localStorage.getItem('optikFormCompleted');
+  if (completed === 'true') {
+    isFormCompleted.value = true;
+    questions.value.forEach(q => {
+      q.saved = true;
+    });
+  }
+
+  const savedPagesFromStorage = localStorage.getItem('savedPages');
+  if (savedPagesFromStorage) {
+    const parsedPages = JSON.parse(savedPagesFromStorage);
+    savedPages.value = new Set(parsedPages);
+  }
+});
+
+const saveSavedPages = () => {
+  localStorage.setItem('savedPages', JSON.stringify([...savedPages.value]));
+};
+
+watch(savedPages, () => {
+  saveSavedPages();
+}, { deep: true });
 </script>
 
 <style scoped>

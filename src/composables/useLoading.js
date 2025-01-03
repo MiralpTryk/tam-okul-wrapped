@@ -12,26 +12,21 @@ export function useLoading() {
 
   // Loading state'i güncelle
   const startLoading = () => {
-    console.log('useLoading - Starting loading');
     loading.value = true;
-    error.value = null;
   }
 
   const stopLoading = () => {
-    console.log('useLoading - Stopping loading');
     loading.value = false;
   }
 
   // Error state'i güncelle
   const setError = (err) => {
-    console.error('useLoading - Setting error:', err);
     error.value = err?.message || 'Bir hata oluştu';
     loading.value = false;
   }
 
   // Loading state'i sıfırla
   const reset = () => {
-    console.log('useLoading - Resetting state');
     loading.value = false;
     error.value = null;
   }

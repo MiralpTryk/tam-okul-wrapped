@@ -1,18 +1,14 @@
 <template>
   <div class="min-h-screen bg-black text-white relative overflow-hidden">
-    <!-- Grid Pattern Background -->
     <div class="fixed inset-0 z-0">
       <div class="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f_1px,transparent_1px)] bg-[size:8rem_8rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_50%,#000_20%,transparent_80%)] opacity-[0.35]"></div>
     </div>
 
     <div class="fixed inset-0 z-[1]">
-      <!-- Purple gradient -->
       <div class="absolute top-[-6rem] -left-[10rem] w-[15rem] h-[15rem] sm:w-[20rem] sm:h-[20rem] md:w-[25rem] md:h-[25rem] lg:w-[30rem] lg:h-[30rem] bg-sky-500/60 rounded-full mix-blend-multiply filter blur-[64px] sm:blur-[96px] md:blur-[112px] lg:blur-[128px] animate-blob [animation-delay:2000ms]"></div>
       
-      <!-- Red gradient -->
       <div class="absolute top-[-1rem] -right-[10rem] w-[15rem] h-[15rem] sm:w-[20rem] sm:h-[20rem] md:w-[25rem] md:h-[25rem] lg:w-[30rem] lg:h-[30rem] bg-red-500/60 rounded-full mix-blend-multiply filter blur-[64px] sm:blur-[96px] md:blur-[112px] lg:blur-[128px] animate-blob [animation-delay:3000ms]"></div>
       
-      <!-- violet gradient -->
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[15rem] h-[15rem] sm:w-[20rem] sm:h-[20rem] md:w-[25rem] md:h-[25rem] lg:w-[30rem] lg:h-[30rem] bg-violet-500/60 rounded-full mix-blend-multiply filter blur-[64px] sm:blur-[96px] md:blur-[112px] lg:blur-[128px] animate-blob [animation-delay:4000ms]"></div>
     </div>
 
@@ -31,11 +27,6 @@
     </AppHeader>
 
     <div class="pt-[4.5rem] min-h-screen relative z-10">
-      <!-- Loading State - Removed spinner, using only skeletons -->
-      <!-- <div v-if="loading" class="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="animate-spin rounded-full h-12 w-12 border-2 border-red-600 border-t-transparent mb-4"></div>
-        <p class="text-zinc-400">Veriler yükleniyor...</p>
-      </div> -->
 
       <!-- Mobile Overlay -->
       <div v-show="isSidebarOpen" class="fixed inset-0 bg-black/50 z-20 xl:hidden" @click="toggleSidebar">
@@ -208,12 +199,10 @@ import ContentCard from "@/components/ContentCard.vue"
 import { useRoute, useRouter } from 'vue-router'
 import { useModal } from '@/composables/useModal'
 
-// Route'u en üstte tanımla
 const route = useRoute()
 const router = useRouter()
 const analysisStore = useAnalysisStore()
 
-// Loading state yönetimini useLoading composable'ından al
 const { 
   loading,
   startLoading,
@@ -245,89 +234,53 @@ const categories = computed(() => {
 });
 
 const generateVideos = (subjectName, categoryId) => {
-  console.log('BrowseView - Generating videos for:', { subjectName, categoryId });
-  
-  // Dersi bul
   const course = analysisStore.courses.value?.find(course => {
     const courseTitle = (course.title || course.title_uppercase || '').toLowerCase();
     const searchTitle = (categoryId || '').toLowerCase();
     const matches = courseTitle === searchTitle;
-    console.log('BrowseView - Comparing course:', { courseTitle, searchTitle, matches });
     return matches;
   });
 
-  if (!course) {
-    console.log('BrowseView - No course found for:', categoryId);
-    return [];
-  }
+  if (!course) return [];
 
-  // Konuyu bul
   const subject = course.subjects?.[subjectName];
-  if (!subject) {
-    console.log('BrowseView - No subject found:', subjectName);
-    return [];
-  }
+  if (!subject) return [];
 
-  // Videoları kontrol et
   const videos = subject.videos;
-  if (!Array.isArray(videos)) {
-    console.log('BrowseView - No videos array found for subject:', subjectName);
-    return [];
-  }
+  if (!Array.isArray(videos)) return [];
 
-  // Videoları işle
   const processedVideos = videos
-    .filter(video => {
-      const isValid = video && video.video_id;
-      if (!isValid) {
-        console.log('BrowseView - Invalid video found:', video);
-      }
-      return isValid;
-    })
-    .map((video, index) => {
-      const processedVideo = {
-        ...video,
-        id: `${video.id || video.video_id}-${subjectName}-${index}`,
-        type: "lesson",
-        subjectName,
-        description: video.description || 'Video açıklaması bulunmuyor.',
-        study_notes: video.study_notes || 'Video özeti bulunmuyor.',
-        channel_title: video.channel_title || 'Tam Okul'
-      };
-      console.log('BrowseView - Processed video:', processedVideo);
-      return processedVideo;
-    });
+    .filter(video => video && video.video_id)
+    .map((video, index) => ({
+      ...video,
+      id: `${video.id || video.video_id}-${subjectName}-${index}`,
+      type: "lesson",
+      subjectName,
+      description: video.description || 'Video açıklaması bulunmuyor.',
+      study_notes: video.study_notes || 'Video özeti bulunmuyor.',
+      channel_title: video.channel_title || 'Tam Okul'
+    }));
 
-  console.log('BrowseView - Generated videos count:', processedVideos.length);
   return processedVideos;
 };
 
-const openCategories = ref([])
-const categoryRefs = ref({})
-const subcategoryRefs = ref({})
-const observers = ref({})
+const openCategories = ref([]);
+const categoryRefs = ref({});
+const subcategoryRefs = ref({});
+const observers = ref({});
 
 const toggleCategory = (categoryId) => {
-  console.log('BrowseView - Toggling category:', categoryId);
-  console.log('BrowseView - Current open categories:', openCategories.value);
-  
   const index = openCategories.value.indexOf(categoryId);
   if (index === -1) {
-    // Kategoriyi aç
     openCategories.value.push(categoryId);
   } else {
-    // Kategoriyi kapat
     openCategories.value.splice(index, 1);
   }
-  
-  console.log('BrowseView - Open categories after toggle:', openCategories.value);
 };
 
 const scrollToSection = (categoryId, subcategory) => {
-  // Önce yönlendirme yap
   navigateToSection(categoryId, subcategory);
 
-  // Sonra scroll işlemini gerçekleştir
   const targetRef = subcategoryRefs.value[`${categoryId}-${subcategory}`]
   if (targetRef) {
     if (window.innerWidth < 1280) {
@@ -362,7 +315,6 @@ const isSidebarOpen = ref(false)
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value
-  // console.log('Sidebar toggled:', isSidebarOpen.value)
 }
 
 
@@ -410,21 +362,16 @@ const {
 } = useModal();
 
 const openContentModal = (video, type) => {
-  console.log('BrowseView - Opening modal with video:', video);
-  console.log('BrowseView - Modal type:', type);
+
   originalOpenContentModal(video, type);
-  console.log('BrowseView - Selected lesson after open:', selectedLesson.value);
-  console.log('BrowseView - Modal visibility after open:', showContentModal.value);
+
 };
 
 const scrollToCategory = async (categoryTitle) => {
   if (!categoryTitle) return;
   
-  console.log('BrowseView - Trying to scroll to category:', categoryTitle);
 
-  // Verinin yüklenmesini bekle
   if (loading.value) {
-    console.log('BrowseView - Waiting for data to load...');
     await new Promise(resolve => {
       const unwatch = watch(loading, (newLoading) => {
         if (!newLoading) {
@@ -435,68 +382,47 @@ const scrollToCategory = async (categoryTitle) => {
     });
   }
 
-  // DOM'un güncellenmesini bekle
   await nextTick();
-  console.log('BrowseView - Categories after loading:', categories.value);
 
-  // Kategoriyi bul
   const category = categories.value.find(cat => {
     const matches = cat.name === categoryTitle;
-    console.log('BrowseView - Comparing:', {
-      categoryName: cat.name,
-      searchTitle: categoryTitle,
-      matches
-    });
     return matches;
   });
 
   if (!category) {
-    console.log('BrowseView - Category not found:', categoryTitle);
     return;
   }
 
-  console.log('BrowseView - Found category:', category.name);
 
-  // Önce diğer kategorileri kapat
   openCategories.value = [];
   
-  // Bu kategoriyi aç
   openCategories.value.push(category.id);
-  console.log('BrowseView - Opened category:', category.id);
 
-  // DOM'un güncellenmesini bekle
   await nextTick();
 
-  // Kategoriye scroll yap
   const element = categoryRefs.value[category.id];
   if (element) {
     const headerOffset = 80;
     const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
     
-    console.log('BrowseView - Scrolling to position:', elementPosition - headerOffset);
     
     window.scrollTo({
       top: elementPosition - headerOffset,
       behavior: 'smooth'
     });
-  } else {
-    console.log('BrowseView - Category element not found in refs');
   }
 };
 
-// Route watcher'ı güncelle
 watch(
   () => route.query.course,
   async (newCourse) => {
     if (newCourse) {
-      console.log('BrowseView - Course changed in URL:', newCourse);
       await scrollToCategory(newCourse);
     }
   },
   { immediate: true }
 );
 
-// Yönlendirme fonksiyonunu güncelle
 const navigateToSection = (categoryId, subcategory) => {
   router.push({
     name: 'browse',
@@ -505,75 +431,51 @@ const navigateToSection = (categoryId, subcategory) => {
   });
 };
 
-// Kategorileri izleyelim ve değişiklikleri loglayalım
 watch(openCategories, (newCategories) => {
-  console.log('BrowseView - Open categories changed:', newCategories);
+  if (newCategories.length > 0 && openCategories.value.length === 0) {
+    const firstCategory = newCategories[0];
+    openCategories.value = [firstCategory.id];
+  }
 });
 
-// Kategorileri otomatik açmak için watch ekleyelim
 watch(categories, (newCategories) => {
   if (newCategories.length > 0 && openCategories.value.length === 0) {
     const firstCategory = newCategories[0];
-    console.log('BrowseView - Auto opening first category:', firstCategory.id);
     openCategories.value = [firstCategory.id];
   }
 }, { immediate: true });
 
-// Loading state'lerini izleyelim
 watch(loading, (newLoading) => {
-  console.log('BrowseView - Loading state changed:', {
-    loading: newLoading
-  });
-  
-  // Loading bittiğinde kategorileri kontrol et
   if (!newLoading && categories.value.length > 0 && openCategories.value.length === 0) {
     const firstCategory = categories.value[0];
-    console.log('BrowseView - Auto opening first category after loading:', firstCategory.id);
     openCategories.value = [firstCategory.id];
   }
 });
 
 onMounted(async () => {
   const code = route.params.code;
-  console.log('BrowseView - Mounting with code:', code);
   
   try {
     startLoading();
-    console.log('BrowseView - Started loading');
-    
-    // Veriyi yükle
-    const data = await analysisStore.fetchAnalysisData(code);
-    console.log('BrowseView - Data fetched:', data);
-    
-    // Veri yüklendikten sonra loading'i kapat
+    await analysisStore.fetchAnalysisData(code);
     stopLoading();
-    console.log('BrowseView - Loading stopped');
     
-    // DOM'un güncellenmesini bekle
     await nextTick();
-    console.log('BrowseView - DOM updated');
     
-    // URL'de course parametresi varsa o kategoriye git
     const course = route.query.course;
     if (course) {
-      console.log('BrowseView - Found course in URL:', course);
       await scrollToCategory(course);
     } else if (categories.value.length > 0) {
-      // Yoksa ilk kategoriyi aç
-      console.log('BrowseView - Opening first category:', categories.value[0].id);
       openCategories.value = [categories.value[0].id];
     }
   } catch (err) {
-    console.error('BrowseView - Error loading data:', err);
     setError(err);
-    stopLoading(); // Hata durumunda da loading'i kapat
+    stopLoading();
   }
 
-  // Event listener'ları ekle
   window.addEventListener('scroll', handleScroll);
   window.addEventListener('resize', handleResize);
 
-  // Intersection Observer'ları ayarla
   nextTick(() => {
     Object.entries(subcategoryRefs.value).forEach(([sectionId, element]) => {
       if (!element) return;
@@ -611,7 +513,6 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* Global scrollbar styles - these can't be done with Tailwind */
 ::-webkit-scrollbar {
   width: 12px;
 }

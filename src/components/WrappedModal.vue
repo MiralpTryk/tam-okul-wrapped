@@ -18,19 +18,16 @@
         <div class="absolute top-0 sm:top-4 left-1/2 transform -translate-x-1/2 w-full px-4 sm:px-8">
           <div class="flex gap-1 w-full max-w-sm sm:max-w-3xl mx-auto">
             <div v-for="(bar, index) in progressBars" :key="index"
-              class="overflow-hidden bg-white/25 transition-all duration-300 flex items-center"
-              :class="{
+              class="overflow-hidden bg-white/25 transition-all duration-300 flex items-center" :class="{
                 'h-1.5': currentSlide === index,
                 'h-1': currentSlide !== index,
                 'flex-[2]': currentSlide === index,
                 'flex-1': currentSlide !== index
               }">
-              <div class="bg-white transition-[width] duration-100"
-                :class="{
-                  'h-1.5': currentSlide === index,
-                  'h-1': currentSlide !== index
-                }"
-                :style="{
+              <div class="bg-white transition-[width] duration-100" :class="{
+                'h-1.5': currentSlide === index,
+                'h-1': currentSlide !== index
+              }" :style="{
                   transitionDuration: bar.isActive ? '5000ms' : '100ms',
                   width: `${bar.progress}%`
                 }">
@@ -56,13 +53,12 @@
                 <!-- Slide Content -->
                 <!-- Slide 0: Intro -->
                 <div>
-                  <h2 v-if="currentSlide === 0"
-                    class="text-3xl sm:text-5xl md:text-6xl font-bold text-center mb-6">
-                    <span class="text-red-600">{{ new Date().getFullYear() }}</span> Öğrenme Yolculuğun
+                  <h2 v-if="currentSlide === 0" class="text-3xl sm:text-5xl md:text-6xl font-bold text-center mb-6">
+                    Öğrenme Yolculuğun <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8 inline-block">hazır,</h3>
                   </h2>
                   <div v-if="currentSlide === 0" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
-                      hazır, peki sen hazır mısın
+                    peki sen hazır mısın
                       <span class="font-bold text-red-600">{{ name }}</span>?
                     </h3>
                     <button @click="nextSlide"
@@ -91,7 +87,7 @@
                       <Transition name="fade">
                         <div v-if="showTotalQuestions" class="space-y-4 sm:flex-1">
                           <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
-                            Bu yıl toplam
+                            Toplam
                           </h3>
                           <div
                             class="text-5xl sm:text-7xl md:text-9xl font-bold text-red-600 min-w-[200px] sm:min-w-[300px] md:min-w-[350px] text-center">
@@ -132,7 +128,7 @@
                         Çok sayıda farklı derste uzmanlaştın
                       </h3>
                       <p class="text-lg sm:text-xl md:text-2xl mb-8">
-                        <span class="font-bold text-red-600">En iyi 5'ini</span>
+                        <span class="font-bold text-red-600">En iyilerini</span>
                         görelim! &#129300;
                       </p>
                     </div>
@@ -156,10 +152,10 @@
                   <div v-if="currentSlide === 3" class="text-center">
                     <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-8">
                       Ama bir derste o kadar iyiydin ki
-        
+
                       <span class="text-red-600">diğerlerinden öne çıktı &#128077;</span>
                     </h3>
-                    
+
                     <Transition name="fade" mode="out-in">
                       <div v-if="showOutstandingCourse" class="space-y-4 sm:space-y-8">
                         <h3 class="text-2xl sm:text-3xl md:text-4xl font-semibold">
@@ -169,7 +165,8 @@
                           class="cursor-pointer flex flex-col items-center justify-center gap-4 relative mx-auto animate-pulse hover:animate-none z-20">
                           <img :src="FingerPrint" alt="Fingerprint"
                             class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 transition-all duration-300" />
-                          <span class="text-xl sm:text-2xl md:text-3xl transition-all duration-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-nowrap">
+                          <span
+                            class="text-xl sm:text-2xl md:text-3xl transition-all duration-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-nowrap">
                             Açmak için tıkla
                           </span>
                         </div>
@@ -339,7 +336,7 @@
                   <div v-if="currentSlide === 7" class="text-center">
                     <div class="relative">
                       <WrappedStatsCard class="wrapped-stats-card" :longestStreak="longestStreak"
-                        :totalAnswers="totalQuestions" :minutesSpent="totalStudyHours * 60" :userName="name"
+                        :totalAnswers="total_questions_solved" :minutesSpent="totalStudyHours * 60" :userName="name"
                         ref="statsCardRef" />
                     </div>
                   </div>
@@ -377,17 +374,11 @@
           <!-- Mobile Touch Navigation -->
           <div v-if="currentSlide !== 0" class="absolute inset-0 sm:hidden flex z-10">
             <!-- Previous Slide Button -->
-            <button 
-              @click="prevSlide"
-              class="w-1/2 h-full"
-              aria-label="Önceki slayt">
+            <button @click="prevSlide" class="w-1/2 h-full" aria-label="Önceki slayt">
             </button>
-            
+
             <!-- Next Slide Button -->
-            <button 
-              @click="nextSlide"
-              class="w-1/2 h-full"
-              aria-label="Sonraki slayt">
+            <button @click="nextSlide" class="w-1/2 h-full" aria-label="Sonraki slayt">
             </button>
           </div>
 
@@ -397,7 +388,8 @@
               <div class="h-full flex justify-between items-center px-4 text-zinc-200/50">
                 <!-- Left Hint -->
                 <div class="flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                   </svg>
                   <span class="text-sm">Geri</span>
@@ -406,7 +398,8 @@
                 <!-- Right Hint -->
                 <div class="flex items-center gap-2">
                   <span class="text-sm">İleri</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
@@ -647,7 +640,7 @@ const initializeSlide = (slideNumber) => {
         safeSetTimeout(() => {
           achievementPhase.value = 'list';
 
-          const badges = calculateBadges(total_questions_solved.value, 80, totalStudyHours.value);
+          const badges = calculateBadges(total_questions_solved.value, total_questions_solved_percentage.value, totalStudyHours.value);
           const duration = 2500; // 2.5 saniye (toplam 5 saniye olması için)
           const badgeInterval = duration / badges.length;
 
@@ -783,30 +776,30 @@ const calculateBadges = (totalQuestions, successRate, hoursSpent) => {
   let id = 1;
 
   // Soru Çözüm Rozetleri
-  if (totalQuestions >= 1500) {
-    badges.push({ id: id++, emoji: '📚', title: 'Soru Çözüm Ustası (1500+ Soru)' });
-  } else if (totalQuestions >= 1000) {
-    badges.push({ id: id++, emoji: '📖', title: 'Soru Çözüm Uzmanı (1000+ Soru)' });
-  } else if (totalQuestions >= 500) {
-    badges.push({ id: id++, emoji: '📝', title: 'Soru Çözüm Acemisi (500+ Soru)' });
+  if (totalQuestions >= 500) {
+    badges.push({ id: id++, emoji: '📚', title: 'Soru Çözüm Ustası (500+ Soru)' });
+  } else if (totalQuestions >= 250) {
+    badges.push({ id: id++, emoji: '📖', title: 'Soru Çözüm Uzmanı (250+ Soru)' });
+  } else if (totalQuestions >= 100) {
+    badges.push({ id: id++, emoji: '📝', title: 'Soru Çözüm Acemisi (100+ Soru)' });
   }
 
   // Başarı Yüzdesi Rozetleri
-  if (successRate >= 100) {
-    badges.push({ id: id++, emoji: '🎯', title: 'Tam İsabet (%100 Başarı)' });
-  } else if (successRate >= 85) {
-    badges.push({ id: id++, emoji: '🎪', title: 'Başarı Yıldızı (%85+ Başarı)' });
-  } else if (successRate >= 70) {
-    badges.push({ id: id++, emoji: '✨', title: 'Yükselen Yıldız (%70+ Başarı)' });
+  if (successRate >= 90) {
+    badges.push({ id: id++, emoji: '🎯', title: 'Tam İsabet (%90+ Başarı)' });
+  } else if (successRate >= 75) {
+    badges.push({ id: id++, emoji: '🎪', title: 'Başarı Yıldızı (%75+ Başarı)' });
+  } else if (successRate >= 60) {
+    badges.push({ id: id++, emoji: '✨', title: 'Yükselen Yıldız (%60+ Başarı)' });
   }
 
   // Çalışma Saati Rozetleri
-  if (hoursSpent >= 300) {
-    badges.push({ id: id++, emoji: '⏰', title: 'Azimli Şampiyon (300+ Saat)' });
-  } else if (hoursSpent >= 200) {
-    badges.push({ id: id++, emoji: '⌚', title: 'Çalışkan Arı (200+ Saat)' });
-  } else if (hoursSpent >= 100) {
-    badges.push({ id: id++, emoji: '⏱️', title: 'Öğrenme Aşığı (100+ Saat)' });
+  if (hoursSpent >= 100) {
+    badges.push({ id: id++, emoji: '⏰', title: 'Azimli Şampiyon (100+ Saat)' });
+  } else if (hoursSpent >= 50) {
+    badges.push({ id: id++, emoji: '⌚', title: 'Çalışkan Arı (50+ Saat)' });
+  } else if (hoursSpent >= 25) {
+    badges.push({ id: id++, emoji: '⏱️', title: 'Öğrenme Aşığı (25+ Saat)' });
   }
 
   return badges;
@@ -959,13 +952,13 @@ const shuffleArray = (array) => {
 // Add this to your script setup section
 const truncateText = (text) => {
   if (text.length <= 57) return text;
-  
+
   // Find the last space within the first 57 characters
   const truncateIndex = text.substring(0, 57).lastIndexOf(' ');
-  
+
   // If no space found, force cut at 57
   if (truncateIndex === -1) return text.substring(0, 57) + '...';
-  
+
   // Return truncated text at the last word boundary
   return text.substring(0, truncateIndex) + '...';
 };
