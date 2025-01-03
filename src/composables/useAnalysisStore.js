@@ -34,7 +34,7 @@ export function useAnalysisStore() {
     return rawSubject
   })
   const bestSubjects = computed(() => store.state.learningJourney?.best_subjects || [])
-  const courses = computed(() => store.state.courses || [])
+  const courses = ref(null)
   const isCoursesLoading = computed(() => store.state.isLoading)
 
   const fetchAnalysisData = async (code) => {
@@ -50,6 +50,7 @@ export function useAnalysisStore() {
         throw new Error(data.message || 'Veri yüklenirken bir hata oluştu')
       }
       await store.dispatch('loadAnalysisData', data)
+      courses.value = data.data.content.courses
       return data
     } catch (error) {
       console.error('Error fetching analysis data:', error)
@@ -58,6 +59,16 @@ export function useAnalysisStore() {
       isOpticDataLoading.value = false
     }
   }
+
+  const getCourseByTitle = (title) => {
+    if (!courses.value || !Array.isArray(courses.value)) return null;
+    
+    return courses.value.find(course => {
+      const courseTitle = (course.title || course.title_uppercase || '').toLowerCase();
+      const searchTitle = (title || '').toLowerCase();
+      return courseTitle === searchTitle;
+    });
+  };
 
   return {
     // Data
@@ -70,13 +81,14 @@ export function useAnalysisStore() {
     bestCourse,
     bestSubject,
     bestSubjects,
-    courses,
+    courses: computed(() => courses.value),
     isCoursesLoading,
     
     // Loading state
     isOpticDataLoading,
     
     // Methods
-    fetchAnalysisData
+    fetchAnalysisData,
+    getCourseByTitle
   }
 } 

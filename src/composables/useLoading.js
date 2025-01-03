@@ -3,7 +3,7 @@ import { useAnalysisStore } from '@/composables/useAnalysisStore'
 
 export function useLoading() {
   const analysisStore = useAnalysisStore()
-  const loading = ref(true)
+  const loading = ref(false)
   const error = ref(null)
 
   // Store'dan gelen loading state'leri
@@ -12,24 +12,28 @@ export function useLoading() {
 
   // Loading state'i güncelle
   const startLoading = () => {
-    loading.value = true
-    error.value = null
+    console.log('useLoading - Starting loading');
+    loading.value = true;
+    error.value = null;
   }
 
   const stopLoading = () => {
-    loading.value = false
+    console.log('useLoading - Stopping loading');
+    loading.value = false;
   }
 
   // Error state'i güncelle
   const setError = (err) => {
-    error.value = err?.message || 'Bir hata oluştu'
-    loading.value = false
+    console.error('useLoading - Setting error:', err);
+    error.value = err?.message || 'Bir hata oluştu';
+    loading.value = false;
   }
 
   // Loading state'i sıfırla
   const reset = () => {
-    loading.value = false
-    error.value = null
+    console.log('useLoading - Resetting state');
+    loading.value = false;
+    error.value = null;
   }
 
   // Loading component'i için gerekli class'lar

@@ -2,14 +2,8 @@
   <div class="text-white min-h-screen overflow-x-hidden">
     <AppHeader />
 
-    <!-- Loading State -->
-    <div v-if="loading" :class="loadingClasses">
-      <div class="animate-spin rounded-full h-12 w-12 border-2 border-red-600 border-t-transparent mb-4"></div>
-      <p class="text-zinc-400">Verileriniz yükleniyor...</p>
-    </div>
-
     <!-- Error State -->
-    <div v-else-if="error" :class="errorClasses">
+    <div v-if="error" class="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm">
       <div class="text-center max-w-md">
         <svg class="w-12 h-12 text-red-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -80,92 +74,82 @@
                   </thead>
                   <tbody>
                     <!-- Çok İyi (>= 80%) -->
-                    <tr class="bg-green-500/5">
-                      <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-green-500">Çok
-                        İyi</td>
-                    </tr>
-                    <tr v-for="(item, itemIndex) in sortedData.excellent" :key="`excellent-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
-                        item.correct ?? '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
-                        '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
-                        '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
-                        '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
-                        <span v-if="item.successRate != null"
-                          class="px-2 py-1 rounded-full text-xs bg-green-500/20 text-green-500">
-                          %{{ item.successRate }}
-                        </span>
-                        <span v-else class="text-zinc-400">—</span>
-                      </td>
-                    </tr>
+                    <template v-if="sortedData.excellent.length > 0">
+                      <tr class="bg-green-500/5">
+                        <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-green-500">Çok İyi</td>
+                      </tr>
+                      <tr v-for="(item, itemIndex) in sortedData.excellent" :key="`excellent-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{ item.correct ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                          <span v-if="item.successRate != null" class="px-2 py-1 rounded-full text-xs bg-green-500/20 text-green-500">%{{ item.successRate }}</span>
+                          <span v-else class="text-zinc-400">—</span>
+                        </td>
+                      </tr>
+                    </template>
 
                     <!-- Daha İyi Olabilir (50-80%) -->
-                    <tr class="bg-yellow-500/5">
-                      <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-yellow-500">
-                        Daha İyi Olabilir</td>
-                    </tr>
-                    <tr v-for="(item, itemIndex) in sortedData.good" :key="`good-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
-                        item.correct ?? '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
-                        '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
-                        '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
-                        '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
-                        <span v-if="item.successRate != null"
-                          class="px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-500">
-                          %{{ item.successRate }}
-                        </span>
-                        <span v-else class="text-zinc-400">—</span>
-                      </td>
-                    </tr>
+                    <template v-if="sortedData.good.length > 0">
+                      <tr class="bg-yellow-500/5">
+                        <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-yellow-500">Daha İyi Olabilir</td>
+                      </tr>
+                      <tr v-for="(item, itemIndex) in sortedData.good" :key="`good-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{ item.correct ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                          <span v-if="item.successRate != null" class="px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-500">%{{ item.successRate }}</span>
+                          <span v-else class="text-zinc-400">—</span>
+                        </td>
+                      </tr>
+                    </template>
 
                     <!-- Geliştirilmeli (< 50%) -->
-                    <tr class="bg-red-600/5">
-                      <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-red-600">
-                        Geliştirilmeli</td>
-                    </tr>
-                    <tr v-for="(item, itemIndex) in sortedData.needsImprovement" :key="`needs-improvement-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{
-                        item.correct ?? '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ??
-                        '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ??
-                        '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ??
-                        '—' }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
-                        <span v-if="item.successRate != null"
-                          class="px-2 py-1 rounded-full text-xs bg-red-600/20 text-red-600">
-                          %{{ item.successRate }}
-                        </span>
-                        <span v-else class="text-zinc-400">—</span>
-                      </td>
-                    </tr>
+                    <template v-if="sortedData.needsImprovement.length > 0">
+                      <tr class="bg-red-600/5">
+                        <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-red-600">Geliştirilmeli</td>
+                      </tr>
+                      <tr v-for="(item, itemIndex) in sortedData.needsImprovement" :key="`needs-improvement-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm" :class="getColorClass(item)">{{ item.correct ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-red-600">{{ item.wrong ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.empty ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">{{ item.net ?? '—' }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                          <span v-if="item.successRate != null" class="px-2 py-1 rounded-full text-xs bg-red-600/20 text-red-600">%{{ item.successRate }}</span>
+                          <span v-else class="text-zinc-400">—</span>
+                        </td>
+                      </tr>
+                    </template>
 
                     <!-- Veri Yok -->
-                    <tr class="bg-zinc-500/5">
-                      <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-zinc-400">Veri
-                        Yok</td>
-                    </tr>
-                    <tr v-for="(item, itemIndex) in sortedData.noData" :key="`no-data-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
-                      <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
-                        <span class="text-zinc-400">—</span>
-                      </td>
-                    </tr>
+                    <template v-if="sortedData.noData.length > 0">
+                      <tr class="bg-zinc-500/5">
+                        <td colspan="6" class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm font-medium text-zinc-400">Veri Yok</td>
+                      </tr>
+                      <tr v-for="(item, itemIndex) in sortedData.noData" :key="`no-data-${item.subject}-${itemIndex}`" class="border-b border-zinc-800">
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-xs sm:text-sm text-white">{{ item.subject }}</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm text-zinc-400">—</td>
+                        <td class="sm:px-4 sm:py-2 px-2 py-1 text-center text-xs sm:text-sm">
+                          <span class="text-zinc-400">—</span>
+                        </td>
+                      </tr>
+                    </template>
+
+                    <!-- Hiç veri yoksa -->
+                    <template v-if="!sortedData.excellent.length && !sortedData.good.length && !sortedData.needsImprovement.length && !sortedData.noData.length">
+                      <tr>
+                        <td colspan="6" class="text-center py-4 text-zinc-400">Bu ders için henüz veri bulunmuyor.</td>
+                      </tr>
+                    </template>
                   </tbody>
                 </table>
                 <div class="mt-6">
@@ -186,33 +170,6 @@
         <img :src="HeroImage" alt="Hero"
           class="absolute inset-0 w-full h-full object-cover object-[70%] sm:object-center" />
         <div class="absolute inset-0 bg-red-600 mix-blend-multiply opacity-60"></div>
-        <!--       <div
-            class="absolute inset-x-0 bottom-0 h-12 sm:h-16 md:h-24 bg-gradient-to-t from-30% from-[#141414] via-[#141414]/70 to-transparent overflow-hidden">
-    <div class="flex gap-4 pr-4 w-[200%] h-full animate-marquee" style="--marquee-duration: 5000ms;">
-              <div class="flex flex-1 h-full">
-                <div
-                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-                  Bu içerikler senin için özenle hazırlandı</div>
-                <div
-                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-                  Bu içerikler senin için özenle hazırlandı</div>
-                <div
-                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-                  Bu içerikler senin için özenle hazırlandı</div>
-              </div>
-              <div class="flex flex-1 h-full">
-                <div
-                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-                  Bu içerikler senin için özenle hazırlandı</div>
-                <div
-                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-                  Bu içerikler senin için özenle hazırlandı</div>
-                <div
-                  class="flex flex-1 sm:items-center justify-center text-center text-white/30 p-1 text-xl text-nowrap font-[helvetica]">
-                  Bu içerikler senin için özenle hazırlandı</div>
-              </div>
-            </div>
-          </div> -->
         <div class="absolute inset-0"></div>
         <div class="px-4 sm:px-6 lg:px-16 2xl:px-24 relative z-10 flex flex-col justify-center h-full">
           <div class="max-w-[720px] mb-8">
@@ -296,7 +253,11 @@
                 </button>
               </div>
               
-              <RouterLink v-if="section.type === 'lesson'" :to="{ name: 'browse', params: { code: route.params.code }, query: { section: section.title } }">
+              <RouterLink v-if="section.type === 'lesson'" :to="{ 
+                name: 'browse', 
+                params: { code: route.params.code }, 
+                query: { course: section.title }
+              }">
                 <button class="text-xs sm:text-sm text-white hover:text-zinc-300">
                   Daha Fazla Göster
                 </button>
@@ -391,15 +352,13 @@ const userName = ref('')
 
 // Loading state yönetimini useLoading composable'ından al
 const { 
-  loading, 
-  error, 
-  isCoursesLoading,
+  loading,
+  error,
   startLoading,
   stopLoading,
   setError,
-  loadingClasses,
-  errorClasses
-} = useLoading()
+  isCoursesLoading
+} = useLoading();
 
 const loadWrappedData = () => {
   checkMobile()
@@ -479,86 +438,107 @@ const generateVideos = (subjectName, subjectData) => {
   console.log('WrappedView - Subject:', subjectName);
   console.log('WrappedView - Subject data:', subjectData);
 
-  if (!subjectData?.videos?.length) {
-    const defaultVideo = {
-      id: `default-${subjectName}-${Date.now()}`,
-      title: subjectName,
-      channel_title: 'Eğitim Kanalı',
-      video_id: "dQw4w9WgXcQ",
-      thumbnail_url: `https://picsum.photos/seed/${subjectName}/300/200`,
-      type: "lesson",
-      subjectName
-    };
-    console.log('WrappedView - Generated default video:', defaultVideo);
-    return [defaultVideo];
+  const subjectVideos = subjectData?.videos;
+  console.log('WrappedView - Subject videos:', subjectVideos);
+
+  // videos array ise ve dolu ise
+  if (Array.isArray(subjectVideos)) {
+    const videos = subjectVideos
+      .filter(video => video && video.video_id) // Null olmayan videoları filtrele
+      .map((video, index) => {
+        const processedVideo = {
+          ...video,
+          id: `${video.id || video.video_id}-${subjectName}-${index}`,
+          type: "lesson",
+          subjectName,
+          description: video.description || 'Video açıklaması bulunmuyor.',
+          summary: video.summary || 'Video özeti bulunmuyor.',
+          channel_title: video.channel_title || 'Tam Okul'
+        };
+        console.log('WrappedView - Processed video:', processedVideo);
+        return processedVideo;
+      });
+
+    return videos;
   }
 
-  const videos = subjectData.videos.map((video, index) => {
-    const processedVideo = {
-      ...video,
-      id: `${video.id || video.video_id}-${subjectName}-${index}`,
-      type: "lesson",
-      subjectName
-    };
-    console.log('WrappedView - Processed video:', processedVideo);
-    return processedVideo;
-  });
-  return videos;
-}
+  // Video yoksa boş array döndür
+  return [];
+};
 
 const generateItemsFromSubjects = (subjects) => {
   if (!subjects) return []
 
+  // Tüm videoları topla
   const allVideos = Object.entries(subjects).flatMap(([name, data]) => {
     return generateVideos(name, data)
   })
 
-  return allVideos
+  // Video ID'lerine göre tekrarlananları filtrele
+  const uniqueVideos = allVideos.reduce((acc, video) => {
+    const videoId = video.video_id;
+    // Eğer bu video_id daha önce eklenmemişse, ekle
+    if (!acc.some(v => v.video_id === videoId)) {
+      acc.push(video);
+    }
+    return acc;
+  }, []);
+
+  // Rastgele sırala ve ilk 20'yi al
+  return uniqueVideos
     .sort(() => Math.random() - 0.5)
-    .slice(0, 20) // Limit to 20 videos
+    .slice(0, 20)
 }
 
 const lessonSections = computed(() => {
-  if (isCoursesLoading.value) {
-    // Return skeleton sections while loading
-    return Array(3).fill().map((_, index) => ({
-      title: 'Loading...',
-      type: 'lesson',
-      items: Array(5).fill().map((_, itemIndex) => ({
-        id: `skeleton-${index}-${itemIndex}`,
-        type: 'lesson',
-        title: 'Loading...',
-        thumbnail_url: '',
-        isLoading: true
-      }))
-    }))
+  console.log('WrappedView - Loading state:', loading.value);
+  console.log('WrappedView - Courses loading state:', isCoursesLoading.value);
+  console.log('WrappedView - Available courses:', analysisStore.courses.value);
+
+  // Eğer courses verisi varsa ve loading false ise
+  const courses = analysisStore.courses.value;
+  if (courses && !loading.value) {
+    return courses.map(course => ({
+      title: formatTitle(course.title || course.title_uppercase),
+      type: "lesson",
+      items: generateItemsFromSubjects(course.subjects || {})
+    }));
   }
 
-  const courses = analysisStore.courses.value
-  if (!courses) return []
-
-  return courses.map(course => ({
-    title: formatTitle(course.title || course.title_uppercase),
-    type: "lesson",
-    items: generateItemsFromSubjects(course.subjects || {})
-  }))
-})
+  // Loading durumunda veya courses verisi yoksa skeleton göster
+  return Array(3).fill().map((_, index) => ({
+    title: 'Loading...',
+    type: 'lesson',
+    items: Array(5).fill().map((_, itemIndex) => ({
+      id: `skeleton-${index}-${itemIndex}`,
+      type: 'lesson',
+      title: 'Loading...',
+      thumbnail_url: '',
+      isLoading: true
+    }))
+  }));
+});
 
 const sections = computed(() => [...lessonSections.value, ...otherSections.value])
 
 const analysisData = computed(() => {
-  if (!selectedCourse.value) return []
+  if (!selectedCourse.value) return [];
 
-  console.log('Selected Course:', selectedCourse.value)
-  const course = analysisStore.getCourseByTitle(selectedCourse.value)
-  console.log('Found Course:', course)
-  if (!course) return []
+  console.log('Selected Course:', selectedCourse.value);
+  
+  // courses.value'dan direkt olarak ders bilgisini al
+  const course = analysisStore.courses.value?.find(course => 
+    (course.title || course.title_uppercase || '').toLowerCase() === selectedCourse.value.toLowerCase()
+  );
+  
+  console.log('Found Course:', course);
+  if (!course) return [];
 
-  const transformedData = []
+  const transformedData = [];
 
   // Eğer subjects verisi yoksa boş bir dizi döndür
   if (!course.subjects || Object.keys(course.subjects).length === 0) {
-    console.log('No subjects found for course:', selectedCourse.value)
+    console.log('No subjects found for course:', selectedCourse.value);
     return [{
       subject: 'Henüz veri yok',
       correct: null,
@@ -566,26 +546,31 @@ const analysisData = computed(() => {
       empty: null,
       net: null,
       successRate: null
-    }]
+    }];
   }
 
   Object.entries(course.subjects).forEach(([subjectName, data]) => {
-    const analysis = data.analysis?.[0]
+    // API yanıtındaki analysis yapısını kontrol et
+    console.log('Subject Data:', data);
+    
+    // analysis bir array ise ilk elemanı al, değilse direkt kendisini kullan
+    const analysis = Array.isArray(data.analysis) ? data.analysis[0] : data.analysis;
+    
     if (analysis) {
       transformedData.push({
         subject: subjectName,
-        correct: analysis.correct,
-        wrong: analysis.incorrect,
-        empty: analysis.empty,
-        net: analysis.net,
-        successRate: analysis.success_ratio
-      })
+        correct: analysis.correct || 0,
+        wrong: analysis.incorrect || 0,
+        empty: analysis.empty || 0,
+        net: analysis.net || 0,
+        successRate: analysis.success_ratio || 0
+      });
     }
-  })
+  });
 
-  console.log('Transformed Data:', transformedData)
-  return transformedData
-})
+  console.log('Transformed Data:', transformedData);
+  return transformedData;
+});
 
 const getColorClass = (item) => {
   if (!item.successRate) return 'text-zinc-400'

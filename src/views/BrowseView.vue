@@ -31,10 +31,17 @@
     </AppHeader>
 
     <div class="pt-[4.5rem] min-h-screen relative z-10">
+      <!-- Loading State - Removed spinner, using only skeletons -->
+      <!-- <div v-if="loading" class="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="animate-spin rounded-full h-12 w-12 border-2 border-red-600 border-t-transparent mb-4"></div>
+        <p class="text-zinc-400">Veriler yükleniyor...</p>
+      </div> -->
+
       <!-- Mobile Overlay -->
       <div v-show="isSidebarOpen" class="fixed inset-0 bg-black/50 z-20 xl:hidden" @click="toggleSidebar">
       </div>
 
+      <!-- Sidebar -->
       <aside :class="[
         'fixed z-30',
         'top-16 h-[calc(100vh-64px)]',
@@ -49,27 +56,38 @@
           <div class="px-4 py-8">
             <nav>
               <ul class="space-y-4">
-                <li v-for="category in categories" :key="category.id" class="mb-2">
-                  <button @click="toggleCategory(category.id)"
-                    class="flex items-center justify-between w-full text-left py-3 px-4 rounded hover:bg-zinc-900/50 transition-colors font-semibold text-zinc-200 hover:text-zinc-100">
-                    <span>{{ category.name }}</span>
-                    <ChevronDown :class="{ 'transform rotate-0': openCategories.includes(category.id) }"
-                      class="w-4 h-4 transition-transform duration-200 -rotate-90" />
-                  </button>
-                  <ul v-if="openCategories.includes(category.id)" class="mx-4 mt-2">
-                    <li v-for="subcategory in category.subcategories" :key="subcategory">
-                      <a href="#" @click.prevent="scrollToSection(category.id, subcategory)"
-                        :data-section="`${category.id}-${subcategory}`" :class="[
-                          'block py-3 px-4 truncate rounded-r transition-colors text-sm border-l',
-                          isActiveSection(`${category.id}-${subcategory}`)
-                            ? 'bg-zinc-900/50 border-l-4 border-red-600 text-zinc-300'
-                            : 'hover:bg-zinc-950/50 hover:border-l-4 hover:border-red-700 text-zinc-200 hover:text-zinc-100 border-zinc-800'
-                        ]">
-                        {{ subcategory }}
-                      </a>
-                    </li>
-                  </ul>
-                </li>
+                <template v-if="!loading && categories.length > 0">
+                  <li v-for="category in categories" :key="category.id" class="mb-2">
+                    <button @click="toggleCategory(category.id)"
+                      class="flex items-center justify-between w-full text-left py-3 px-4 rounded hover:bg-zinc-900/50 transition-colors font-semibold text-zinc-200 hover:text-zinc-100">
+                      <span>{{ category.name }}</span>
+                      <ChevronDown :class="{ 'transform rotate-0': openCategories.includes(category.id) }"
+                        class="w-4 h-4 transition-transform duration-200 -rotate-90" />
+                    </button>
+                    <ul v-if="openCategories.includes(category.id)" class="mx-4 mt-2">
+                      <li v-for="subcategory in category.subcategories" :key="subcategory">
+                        <a href="#" @click.prevent="scrollToSection(category.id, subcategory)"
+                          :data-section="`${category.id}-${subcategory}`" :class="[
+                            'block py-3 px-4 truncate rounded-r transition-colors text-sm border-l',
+                            isActiveSection(`${category.id}-${subcategory}`)
+                              ? 'bg-zinc-900/50 border-l-4 border-red-600 text-zinc-300'
+                              : 'hover:bg-zinc-950/50 hover:border-l-4 hover:border-red-700 text-zinc-200 hover:text-zinc-100 border-zinc-800'
+                          ]">
+                          {{ subcategory }}
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                </template>
+                <template v-else>
+                  <!-- Skeleton Loading for Categories -->
+                  <li v-for="n in 5" :key="n" class="mb-2 animate-pulse">
+                    <div class="h-12 bg-zinc-700/50 rounded mb-2"></div>
+                    <div class="space-y-2 ml-4">
+                      <div v-for="i in 3" :key="i" class="h-8 bg-zinc-400/30 rounded"></div>
+                    </div>
+                  </li>
+                </template>
               </ul>
             </nav>
           </div>
@@ -83,56 +101,75 @@
         'relative'
       ]">
         <main class="p-4 sm:p-6 xl:p-8">
-          <div v-for="category in categories" :key="category.id" class="mb-12">
-            <h2 :ref="el => { if (el) categoryRefs[category.id] = el }" class="text-2xl sm:text-3xl font-bold mb-6">
-              {{ category.name }}
-            </h2>
-            <div v-for="subcategory in category.subcategories" :key="subcategory" class="mb-8">
-              <h3 :ref="el => { if (el) subcategoryRefs[`${category.id}-${subcategory}`] = el }"
-                class="text-xl sm:text-2xl font-semibold mb-4">
-                {{ subcategory }}
-              </h3>
-              <!-- Responsive grid for video cards -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <template v-if="isCoursesLoading">
-                  <div v-for="n in 8" :key="n" class="aspect-video">
-                    <ContentCard
-                      :item="{ isLoading: true }"
-                      :type="'lesson'"
-                      class="w-full h-full"
-                    />
-                  </div>
-                </template>
-                <template v-else>
+          <template v-if="!loading && categories.length > 0">
+            <div v-for="category in categories" :key="category.id" class="mb-16">
+              <!-- Category Title -->
+              <h2 :ref="el => { if (el) categoryRefs[category.id] = el }" 
+                class="text-2xl sm:text-3xl font-bold mb-8 break-words">
+                {{ category.name }}
+              </h2>
+
+              <!-- Subcategories -->
+              <div v-for="subcategory in category.subcategories" :key="subcategory" class="mb-12">
+                <!-- Subcategory Header -->
+                <div class="mb-6">
+                  <h3 :ref="el => { if (el) subcategoryRefs[`${category.id}-${subcategory}`] = el }"
+                    class="flex flex-wrap items-center gap-3">
+                    <span class="text-xl sm:text-2xl font-semibold break-words">{{ subcategory }}</span>
+
+                  </h3>
+                </div>
+
+                <!-- Video Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   <div 
-                    v-for="video in generateVideos(subcategory)"
+                    v-for="video in generateVideos(subcategory, category.id)"
                     :key="video.id"
-                    class="aspect-video"
+                    class="flex flex-col h-full"
                   >
-                    <ContentCard
-                      :item="video"
+                    <ContentCard 
+                      :item="video" 
                       :type="'lesson'"
-                      @click="(item, type) => {
-                        console.log('BrowseView - Card clicked with full details:', {
-                          item,
-                          type,
-                          showContentModal: showContentModal.value,
-                          selectedLesson: selectedLesson.value,
-                          isLoading: isCoursesLoading.value
-                        });
-                        if (!isCoursesLoading.value) {
-                          openContentModal(item, type);
-                        } else {
-                          console.log('BrowseView - Still loading, click ignored');
-                        }
-                      }"
+                      @click="(item, type) => openContentModal(item, type)"
                       class="w-full h-full"
                     />
                   </div>
-                </template>
+                </div>
               </div>
             </div>
-          </div>
+          </template>
+
+          <template v-else-if="!loading && categories.length === 0">
+            <div class="text-center py-12">
+              <p class="text-zinc-400">Henüz hiç ders bulunamadı.</p>
+            </div>
+          </template>
+
+          <template v-else>
+            <!-- Skeleton Loading -->
+            <div v-for="n in 3" :key="n" class="mb-16">
+              <!-- Category Title Skeleton -->
+              <div class="h-10 bg-zinc-400/50 rounded w-1/3 mb-8 animate-pulse"></div>
+              
+              <!-- Subcategories -->
+              <div v-for="i in 2" :key="i" class="mb-12">
+                <!-- Subcategory Header Skeleton -->
+                <div class="h-8 bg-zinc-400/30 rounded w-1/4 mb-6 animate-pulse"></div>
+                
+                <!-- Video Grid Skeleton -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div v-for="j in 4" :key="j" class="flex flex-col">
+                    <!-- Thumbnail Skeleton -->
+                    <div class="aspect-video bg-zinc-400/30 rounded-lg mb-3 animate-pulse"></div>
+                    <!-- Title Skeleton -->
+                    <div class="h-4 bg-zinc-400/40 rounded w-3/4 mb-2 animate-pulse"></div>
+                    <!-- Subtitle Skeleton -->
+                    <div class="h-3 bg-zinc-400/30 rounded w-1/2 animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
         </main>
       </div>
 
@@ -161,7 +198,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
-import { ChevronDown, ChevronUp, Menu as MenuIcon, X as XIcon } from 'lucide-vue-next'
+import { ChevronUp, Menu as MenuIcon, X as XIcon, ChevronDown } from 'lucide-vue-next'
 import AppHeader from "@/components/AppHeader.vue"
 import { useAnalysisStore } from '@/composables/useAnalysisStore'
 import { useLoading } from '@/composables/useLoading'
@@ -177,78 +214,92 @@ const router = useRouter()
 const analysisStore = useAnalysisStore()
 
 // Loading state yönetimini useLoading composable'ından al
-const { isCoursesLoading } = useLoading()
+const { 
+  loading,
+  startLoading,
+  stopLoading,
+  setError
+} = useLoading();
 
-// Loading durumunu kontrol edelim
-watch(isCoursesLoading, (newValue) => {
-  console.log('BrowseView - Loading state changed:', newValue)
-})
-
+// Categories computed property'sini güncelle
 const categories = computed(() => {
-  console.log('BrowseView - Courses:', analysisStore.courses.value)
-  console.log('BrowseView - Is Loading:', isCoursesLoading.value)
-  
   const courses = analysisStore.courses.value;
-  if (!courses) {
-    console.log('BrowseView - No courses found')
+  if (!courses || !Array.isArray(courses)) {
     return [];
   }
 
   return courses.map(course => {
-    const category = {
+    const subjectsWithVideos = Object.entries(course.subjects || {})
+      .filter(([, subjectData]) => {
+        const videos = subjectData.videos;
+        return Array.isArray(videos) && videos.filter(video => video && video.video_id).length > 0;
+      })
+      .map(([subjectName]) => subjectName);
+
+    return {
       id: course.title || course.title_uppercase,
       name: course.title || course.title_uppercase,
-      subcategories: Object.keys(course.subjects || {})
-    }
-    console.log('BrowseView - Generated category:', category)
-    return category
-  });
+      subcategories: subjectsWithVideos
+    };
+  }).filter(category => category.subcategories.length > 0);
 });
 
-const generateVideos = (subjectName) => {
-  if (isCoursesLoading.value) {
-    console.log('BrowseView - Still loading, returning empty array');
+const generateVideos = (subjectName, categoryId) => {
+  console.log('BrowseView - Generating videos for:', { subjectName, categoryId });
+  
+  // Dersi bul
+  const course = analysisStore.courses.value?.find(course => {
+    const courseTitle = (course.title || course.title_uppercase || '').toLowerCase();
+    const searchTitle = (categoryId || '').toLowerCase();
+    const matches = courseTitle === searchTitle;
+    console.log('BrowseView - Comparing course:', { courseTitle, searchTitle, matches });
+    return matches;
+  });
+
+  if (!course) {
+    console.log('BrowseView - No course found for:', categoryId);
     return [];
   }
 
-  const course = analysisStore.courses.value?.find(
-    course => course.subjects && course.subjects[subjectName]
-  );
-
-  console.log('BrowseView - Course found:', course);
-  console.log('BrowseView - Subject:', subjectName);
-  console.log('BrowseView - Loading state:', isCoursesLoading.value);
-
-  if (!course?.subjects?.[subjectName]?.videos?.length) {
-    const defaultVideo = {
-      id: `default-${subjectName}-${Date.now()}`,
-      title: subjectName,
-      channel_title: 'Eğitim Kanalı',
-      video_id: "dQw4w9WgXcQ",
-      thumbnail_url: `https://picsum.photos/seed/${subjectName}/300/200`,
-      type: "lesson",
-      subjectName,
-      description: 'Bu ders için henüz video eklenmemiş.',
-      summary: 'Bu ders için henüz video eklenmemiş.'
-    };
-    console.log('BrowseView - Generated default video:', defaultVideo);
-    return [defaultVideo];
+  // Konuyu bul
+  const subject = course.subjects?.[subjectName];
+  if (!subject) {
+    console.log('BrowseView - No subject found:', subjectName);
+    return [];
   }
 
-  const videos = course.subjects[subjectName].videos.map((video, index) => {
-    const processedVideo = {
-      ...video,
-      id: `${video.id || video.video_id}-${subjectName}-${index}`,
-      type: "lesson",
-      subjectName,
-      description: video.description || '',
-      summary: video.summary || '',
-      channel_title: video.channel_title || 'Eğitim Kanalı'
-    };
-    console.log('BrowseView - Processed video:', processedVideo);
-    return processedVideo;
-  });
-  return videos;
+  // Videoları kontrol et
+  const videos = subject.videos;
+  if (!Array.isArray(videos)) {
+    console.log('BrowseView - No videos array found for subject:', subjectName);
+    return [];
+  }
+
+  // Videoları işle
+  const processedVideos = videos
+    .filter(video => {
+      const isValid = video && video.video_id;
+      if (!isValid) {
+        console.log('BrowseView - Invalid video found:', video);
+      }
+      return isValid;
+    })
+    .map((video, index) => {
+      const processedVideo = {
+        ...video,
+        id: `${video.id || video.video_id}-${subjectName}-${index}`,
+        type: "lesson",
+        subjectName,
+        description: video.description || 'Video açıklaması bulunmuyor.',
+        study_notes: video.study_notes || 'Video özeti bulunmuyor.',
+        channel_title: video.channel_title || 'Tam Okul'
+      };
+      console.log('BrowseView - Processed video:', processedVideo);
+      return processedVideo;
+    });
+
+  console.log('BrowseView - Generated videos count:', processedVideos.length);
+  return processedVideos;
 };
 
 const openCategories = ref([])
@@ -257,13 +308,20 @@ const subcategoryRefs = ref({})
 const observers = ref({})
 
 const toggleCategory = (categoryId) => {
-  const index = openCategories.value.indexOf(categoryId)
+  console.log('BrowseView - Toggling category:', categoryId);
+  console.log('BrowseView - Current open categories:', openCategories.value);
+  
+  const index = openCategories.value.indexOf(categoryId);
   if (index === -1) {
-    openCategories.value.push(categoryId)
+    // Kategoriyi aç
+    openCategories.value.push(categoryId);
   } else {
-    openCategories.value.splice(index, 1)
+    // Kategoriyi kapat
+    openCategories.value.splice(index, 1);
   }
-}
+  
+  console.log('BrowseView - Open categories after toggle:', openCategories.value);
+};
 
 const scrollToSection = (categoryId, subcategory) => {
   // Önce yönlendirme yap
@@ -352,107 +410,87 @@ const {
 } = useModal();
 
 const openContentModal = (video, type) => {
-  console.log('BrowseView - Opening modal with full details:', {
-    video,
-    type,
-    currentShowContentModal: showContentModal.value,
-    currentSelectedLesson: selectedLesson.value
-  });
-  
-  const fullVideo = {
-    ...video,
-    type: type || video.type,
-    description: video.description || '',
-    summary: video.summary || '',
-    channel_title: video.channel_title || 'Eğitim Kanalı'
-  };
-  
-  originalOpenContentModal(fullVideo, type);
-  
-  console.log('BrowseView - After opening modal:', {
-    showContentModal: showContentModal.value,
-    selectedLesson: selectedLesson.value
-  });
+  console.log('BrowseView - Opening modal with video:', video);
+  console.log('BrowseView - Modal type:', type);
+  originalOpenContentModal(video, type);
+  console.log('BrowseView - Selected lesson after open:', selectedLesson.value);
+  console.log('BrowseView - Modal visibility after open:', showContentModal.value);
 };
 
-const scrollToSectionByTitle = (sectionTitle) => {
-  if (!sectionTitle) return;
+const scrollToCategory = async (categoryTitle) => {
+  if (!categoryTitle) return;
   
-  console.log('BrowseView - Scrolling to section:', sectionTitle);
-  
-  const normalizedSearch = sectionTitle.toLowerCase().trim();
-  
-  // Önce kategorileri kontrol et
+  console.log('BrowseView - Trying to scroll to category:', categoryTitle);
+
+  // Verinin yüklenmesini bekle
+  if (loading.value) {
+    console.log('BrowseView - Waiting for data to load...');
+    await new Promise(resolve => {
+      const unwatch = watch(loading, (newLoading) => {
+        if (!newLoading) {
+          unwatch();
+          resolve();
+        }
+      });
+    });
+  }
+
+  // DOM'un güncellenmesini bekle
+  await nextTick();
+  console.log('BrowseView - Categories after loading:', categories.value);
+
+  // Kategoriyi bul
   const category = categories.value.find(cat => {
-    const normalizedName = (cat.name || cat.title || cat.title_uppercase || '').toLowerCase().trim();
-    return normalizedName === normalizedSearch;
+    const matches = cat.name === categoryTitle;
+    console.log('BrowseView - Comparing:', {
+      categoryName: cat.name,
+      searchTitle: categoryTitle,
+      matches
+    });
+    return matches;
   });
 
-  if (category) {
-    console.log('BrowseView - Found matching category:', category.id);
-    
-    if (!openCategories.value.includes(category.id)) {
-      toggleCategory(category.id);
-    }
-
-    nextTick(() => {
-      const element = categoryRefs.value[category.id];
-      if (element) {
-        const headerOffset = 80;
-        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-        window.scrollTo({
-          top: elementPosition - headerOffset,
-          behavior: 'smooth'
-        });
-      }
-    });
+  if (!category) {
+    console.log('BrowseView - Category not found:', categoryTitle);
     return;
   }
 
-  // Eğer kategori bulunamadıysa, alt kategorileri kontrol et
-  for (const category of categories.value) {
-    const subcategory = category.subcategories.find(sub => 
-      sub.toLowerCase().trim() === normalizedSearch
-    );
+  console.log('BrowseView - Found category:', category.name);
 
-    if (subcategory) {
-      console.log('BrowseView - Found matching subcategory:', subcategory, 'in category:', category.id);
-      
-      if (!openCategories.value.includes(category.id)) {
-        toggleCategory(category.id);
-      }
+  // Önce diğer kategorileri kapat
+  openCategories.value = [];
+  
+  // Bu kategoriyi aç
+  openCategories.value.push(category.id);
+  console.log('BrowseView - Opened category:', category.id);
 
-      nextTick(() => {
-        const element = subcategoryRefs.value[`${category.id}-${subcategory}`];
-        if (element) {
-          const headerOffset = 80;
-          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-          window.scrollTo({
-            top: elementPosition - headerOffset,
-            behavior: 'smooth'
-          });
-        }
-      });
-      return;
-    }
+  // DOM'un güncellenmesini bekle
+  await nextTick();
+
+  // Kategoriye scroll yap
+  const element = categoryRefs.value[category.id];
+  if (element) {
+    const headerOffset = 80;
+    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+    
+    console.log('BrowseView - Scrolling to position:', elementPosition - headerOffset);
+    
+    window.scrollTo({
+      top: elementPosition - headerOffset,
+      behavior: 'smooth'
+    });
+  } else {
+    console.log('BrowseView - Category element not found in refs');
   }
-
-  console.log('BrowseView - No matching section found for:', sectionTitle);
 };
 
-// Section parametresini props olarak al
-defineProps({
-  section: {
-    type: String,
-    default: ''
-  }
-});
-
+// Route watcher'ı güncelle
 watch(
-  () => route.query.section,
-  (newSection) => {
-    if (newSection) {
-      scrollToSectionByTitle(newSection);
+  () => route.query.course,
+  async (newCourse) => {
+    if (newCourse) {
+      console.log('BrowseView - Course changed in URL:', newCourse);
+      await scrollToCategory(newCourse);
     }
   },
   { immediate: true }
@@ -467,36 +505,98 @@ const navigateToSection = (categoryId, subcategory) => {
   });
 };
 
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-  if (categories.value.length > 0) {
-    openCategories.value.push(categories.value[0].id)
-  }
-  window.addEventListener('resize', handleResize)
+// Kategorileri izleyelim ve değişiklikleri loglayalım
+watch(openCategories, (newCategories) => {
+  console.log('BrowseView - Open categories changed:', newCategories);
+});
 
+// Kategorileri otomatik açmak için watch ekleyelim
+watch(categories, (newCategories) => {
+  if (newCategories.length > 0 && openCategories.value.length === 0) {
+    const firstCategory = newCategories[0];
+    console.log('BrowseView - Auto opening first category:', firstCategory.id);
+    openCategories.value = [firstCategory.id];
+  }
+}, { immediate: true });
+
+// Loading state'lerini izleyelim
+watch(loading, (newLoading) => {
+  console.log('BrowseView - Loading state changed:', {
+    loading: newLoading
+  });
+  
+  // Loading bittiğinde kategorileri kontrol et
+  if (!newLoading && categories.value.length > 0 && openCategories.value.length === 0) {
+    const firstCategory = categories.value[0];
+    console.log('BrowseView - Auto opening first category after loading:', firstCategory.id);
+    openCategories.value = [firstCategory.id];
+  }
+});
+
+onMounted(async () => {
+  const code = route.params.code;
+  console.log('BrowseView - Mounting with code:', code);
+  
+  try {
+    startLoading();
+    console.log('BrowseView - Started loading');
+    
+    // Veriyi yükle
+    const data = await analysisStore.fetchAnalysisData(code);
+    console.log('BrowseView - Data fetched:', data);
+    
+    // Veri yüklendikten sonra loading'i kapat
+    stopLoading();
+    console.log('BrowseView - Loading stopped');
+    
+    // DOM'un güncellenmesini bekle
+    await nextTick();
+    console.log('BrowseView - DOM updated');
+    
+    // URL'de course parametresi varsa o kategoriye git
+    const course = route.query.course;
+    if (course) {
+      console.log('BrowseView - Found course in URL:', course);
+      await scrollToCategory(course);
+    } else if (categories.value.length > 0) {
+      // Yoksa ilk kategoriyi aç
+      console.log('BrowseView - Opening first category:', categories.value[0].id);
+      openCategories.value = [categories.value[0].id];
+    }
+  } catch (err) {
+    console.error('BrowseView - Error loading data:', err);
+    setError(err);
+    stopLoading(); // Hata durumunda da loading'i kapat
+  }
+
+  // Event listener'ları ekle
+  window.addEventListener('scroll', handleScroll);
+  window.addEventListener('resize', handleResize);
+
+  // Intersection Observer'ları ayarla
   nextTick(() => {
     Object.entries(subcategoryRefs.value).forEach(([sectionId, element]) => {
+      if (!element) return;
+      
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              activeSection.value = sectionId
+              activeSection.value = sectionId;
             }
-          })
+          });
         },
         {
           rootMargin: '-10% 0px -70% 0px',
           threshold: 0
         }
-      )
+      );
 
-      if (element) {
-        observer.observe(element)
-        observers.value[sectionId] = observer
-      }
-    })
-  })
-})
+      observer.observe(element);
+      observers.value[sectionId] = observer;
+    });
+  });
+});
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
@@ -506,7 +606,7 @@ onUnmounted(() => {
     observer.disconnect()
   })
 
-  modalCleanup()
+  modalCleanup();
 })
 </script>
 

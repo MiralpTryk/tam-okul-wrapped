@@ -146,15 +146,54 @@ export default createStore({
   },
 
   actions: {
-    loadAnalysisData({ commit }, data) {
+    async loadAnalysisData({ commit }, data) {
       commit('SET_LOADING', true);
       try {
-        commit('SET_ANALYSIS_DATA', data);
+        // Veriyi kontrol et
+        if (!data?.data?.content?.courses) {
+          throw new Error('Kurs verileri bulunamadı');
+        }
+
+        // Kurs verilerini işle
+        const processedCourses = data.data.content.courses.map(course => ({
+          ...course,
+          subjects: Object.entries(course.subjects || {}).reduce((acc, [key, value]) => {
+            // videos alanını düzgün şekilde işle
+            let videos = [];
+            if (value.videos === null) {
+              videos = [];
+            } else if (Array.isArray(value.videos)) {
+              videos = value.videos.filter(v => v && v.video_id);
+            }
+            acc[key] = {
+              ...value,
+              videos
+            };
+            return acc;
+          }, {})
+        }));
+
+        console.log('Processed courses:', processedCourses);
+
+        // İşlenmiş veriyi state'e kaydet
+        commit('SET_ANALYSIS_DATA', {
+          ...data,
+          data: {
+            ...data.data,
+            content: {
+              ...data.data.content,
+              courses: processedCourses
+            }
+          }
+        });
+        
         commit('SET_ERROR', null);
       } catch (error) {
-        commit('SET_ERROR', error.message);
         console.error('Error loading analysis data:', error);
+        commit('SET_ERROR', error.message);
+        throw error;
       } finally {
+        // Loading state'i hemen güncelle
         commit('SET_LOADING', false);
       }
     },
