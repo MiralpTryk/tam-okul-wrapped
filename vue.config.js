@@ -3,11 +3,8 @@ const webpack = require("webpack");
 
 module.exports = defineConfig({
   transpileDependencies: true,
-  publicPath: "/",
+  publicPath: "./",
   productionSourceMap: false,
-  devServer: {
-    historyApiFallback: true
-  },
   configureWebpack: {
     plugins: [
       new webpack.DefinePlugin({

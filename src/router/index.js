@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import WrappedView from "@/views/WrappedView.vue";
 import OpticFormView from "@/views/OpticFormView.vue";
 import BrowseView from "@/views/BrowseView.vue";
@@ -83,8 +83,19 @@ const routes = [
   }
 ];
 
+const domain = window.location.hostname;
+const subdomain = domain.substring(0, domain.indexOf("."));
+const isLocal = process.env.VUE_APP_ENV === "local";
+
+let baseURL = "";
+if (isLocal) {
+  baseURL = "https://34000010" + process.env.VUE_APP_URL;
+} else {
+  baseURL = "https://" + subdomain + process.env.VUE_APP_URL;
+}
+
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(baseURL),
   routes,
 });
 
