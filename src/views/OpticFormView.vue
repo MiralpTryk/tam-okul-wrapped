@@ -938,8 +938,7 @@ const savePageAnswers = (subject, page) => {
 
       const pageQuestions = questions.value.filter(q => q.title === subject && q.page === parseInt(page));
       
-      const hash = window.location.hash;
-      const code = hash.split('/').pop() || '';
+      const code = window.location.pathname.split('/').pop() || '';
       
       savedAnswersData.value.code = code;
       
