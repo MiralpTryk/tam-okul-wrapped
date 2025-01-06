@@ -410,6 +410,19 @@
       </div>
     </div>
   </Transition>
+
+  <!-- Toast Notification -->
+  <Transition name="toast">
+    <div v-if="showToast" 
+      class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[9999] px-4 py-2 rounded-lg shadow-lg text-white min-w-[200px] text-center"
+      :class="{
+        'bg-blue-600': toastType === 'info',
+        'bg-red-600': toastType === 'error',
+        'bg-green-600': toastType === 'success'
+      }">
+      {{ toastMessage }}
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -417,12 +430,12 @@ import { ref, computed, watch, onUnmounted, onMounted } from "vue";
 import { useAnalysisStore } from '@/composables/useAnalysisStore';
 import Celebration from "@/components/Celebration.vue";
 import WrappedStatsCard from "@/components/WrappedStatsCard.vue";
-import html2canvas from 'html2canvas';
 import { RefreshCwIcon, Share2Icon } from "lucide-vue-next";
 import CircularProgress from '@/components/CircularProgress.vue';
 import FingerPrint from '@/assets/fingerprint.svg';
 import LogoBack from '@/assets/tam-okul-ai-logo-back.svg';
 import LogoFront from '@/assets/tam-okul-ai-logo-front.svg';
+import { toPng } from 'html-to-image';
 
 const props = defineProps({
   show: {
@@ -436,9 +449,7 @@ const emit = defineEmits(["close"]);
 const analysisStore = useAnalysisStore();
 
 const loadData = () => {
-  // Store'dan gerekli verileri al
   total_questions_solved.value = analysisStore.totalQuestionsSolved.value;
-  // Diğer gerekli verileri buradan yükle
 };
 
 const currentSlide = ref(0);
@@ -503,7 +514,6 @@ const safeSetTimeout = (fn, delay) => {
   return timeoutId;
 };
 
-// Animasyon süreleri için sabitler
 const ANIMATION_CONSTANTS = {
   TOTAL_DURATION: 5000,    // Genel animasyon süresi
   INITIAL_DELAY: 1000,     // Başlangıç gecikmesi
@@ -515,10 +525,8 @@ const ANIMATION_CONSTANTS = {
 const nextSlide = () => {
   if (currentSlide.value >= totalSlides - 1) return;
 
-  // Mevcut bar'ı tamamla
   completeBar(currentSlide.value);
 
-  // Slaytı değiştir
   transitionName.value = "slide-left";
   currentSlide.value++;
 };
@@ -526,10 +534,8 @@ const nextSlide = () => {
 const prevSlide = () => {
   if (currentSlide.value <= 0) return;
 
-  // Mevcut bar'ı sıfırla
   resetBar(currentSlide.value);
 
-  // Slaytı değiştir
   transitionName.value = "slide-right";
   currentSlide.value--;
 };
@@ -586,7 +592,6 @@ const initializeSlide = (slideNumber) => {
         coursesOpacity.value = 1;
         const courseInterval = ANIMATION_CONSTANTS.ANIMATION_DURATION / topCourses.value.length;
 
-        // Kursları karıştır
         const shuffledCourses = shuffleArray([...topCourses.value]);
 
         shuffledCourses.forEach((course, index) => {
@@ -641,7 +646,7 @@ const initializeSlide = (slideNumber) => {
           achievementPhase.value = 'list';
 
           const badges = calculateBadges(total_questions_solved.value, total_questions_solved_percentage.value, totalStudyHours.value);
-          const duration = 2500; // 2.5 saniye (toplam 5 saniye olması için)
+          const duration = 2500;
           const badgeInterval = duration / badges.length;
 
           badges.forEach((badge, index) => {
@@ -665,8 +670,8 @@ const initializeSlide = (slideNumber) => {
               }
             }, badgeInterval * index);
           });
-        }, 1500); // 1.5 saniye
-      }, 1000); // 1 saniye başlangıç gecikmesi
+        }, 1500);
+      }, 1000);
       break;
   }
 };
@@ -694,67 +699,60 @@ const resetAllStates = () => {
   resetSlide6();
 };
 
+const showToast = ref(false);
+const toastMessage = ref('');
+const toastType = ref('info');
+
+const displayToast = (message, type = 'info', duration = 3000) => {
+  toastMessage.value = message;
+  toastType.value = type;
+  showToast.value = true;
+  setTimeout(() => {
+    showToast.value = false;
+  }, duration);
+};
+
 const handleShare = async () => {
   try {
-    const card = document.querySelector('.wrapped-stats-card');
+    if (!statsCardRef.value) {
+      displayToast('Kart bulunamadı', 'error');
+      return;
+    }
 
-    const elements = card.querySelectorAll('*');
-    const originalStyles = new Map();
-
-    elements.forEach(el => {
-      originalStyles.set(el, el.style.cssText);
-      el.style.transition = 'none';
-      el.style.animation = 'none';
+    const card = statsCardRef.value.$el;
+    
+    const dataUrl = await toPng(card, {
+      quality: 1.0,
+      backgroundColor: '#000000',
+      style: {
+        transform: 'none',
+        borderRadius: '0',
+      },
+      cacheBust: true,
+      pixelRatio: 2
     });
 
-    await document.fonts.ready;
-    await new Promise(resolve => setTimeout(resolve, 500));
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    const file = new File([blob], 'ogrenme-yolculugum.png', { type: 'image/png' });
 
-    const canvas = await html2canvas(card, {
-      scale: 4,
-      backgroundColor: null,
-      logging: false,
-      useCORS: true,
-      allowTaint: true
-    });
-
-    elements.forEach(el => {
-      el.style.cssText = originalStyles.get(el);
-    });
-
-    const dataUrl = canvas.toDataURL('image/png');
-
-    if (navigator.canShare && navigator.canShare({ files: [new File([], 'test.png')] })) {
-      const response = await fetch(dataUrl);
-      const blob = await response.blob();
-      const file = new File([blob], "2023-degerlendirmesi.png", {
-        type: "image/png",
+    if (navigator.share) {
+      await navigator.share({
+        files: [file],
+        title: 'Tam Okul KÖKSİS Öğrenme Yolculuğum',
+        text: 'İşte benim Tam Okul KÖKSİS Öğrenme Yolculuğum! 🎓✨'
       });
-
-      try {
-        await navigator.share({
-          files: [file],
-          title: "2023 Yılı Değerlendirmesi",
-          text: "2023 yılındaki öğrenme istatistiklerime göz atın!",
-        });
-      } catch (shareError) {
-        console.error("Paylaşım hatası:", shareError);
-        downloadImage(dataUrl);
-      }
     } else {
-      downloadImage(dataUrl);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = 'ogrenme-yolculugum.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   } catch (error) {
-    console.error("Görüntü oluşturma hatası:", error);
+    displayToast('Paylaşım sırasında bir hata oluştu', 'error');
   }
-};
-const downloadImage = (dataUrl) => {
-  const link = document.createElement("a");
-  link.href = dataUrl;
-  link.download = "2023-degerlendirmesi.png";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 };
 
 watch(
@@ -763,7 +761,6 @@ watch(
     if (newShow) {
       currentSlide.value = 0;
       resetAllStates();
-      // Modal açıldığında ilk progress bar'ı başlat
       startBarProgress(0);
     }
   }
@@ -855,7 +852,7 @@ const animateMovieCount = () => {
 };
 
 const startSlide1Animations = () => {
-  const duration = ANIMATION_CONSTANTS.TOTAL_DURATION * 0.6; // Progress bar süresinin %60'ı
+  const duration = ANIMATION_CONSTANTS.TOTAL_DURATION * 0.6;
   const startTime = Date.now();
 
   const animate = () => {
@@ -888,14 +885,12 @@ onUnmounted(() => {
   clearAllTimeouts();
 });
 
-// Progress bar state'i için ref array
 const progressBars = ref(Array(8).fill().map(() => ({
   progress: 0,
   isActive: false,
   isCompleted: false
 })));
 
-// Progress animasyonu için fonksiyonlar
 const startBarProgress = (index) => {
   const startTime = Date.now();
   progressBars.value[index].isActive = true;
@@ -926,21 +921,16 @@ const resetBar = (index) => {
   progressBars.value[index].isCompleted = false;
 };
 
-// Slayt değişimini izle ve progress'i başlat
 watch(currentSlide, (newSlide) => {
-  // Önceki tüm barları tamamla
   for (let i = 0; i < newSlide; i++) {
     completeBar(i);
   }
-  // Sonraki tüm barları sıfırla
   for (let i = newSlide + 1; i < progressBars.value.length; i++) {
     resetBar(i);
   }
-  // Yeni bar'ı başlat
   startBarProgress(newSlide);
 });
 
-// Shuffle fonksiyonu
 const shuffleArray = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -949,23 +939,34 @@ const shuffleArray = (array) => {
   return array;
 };
 
-// Add this to your script setup section
 const truncateText = (text) => {
   if (text.length <= 57) return text;
 
-  // Find the last space within the first 57 characters
   const truncateIndex = text.substring(0, 57).lastIndexOf(' ');
 
-  // If no space found, force cut at 57
   if (truncateIndex === -1) return text.substring(0, 57) + '...';
 
-  // Return truncated text at the last word boundary
   return text.substring(0, truncateIndex) + '...';
 };
 
-onMounted(() => {
-  // Sadece store'dan veriyi kullan, yükleme yapma
+const loadFabric = () => {
+  return new Promise((resolve, reject) => {
+    if (window.fabric) {
+      resolve(window.fabric);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js';
+    script.onload = () => resolve(window.fabric);
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+};
+
+onMounted(async () => {
   loadData();
+  await loadFabric();
 });
 
 </script>
@@ -1056,5 +1057,16 @@ onMounted(() => {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='18%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E📚%3C/text%3E%3Ctext x='0%25' y='20%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🎓%3C/text%3E%3Ctext x='100%25' y='20%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🎓%3C/text%3E%3Ctext x='25%25' y='50%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E✏️%3C/text%3E%3Ctext x='75%25' y='50%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🔖%3C/text%3E%3Ctext x='0%25' y='80%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🧠%3C/text%3E%3Ctext x='100%25' y='80%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🧠%3C/text%3E%3Ctext x='50%25' y='80%25' font-size='20' text-anchor='middle' dominant-baseline='middle' fill='white'%3E🔬%3C/text%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 300px 300px;
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, 100%);
 }
 </style>

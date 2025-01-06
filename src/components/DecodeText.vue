@@ -7,7 +7,7 @@
   </template>
   
   <script setup>
-  import { ref, onMounted, watch } from 'vue';
+  import { ref, onMounted, watch, nextTick } from 'vue';
   
   const props = defineProps({
     text: {
@@ -37,7 +37,11 @@
       const char = characters.value[index];
       if (char.value === ' ') return;
   
-      const state1Time = Math.round(Math.random() * (2000 - 300)) + 50;
+      const isFirstReveal = !char.class;
+      const state1Time = isFirstReveal 
+        ? Math.round(Math.random() * (2000 - 300)) + 50
+        : Math.round(Math.random() * (2000 - 300)) + 50;
+      
       setTimeout(() => {
         char.class = 'state-1';
         setTimeout(() => {
@@ -58,11 +62,18 @@
     return array;
   };
   
-  watch(() => props.text, initializeCharacters);
+  watch(() => props.text, () => {
+    initializeCharacters();
+    nextTick(() => {
+      decodeText();
+    });
+  });
   
   onMounted(() => {
     initializeCharacters();
-    decodeText();
+    nextTick(() => {
+      decodeText();
+    });
     setInterval(decodeText, props.interval);
   });
   </script>

@@ -2,6 +2,14 @@
   <div class="text-white min-h-screen overflow-x-hidden">
     <AppHeader />
 
+    <!-- Loading Overlay -->
+    <div v-if="loading" class="fixed inset-0 z-[60] bg-black flex items-center justify-center">
+      <div class="flex flex-col items-center">
+        <div class="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-zinc-200 mt-4 text-center">Yükleniyor...</p>
+      </div>
+    </div>
+
     <!-- Error State -->
     <div v-if="error" class="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm">
       <div class="text-center max-w-md">
@@ -349,7 +357,6 @@ const showLeftScrollButton = ref({})
 const showRightScrollButton = ref({})
 const userName = ref('')
 
-// Loading state yönetimini useLoading composable'ından al
 const { 
   loading,
   error,
@@ -378,7 +385,6 @@ const loadWrappedData = () => {
     localStorage.setItem('wrappedModalLastShown', currentTime.toString())
   }
 
-  // Her section için başlangıç scroll durumunu kontrol et
   nextTick(() => {
     sections.value.forEach((_, index) => {
       checkScrollPosition(index)
@@ -396,7 +402,6 @@ const {
   cleanup: scrollCleanup
 } = useScroll()
 
-// Modal yönetimini useModal composable'ından al
 const {
   showModal,
   showContentModal,
@@ -436,10 +441,9 @@ const generateVideos = (subjectName, subjectData) => {
 
   const subjectVideos = subjectData?.videos;
 
-  // videos array ise ve dolu ise
   if (Array.isArray(subjectVideos)) {
     const videos = subjectVideos
-      .filter(video => video && video.video_id) // Null olmayan videoları filtrele
+      .filter(video => video && video.video_id)
       .map((video, index) => {
         const processedVideo = {
           ...video,
@@ -456,29 +460,24 @@ const generateVideos = (subjectName, subjectData) => {
     return videos;
   }
 
-  // Video yoksa boş array döndür
   return [];
 };
 
 const generateItemsFromSubjects = (subjects) => {
   if (!subjects) return []
 
-  // Tüm videoları topla
   const allVideos = Object.entries(subjects).flatMap(([name, data]) => {
     return generateVideos(name, data)
   })
 
-  // Video ID'lerine göre tekrarlananları filtrele
   const uniqueVideos = allVideos.reduce((acc, video) => {
     const videoId = video.video_id;
-    // Eğer bu video_id daha önce eklenmemişse, ekle
     if (!acc.some(v => v.video_id === videoId)) {
       acc.push(video);
     }
     return acc;
   }, []);
 
-  // Rastgele sırala ve ilk 20'yi al
   return uniqueVideos
     .sort(() => Math.random() - 0.5)
     .slice(0, 20)
@@ -487,7 +486,6 @@ const generateItemsFromSubjects = (subjects) => {
 const lessonSections = computed(() => {
 
 
-  // Eğer courses verisi varsa ve loading false ise
   const courses = analysisStore.courses.value;
   if (courses && !loading.value) {
     return courses.map(course => ({
@@ -497,7 +495,6 @@ const lessonSections = computed(() => {
     }));
   }
 
-  // Loading durumunda veya courses verisi yoksa skeleton göster
   return Array(3).fill().map((_, index) => ({
     title: 'Loading...',
     type: 'lesson',
@@ -612,7 +609,9 @@ onMounted(async () => {
     startLoading()
     const data = await analysisStore.fetchAnalysisData(code)
     userName.value = data.data.user.name
-    loadWrappedData()
+    nextTick(() => {
+      loadWrappedData()
+    })
   } catch (err) {
     setError(err)
     console.error('Error loading data:', err)
@@ -632,9 +631,6 @@ onUnmounted(() => {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
-  /* -webkit-overflow-scrolling: touch; */
-  /* scroll-behavior: smooth; */
-  /* scroll-snap-type: x mandatory; */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
