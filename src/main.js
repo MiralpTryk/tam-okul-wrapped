@@ -2,48 +2,16 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import store from "./store";
 import "./assets/tailwind.css";
-import "@fortawesome/fontawesome-free/css/all.css";
 import router from "./router";
 import VueSweetalert2 from "vue-sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
-import "primeicons/primeicons.css";
-import { useStore } from "vuex";
-import axios from "axios";
 import "./styles/modal.css";
 
 const app = createApp(App);
 
+// Store ve router kurulumu
 app.use(store);
 app.use(router);
 app.use(VueSweetalert2);
-app.use(useStore);
-
-const knownTLDs = ["com", "net"];
-
-function getDomainExtension(domain) {
-  const domainParts = domain.split(".");
-  for (let i = domainParts.length - 1; i >= 0; i--) {
-    if (knownTLDs.includes(domainParts[i])) {
-      return domainParts[i];
-    }
-  }
-  return null;
-}
-
-const domain = window.location.hostname;
-const subdomain = domain.substring(0, domain.indexOf("."));
-const domainExtension = getDomainExtension(domain);
-
-const isLocal = process.env.VUE_APP_ENV === "local";
-
-if (isLocal) {
-  axios.defaults.baseURL = "https://06000041" + process.env.VUE_APP_API_URL;
-  axios.defaults.trialReportURL = `https://06000041.tamokul.${domainExtension}`;
-} else {
-  axios.defaults.baseURL = `https://${subdomain}${process.env.VUE_APP_API_URL}`;
-  axios.defaults.trialReportURL = `https://${subdomain}.tamokul.${domainExtension}`;
-}
-
-export const subdomainTamokul = subdomain + ".tamokul.com";
 
 app.mount("#app");

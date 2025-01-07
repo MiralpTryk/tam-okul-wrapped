@@ -1,6 +1,7 @@
 <template>
   <header :class="[
-    'fixed top-0 left-0 right-0 z-50 transition-all duration-1000',
+    isFixed ? 'fixed top-0 left-0 right-0' : '',
+    'z-50 transition-all duration-1000',
     isScrolled ? 'bg-black backdrop-blur-sm' : 'bg-gradient-to-t from-transparent to-black'
   ]">
     <nav class="mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-16 2xl:px-24">
@@ -28,6 +29,10 @@ defineProps({
   hideOpticButton: {
     type: Boolean,
     default: false
+  },
+  isFixed: {
+    type: Boolean,
+    default: true
   }
 })
 

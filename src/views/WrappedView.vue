@@ -42,11 +42,11 @@
       <!-- Analysis Modal -->
       <Transition name="modal">
         <div v-if="showAnalysisModal" class="fixed inset-0 z-[60]">
-          <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-          <div class="fixed inset-0 overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-0 sm:p-4" @click="closeAnalysisModal">
+          <div class="absolute inset-0 bg-black/50 backdrop-blur-sm pointer-events-auto" @click="closeAnalysisModal"></div>
+          <div class="fixed inset-0 pointer-events-none">
+            <div class="flex min-h-full items-center justify-center p-0 sm:p-4">
               <div
-                class="max-w-3xl relative transform sm:rounded-2xl bg-zinc-900 p-4 sm:p-6 text-left shadow-xl transition-all overflow-y-auto z-50 sm:max-h-[80vh] md:rounded-2xl sm:m-4 h-screen w-screen m-0 rounded-none sm:h-auto sm:w-auto">
+                class="max-w-3xl relative transform sm:rounded-2xl bg-zinc-900 p-4 sm:p-6 text-left shadow-xl transition-all overflow-y-auto sm:max-h-[80vh] md:rounded-2xl sm:m-4 h-screen w-screen m-0 rounded-none sm:h-auto sm:w-auto pointer-events-auto">
                 <div class="absolute top-0 right-0">
                   <button v-if="isMobile" @click="showAnalysisModal = false"
                     class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-gray-200 z-50 w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-xl sm:text-3xl">
