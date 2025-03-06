@@ -96,7 +96,7 @@
                 <div class="relative">
                   <div class="sticky top-0 z-30">
                     <div :class="[
-                      'w-screen relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] transition-colors duration-300',
+                      'w-screen md:w-[calc(100vw-0.4rem)] relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] transition-colors duration-300',
                       scrollY > 144 ? 'bg-black/95 backdrop-blur-sm' : 'bg-transparent'
                     ]">
                       <div class="mx-auto px-4 sm:px-6 lg:px-16 2xl:px-24">
@@ -131,7 +131,10 @@
                             <div class="flex justify-between items-center mb-2">
                               <span class="font-bold text-base">Soru {{ question.number }}</span>
                               <div class="flex items-center gap-3">
-                                <button @click="openVideoSolution(question.id)" class="action-button hover:scale-110 transition-all duration-200 text-zinc-400 hover:text-zinc-200 p-1.5 rounded-full hover:bg-zinc-800/70 focus:outline-none focus:ring-1 focus:ring-zinc-500" title="Video Çözüm">
+                                <button v-if="question.video_url" @click="openVideoSolution(question.id)" class="action-button hover:scale-110 transition-all duration-200 text-green-500 hover:text-green-400 p-1.5 rounded-full hover:bg-zinc-800/70 focus:outline-none focus:ring-1 focus:ring-green-500" title="Video Çözüm">
+                                  <component :is="TvMinimalPlayIcon" class="w-4 h-4 md:w-5 md:h-5" />
+                                </button>
+                                <button v-else class="cursor-not-allowed text-zinc-400 p-1.5 rounded-full focus:outline-none" title="Video Çözüm">
                                   <component :is="TvMinimalPlayIcon" class="w-4 h-4 md:w-5 md:h-5" />
                                 </button>
                                 <button @click="toggleBookmark(question.id)" :class="[
@@ -265,16 +268,13 @@
                 <div class="animate-spin rounded-full h-12 w-12 border-2 border-[#E50914] border-t-transparent"></div>
               </div>
               
-              <!-- Video iframe -->
-              <iframe v-if="currentVideoUrl" :src="currentVideoUrl" class="w-full h-full" frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen @load="isVideoLoading = false"></iframe>
+              <!-- YouTube Player Container -->
+              <div v-if="currentVideoId" id="youtube-player" class="w-full h-full absolute inset-0"></div>
                 
               <!-- No video state -->
-              <div v-else class="w-full h-full flex flex-col items-center justify-center text-zinc-400 text-sm sm:text-base p-8">
+              <div v-if="!currentVideoId" class="w-full h-full flex flex-col items-center justify-center text-zinc-400 text-sm sm:text-base p-8">
                 <component :is="TvMinimalPlayIcon" class="w-12 h-12 mb-4 text-zinc-600" />
                 <p class="text-center">Bu soru için henüz video çözüm eklenmemiştir.</p>
-                <p class="text-center text-xs mt-2 text-zinc-500">Video çözümler yakında eklenecektir.</p>
               </div>
             </div>
           </div>
@@ -493,6 +493,7 @@ const currentPage = ref(1);
 const imageLoadError = ref(false);
 const showVideoModal = ref(false);
 const currentVideoUrl = ref('');
+const currentVideoId = ref('');
 const isVideoLoading = ref(false);
 const currentQuestionTitle = ref('');
 const showWelcomeModal = ref(true);
@@ -597,7 +598,7 @@ const loadQuestions = () => {
             correct_answer: question.correct_answer.toString(),
             subject: question.subject,
             image: question.image,
-            video_url: question.video_url || null,
+            video_url: question.solution || null,
             page: parseInt(pageNumber),
             title: course.title,
             answer: null,
@@ -757,6 +758,74 @@ const handleImageError = (event) => {
   }
 };
 
+let youtubePlayer = null;
+
+const loadYouTubeAPI = () => {
+  return new Promise((resolve) => {
+    // If the API is already loaded, resolve immediately
+    if (window.YT && window.YT.Player) {
+      resolve();
+      return;
+    }
+
+    // Create a global callback function
+    window.onYouTubeIframeAPIReady = () => {
+      resolve();
+    };
+
+    // Load the YouTube API script
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  });
+};
+
+const initYouTubePlayer = async (videoId, startTime) => {
+  // Make sure the API is loaded
+  await loadYouTubeAPI();
+  
+  // Create the player
+  createYouTubePlayer(videoId, startTime);
+};
+
+const createYouTubePlayer = (videoId, startTime) => {
+  // Destroy existing player if any
+  if (youtubePlayer) {
+    youtubePlayer.destroy();
+  }
+  
+  // Create new player
+  youtubePlayer = new window.YT.Player('youtube-player', {
+    videoId: videoId,
+    playerVars: {
+      autoplay: 1,
+      modestbranding: 1,
+      rel: 0,
+      fs: 1,
+      start: startTime
+    },
+    events: {
+      'onReady': onPlayerReady,
+      'onStateChange': onPlayerStateChange,
+      'onError': onPlayerError
+    }
+  });
+};
+
+const onPlayerReady = () => {
+  isVideoLoading.value = false;
+};
+
+const onPlayerStateChange = () => {
+  // You can handle player state changes here if needed
+};
+
+const onPlayerError = (event) => {
+  console.error('YouTube player error:', event);
+  isVideoLoading.value = false;
+};
+
 const watchSolutionVideo = (questionId) => {
   const question = questions.value.find(q => q.id === questionId);
 
@@ -767,15 +836,53 @@ const watchSolutionVideo = (questionId) => {
     // Set question title for the modal
     currentQuestionTitle.value = `Soru ${question.number} - Çözüm Videosu`;
     
-    // Get video URL (fallback to a placeholder if not available)
-    const videoUrl = question.video_url || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
-    currentVideoUrl.value = videoUrl;
-
-    // Show the modal
-    showVideoModal.value = true;
+    // Get video URL from the solution field
+    let videoUrl = question.video_url;
     
-    // If there's no actual video, don't show loading state
-    if (!question.video_url) {
+    // Extract YouTube video ID and timestamp
+    let videoId = '';
+    let startTime = 0;
+    
+    if (videoUrl) {
+      // Handle youtube.com/watch?v= format
+      if (videoUrl.includes('youtube.com/watch?v=')) {
+        const urlParts = new URL(videoUrl);
+        videoId = urlParts.searchParams.get('v');
+        startTime = urlParts.searchParams.get('t') || 0;
+      } 
+      // Handle youtu.be/ format
+      else if (videoUrl.includes('youtu.be/')) {
+        const baseUrl = videoUrl.split('?')[0];
+        videoId = baseUrl.split('youtu.be/')[1];
+        
+        // Check for timestamp in the URL
+        if (videoUrl.includes('t=')) {
+          const timeParam = videoUrl.split('t=')[1].split('&')[0];
+          startTime = parseInt(timeParam) || 0;
+        } else if (videoUrl.includes('&t=')) {
+          const timeParam = videoUrl.split('&t=')[1].split('&')[0];
+          startTime = parseInt(timeParam) || 0;
+        }
+      } 
+      // Handle youtube.com/embed/ format
+      else if (videoUrl.includes('youtube.com/embed/')) {
+        const urlParts = new URL(videoUrl);
+        videoId = urlParts.pathname.split('/embed/')[1];
+        startTime = urlParts.searchParams.get('start') || 0;
+      }
+      
+      currentVideoId.value = videoId;
+      
+      // Show the modal first
+      showVideoModal.value = true;
+      
+      // Initialize YouTube player after modal is shown
+      nextTick(() => {
+        initYouTubePlayer(videoId, startTime);
+      });
+    } else {
+      currentVideoId.value = '';
+      showVideoModal.value = true;
       isVideoLoading.value = false;
     }
   }
@@ -787,7 +894,7 @@ const openVideoSolution = (questionId) => {
   
   if (!question) return;
   
-  // Check if the question has a video_url
+  // Check if the question has a video_url (which now comes from the solution field)
   if (question.video_url) {
     // If video_url exists, use the existing watchSolutionVideo function
     watchSolutionVideo(questionId);
@@ -795,7 +902,7 @@ const openVideoSolution = (questionId) => {
     // If no video_url exists yet, show a notification
     Swal.fire({
       title: 'Video Çözüm',
-      text: 'Bu soru için henüz video çözüm eklenmemiştir. Yakında eklenecektir.',
+      text: 'Bu soru için henüz video çözüm eklenmemiştir.',
       icon: 'info',
       confirmButtonText: 'Tamam',
       confirmButtonColor: '#E50914',
@@ -805,15 +912,22 @@ const openVideoSolution = (questionId) => {
     });
     
     // Log for debugging
-    console.log('Video solution requested for question ID:', questionId, 'but no video_url available yet');
+    console.log('Video solution requested for question ID:', questionId, 'but no solution available yet');
   }
 };
 
 const closeVideoModal = () => {
   showVideoModal.value = false;
   currentVideoUrl.value = '';
+  currentVideoId.value = '';
   currentQuestionTitle.value = '';
   isVideoLoading.value = false;
+  
+  // Destroy YouTube player when modal is closed
+  if (youtubePlayer) {
+    youtubePlayer.destroy();
+    youtubePlayer = null;
+  }
 };
 
 const closeWelcomeModal = () => {
