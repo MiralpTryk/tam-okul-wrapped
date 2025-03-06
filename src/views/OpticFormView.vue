@@ -130,13 +130,18 @@
                             class="bg-[#141414]/70 backdrop-blur-sm rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#3F3F3F]">
                             <div class="flex justify-between items-center mb-2">
                               <span class="font-bold text-base">Soru {{ question.number }}</span>
-                              <button @click="toggleBookmark(question.id)" :class="[
-                                'hover:scale-110 transition-transform duration-200',
-                                question.bookmarked ? 'text-[#E50914]' : 'text-green-500'
-                              ]">
-                                <component :is="question.bookmarked ? BookmarkMinusIcon : BookmarkPlusIcon"
-                                  class="w-5 h-5 md:w-6 md:h-6" />
-                              </button>
+                              <div class="flex items-center gap-3">
+                                <button @click="openVideoSolution(question.id)" class="action-button hover:scale-110 transition-all duration-200 text-zinc-400 hover:text-zinc-200 p-1.5 rounded-full hover:bg-zinc-800/70 focus:outline-none focus:ring-1 focus:ring-zinc-500" title="Video Çözüm">
+                                  <component :is="TvMinimalPlayIcon" class="w-4 h-4 md:w-5 md:h-5" />
+                                </button>
+                                <button @click="toggleBookmark(question.id)" :class="[
+                                  'action-button hover:scale-110 transition-all duration-200 p-1.5 rounded-full hover:bg-zinc-800/70 focus:outline-none focus:ring-1 focus:ring-zinc-500',
+                                  question.bookmarked ? 'text-[#E50914] hover:text-[#E50914]/90' : 'text-green-500 hover:text-green-400'
+                                ]" :title="question.bookmarked ? 'Favorilerden Çıkar' : 'Favorilere Ekle'">
+                                  <component :is="question.bookmarked ? BookmarkMinusIcon : BookmarkPlusIcon"
+                                    class="w-4 h-4 md:w-5 md:h-5" />
+                                </button>
+                              </div>
                             </div>
                             <p class="text-sm text-zinc-400 mb-6 truncate">{{ question.subject }}</p>
 
@@ -242,21 +247,34 @@
         <!-- Video Modal -->
         <div v-if="showVideoModal"
           class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div class="bg-[#141414] rounded-lg overflow-hidden w-full max-w-4xl mx-4">
+          <div class="bg-[#141414] rounded-lg overflow-hidden w-full max-w-4xl mx-4 shadow-2xl">
             <div class="p-3 sm:p-4 flex justify-between items-center border-b border-zinc-800">
-              <h3 class="text-base sm:text-lg font-medium text-zinc-200">Çözüm Videosu</h3>
+              <h3 class="text-base sm:text-lg font-medium text-zinc-200">
+                <span v-if="currentQuestionTitle">{{ currentQuestionTitle }}</span>
+                <span v-else>Çözüm Videosu</span>
+              </h3>
               <button @click="closeVideoModal" class="text-zinc-400 hover:text-white transition-colors">
                 <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div class="aspect-w-16">
+            <div class="aspect-w-16 relative">
+              <!-- Loading state -->
+              <div v-if="isVideoLoading" class="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                <div class="animate-spin rounded-full h-12 w-12 border-2 border-[#E50914] border-t-transparent"></div>
+              </div>
+              
+              <!-- Video iframe -->
               <iframe v-if="currentVideoUrl" :src="currentVideoUrl" class="w-full h-full" frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen></iframe>
-              <div v-else class="w-full h-full flex items-center justify-center text-zinc-400 text-sm sm:text-base">
-                Video bulunamadı
+                allowfullscreen @load="isVideoLoading = false"></iframe>
+                
+              <!-- No video state -->
+              <div v-else class="w-full h-full flex flex-col items-center justify-center text-zinc-400 text-sm sm:text-base p-8">
+                <component :is="TvMinimalPlayIcon" class="w-12 h-12 mb-4 text-zinc-600" />
+                <p class="text-center">Bu soru için henüz video çözüm eklenmemiştir.</p>
+                <p class="text-center text-xs mt-2 text-zinc-500">Video çözümler yakında eklenecektir.</p>
               </div>
             </div>
           </div>
@@ -457,7 +475,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useAnalysisStore } from '@/composables/useAnalysisStore';
-import { BookmarkPlusIcon, BookmarkMinusIcon } from 'lucide-vue-next';
+import { BookmarkPlusIcon, BookmarkMinusIcon, TvMinimalPlayIcon } from 'lucide-vue-next';
 import AppHeader from "@/components/AppHeader.vue";
 import QuestionSkeleton from "@/components/QuestionSkeleton.vue";
 import Swal from 'sweetalert2';
@@ -475,6 +493,8 @@ const currentPage = ref(1);
 const imageLoadError = ref(false);
 const showVideoModal = ref(false);
 const currentVideoUrl = ref('');
+const isVideoLoading = ref(false);
+const currentQuestionTitle = ref('');
 const showWelcomeModal = ref(true);
 const dontShowWelcomeAgain = ref(false);
 const allSavedAnswers = ref({});
@@ -577,6 +597,7 @@ const loadQuestions = () => {
             correct_answer: question.correct_answer.toString(),
             subject: question.subject,
             image: question.image,
+            video_url: question.video_url || null,
             page: parseInt(pageNumber),
             title: course.title,
             answer: null,
@@ -737,20 +758,62 @@ const handleImageError = (event) => {
 };
 
 const watchSolutionVideo = (questionId) => {
-
   const question = questions.value.find(q => q.id === questionId);
 
   if (question) {
+    // Set loading state
+    isVideoLoading.value = true;
+    
+    // Set question title for the modal
+    currentQuestionTitle.value = `Soru ${question.number} - Çözüm Videosu`;
+    
+    // Get video URL (fallback to a placeholder if not available)
     const videoUrl = question.video_url || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
     currentVideoUrl.value = videoUrl;
 
+    // Show the modal
     showVideoModal.value = true;
+    
+    // If there's no actual video, don't show loading state
+    if (!question.video_url) {
+      isVideoLoading.value = false;
+    }
+  }
+};
+
+const openVideoSolution = (questionId) => {
+  // Get the question object
+  const question = questions.value.find(q => q.id === questionId);
+  
+  if (!question) return;
+  
+  // Check if the question has a video_url
+  if (question.video_url) {
+    // If video_url exists, use the existing watchSolutionVideo function
+    watchSolutionVideo(questionId);
+  } else {
+    // If no video_url exists yet, show a notification
+    Swal.fire({
+      title: 'Video Çözüm',
+      text: 'Bu soru için henüz video çözüm eklenmemiştir. Yakında eklenecektir.',
+      icon: 'info',
+      confirmButtonText: 'Tamam',
+      confirmButtonColor: '#E50914',
+      background: '#242424',
+      color: '#fff',
+      iconColor: '#E50914'
+    });
+    
+    // Log for debugging
+    console.log('Video solution requested for question ID:', questionId, 'but no video_url available yet');
   }
 };
 
 const closeVideoModal = () => {
   showVideoModal.value = false;
   currentVideoUrl.value = '';
+  currentQuestionTitle.value = '';
+  isVideoLoading.value = false;
 };
 
 const closeWelcomeModal = () => {
@@ -1196,5 +1259,30 @@ select option:checked {
 [v-if="showConfirmation"]>div,
 [v-if="showWelcomeModal"]>div {
   animation: fadeIn 0.3s ease-out;
+}
+
+.action-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.action-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.action-button:active::after {
+  opacity: 0.1;
+  transform: translate(-50%, -50%) scale(1);
+  transition: opacity 0s, transform 0s;
 }
 </style>
