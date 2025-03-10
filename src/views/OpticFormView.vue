@@ -131,7 +131,7 @@
                             <div class="flex justify-between items-center mb-2">
                               <span class="font-bold text-base">Soru {{ question.number }}</span>
                               <div class="flex items-center gap-3">
-                                <button v-if="question.video_url" @click="openVideoSolution(question.id)" class="action-button hover:scale-110 transition-all duration-200 text-green-500 hover:text-green-400 p-1.5 rounded-full hover:bg-zinc-800/70 focus:outline-none focus:ring-1 focus:ring-green-500" title="Video Çözüm">
+                                <button v-if="question.video_url || question.solution_meta" @click="openVideoSolution(question.id)" class="action-button hover:scale-110 transition-all duration-200 text-green-500 hover:text-green-400 p-1.5 rounded-full hover:bg-zinc-800/70 focus:outline-none focus:ring-1 focus:ring-green-500" title="Video Çözüm">
                                   <component :is="TvMinimalPlayIcon" class="w-4 h-4 md:w-5 md:h-5" />
                                 </button>
                                 <button v-else class="cursor-not-allowed text-zinc-400 p-1.5 rounded-full focus:outline-none" title="Video Çözüm">
@@ -189,23 +189,15 @@
                             <button v-if="question.answer !== null && !isPageSaved(question.page)"
                               @click="handleAnswerChange(question.id, null)"
                               class="mt-4 flex items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded-md py-1.5 px-3 hover:border-zinc-700 w-full">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2">
-                                <path
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
+                              <component :is="TrashIcon" class="w-4 h-4" />
                               <span class="text-sm">Cevabı Temizle</span>
                             </button>
 
                             <!-- Solution Video Button -->
-                            <div v-show="question.saved && showSolutionVideos" class="mt-6">
+                            <div v-show="question.saved && showSolutionVideos && (question.video_url || question.solution_meta)" class="mt-6">
                               <button @click="watchSolutionVideo(question.id)"
                                 class="w-full bg-[#141414] hover:bg-[#3F3F3F] text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200 border border-[#3F3F3F]">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                  stroke-width="2">
-                                  <circle cx="12" cy="12" r="10" />
-                                  <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
-                                </svg>
+                                <component :is="PlayCircleIcon" class="w-4 h-4" />
                                 <span class="text-sm">Çözüm Videosu</span>
                               </button>
                             </div>
@@ -253,13 +245,14 @@
           <div class="bg-[#141414] rounded-lg overflow-hidden w-full max-w-4xl mx-4 shadow-2xl">
             <div class="p-3 sm:p-4 flex justify-between items-center border-b border-zinc-800">
               <h3 class="text-base sm:text-lg font-medium text-zinc-200">
-                <span v-if="currentQuestionTitle">{{ currentQuestionTitle }}</span>
+                <span v-if="currentQuestionTitle">
+                  <span v-if="currentQuestionSubject">{{ currentQuestionSubject }} &middot; </span>
+                  {{ currentQuestionTitle }}
+                </span>
                 <span v-else>Çözüm Videosu</span>
               </h3>
               <button @click="closeVideoModal" class="text-zinc-400 hover:text-white transition-colors">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <component :is="XIcon" class="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
             <div class="aspect-w-16 relative">
@@ -275,6 +268,27 @@
               <div v-if="!currentVideoId" class="w-full h-full flex flex-col items-center justify-center text-zinc-400 text-sm sm:text-base p-8">
                 <component :is="TvMinimalPlayIcon" class="w-12 h-12 mb-4 text-zinc-600" />
                 <p class="text-center">Bu soru için henüz video çözüm eklenmemiştir.</p>
+              </div>
+              
+              <!-- Segment ended overlay -->
+              <div v-if="segmentEnded" class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-20">
+                <p class="text-white text-lg mb-4">Çözüm videosu sona erdi</p>
+                <button @click="replaySegment" class="bg-[#E50914] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#E50914]/90 transition-colors">
+                  <component :is="RefreshCwIcon" class="w-5 h-5" />
+                  <span>Tekrar İzle</span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Video controls and segment info -->
+            <div v-if="currentVideoId && currentVideoEndTime" class="p-3 sm:p-4 border-t border-zinc-800">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+                <div class="text-sm text-zinc-400">
+                  <span v-if="currentVideoStartTime !== null && currentVideoEndTime !== null" class="flex items-center gap-1.5">
+                    <component :is="ClockIcon" class="w-4 h-4" />
+                    Çözüm süresi: {{ formatTime(currentVideoStartTime) }} - {{ formatTime(currentVideoEndTime) }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -475,7 +489,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useAnalysisStore } from '@/composables/useAnalysisStore';
-import { BookmarkPlusIcon, BookmarkMinusIcon, TvMinimalPlayIcon } from 'lucide-vue-next';
+import { BookmarkPlusIcon, BookmarkMinusIcon, TvMinimalPlayIcon, PlayCircleIcon, RefreshCwIcon, XIcon, ClockIcon, TrashIcon } from 'lucide-vue-next';
 import AppHeader from "@/components/AppHeader.vue";
 import QuestionSkeleton from "@/components/QuestionSkeleton.vue";
 import Swal from 'sweetalert2';
@@ -599,6 +613,7 @@ const loadQuestions = () => {
             subject: question.subject,
             image: question.image,
             video_url: question.solution || null,
+            solution_meta: question.solution_meta || null,
             page: parseInt(pageNumber),
             title: course.title,
             answer: null,
@@ -815,10 +830,19 @@ const createYouTubePlayer = (videoId, startTime) => {
 
 const onPlayerReady = () => {
   isVideoLoading.value = false;
+  
+  // Start checking video time if we have an end time
+  if (currentVideoEndTime.value) {
+    startTimeCheck();
+  }
 };
 
-const onPlayerStateChange = () => {
-  // You can handle player state changes here if needed
+const onPlayerStateChange = (event) => {
+  // Check if the player is in fullscreen when the segment ends
+  if (event.data === window.YT.PlayerState.PLAYING) {
+    // Reset the segment ended state when video starts playing
+    segmentEnded.value = false;
+  }
 };
 
 const onPlayerError = (event) => {
@@ -832,9 +856,11 @@ const watchSolutionVideo = (questionId) => {
   if (question) {
     // Set loading state
     isVideoLoading.value = true;
+    segmentEnded.value = false;
     
-    // Set question title for the modal
+    // Set question title and subject for the modal
     currentQuestionTitle.value = `Soru ${question.number} - Çözüm Videosu`;
+    currentQuestionSubject.value = question.title || '';
     
     // Get video URL from the solution field
     let videoUrl = question.video_url;
@@ -842,13 +868,33 @@ const watchSolutionVideo = (questionId) => {
     // Extract YouTube video ID and timestamp
     let videoId = '';
     let startTime = 0;
+    let endTime = null;
     
-    if (videoUrl) {
+    // Check if we have solution_meta data
+    if (question.solution_meta) {
+      try {
+        // Parse solution_meta (format: "videoId,startTime,endTime,partNumber")
+        const metaParts = question.solution_meta.split(',');
+        if (metaParts.length >= 3) {
+          videoId = metaParts[0];
+          // Add 1 second to the start time to skip the intro
+          startTime = parseInt(metaParts[1]) || 0;
+          startTime = startTime + 2; // Add 1 second to skip intro
+          endTime = parseInt(metaParts[2]) || null;
+          // partNumber is metaParts[3] if needed
+        }
+      } catch (error) {
+        console.error('Error parsing solution_meta:', error);
+      }
+    } 
+    // Fallback to video_url if no solution_meta or parsing failed
+    else if (videoUrl) {
       // Handle youtube.com/watch?v= format
       if (videoUrl.includes('youtube.com/watch?v=')) {
         const urlParts = new URL(videoUrl);
         videoId = urlParts.searchParams.get('v');
-        startTime = urlParts.searchParams.get('t') || 0;
+        startTime = parseInt(urlParts.searchParams.get('t')) || 0;
+        startTime = startTime + 2; // Add 1 second to skip intro
       } 
       // Handle youtu.be/ format
       else if (videoUrl.includes('youtu.be/')) {
@@ -859,19 +905,28 @@ const watchSolutionVideo = (questionId) => {
         if (videoUrl.includes('t=')) {
           const timeParam = videoUrl.split('t=')[1].split('&')[0];
           startTime = parseInt(timeParam) || 0;
+          startTime = startTime + 2; // Add 1 second to skip intro
         } else if (videoUrl.includes('&t=')) {
           const timeParam = videoUrl.split('&t=')[1].split('&')[0];
           startTime = parseInt(timeParam) || 0;
+          startTime = startTime + 2; // Add 1 second to skip intro
         }
       } 
       // Handle youtube.com/embed/ format
       else if (videoUrl.includes('youtube.com/embed/')) {
         const urlParts = new URL(videoUrl);
         videoId = urlParts.pathname.split('/embed/')[1];
-        startTime = urlParts.searchParams.get('start') || 0;
+        startTime = parseInt(urlParts.searchParams.get('start')) || 0;
+        startTime = startTime + 2; // Add 1 second to skip intro
       }
-      
+    }
+    
+    if (videoId) {
       currentVideoId.value = videoId;
+      
+      // Store the start and end times
+      currentVideoStartTime.value = startTime;
+      currentVideoEndTime.value = endTime;
       
       // Show the modal first
       showVideoModal.value = true;
@@ -882,6 +937,8 @@ const watchSolutionVideo = (questionId) => {
       });
     } else {
       currentVideoId.value = '';
+      currentVideoStartTime.value = null;
+      currentVideoEndTime.value = null;
       showVideoModal.value = true;
       isVideoLoading.value = false;
     }
@@ -894,12 +951,12 @@ const openVideoSolution = (questionId) => {
   
   if (!question) return;
   
-  // Check if the question has a video_url (which now comes from the solution field)
-  if (question.video_url) {
-    // If video_url exists, use the existing watchSolutionVideo function
+  // Check if the question has a video_url or solution_meta
+  if (question.solution_meta || question.video_url) {
+    // If video data exists, use the existing watchSolutionVideo function
     watchSolutionVideo(questionId);
   } else {
-    // If no video_url exists yet, show a notification
+    // If no video data exists yet, show a notification
     Swal.fire({
       title: 'Video Çözüm',
       text: 'Bu soru için henüz video çözüm eklenmemiştir.',
@@ -921,7 +978,17 @@ const closeVideoModal = () => {
   currentVideoUrl.value = '';
   currentVideoId.value = '';
   currentQuestionTitle.value = '';
+  currentQuestionSubject.value = '';
   isVideoLoading.value = false;
+  currentVideoEndTime.value = null;
+  currentVideoStartTime.value = null;
+  segmentEnded.value = false;
+  
+  // Clear the time check interval if it exists
+  if (videoTimeCheckInterval.value) {
+    clearInterval(videoTimeCheckInterval.value);
+    videoTimeCheckInterval.value = null;
+  }
   
   // Destroy YouTube player when modal is closed
   if (youtubePlayer) {
@@ -1270,6 +1337,110 @@ const saveSavedPages = () => {
 watch(savedPages, () => {
   saveSavedPages();
 }, { deep: true });
+
+// Add this new ref for tracking the end time
+const currentVideoEndTime = ref(null);
+
+// Add this new function to check video time
+const startTimeCheck = () => {
+  if (!youtubePlayer || !currentVideoEndTime.value) return;
+  
+  segmentEnded.value = false;
+  
+  const timeCheckInterval = setInterval(() => {
+    if (!youtubePlayer || !showVideoModal.value) {
+      clearInterval(timeCheckInterval);
+      return;
+    }
+    
+    try {
+      const currentTime = youtubePlayer.getCurrentTime();
+      
+      // If we've reached or passed the end time, pause the video
+      if (currentTime >= currentVideoEndTime.value) {
+        // Check if we're in fullscreen mode
+        const isFullscreen = document.fullscreenElement || 
+                            document.webkitFullscreenElement || 
+                            document.mozFullScreenElement || 
+                            document.msFullscreenElement;
+        
+        // Pause the video
+        youtubePlayer.pauseVideo();
+        
+        // If in fullscreen, exit fullscreen first
+        if (isFullscreen) {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().then(() => {
+              // Show the segment ended overlay after exiting fullscreen
+              setTimeout(() => {
+                segmentEnded.value = true;
+              }, 300); // Small delay to ensure fullscreen exit completes
+            });
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+            setTimeout(() => {
+              segmentEnded.value = true;
+            }, 300);
+          } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+            setTimeout(() => {
+              segmentEnded.value = true;
+            }, 300);
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+            setTimeout(() => {
+              segmentEnded.value = true;
+            }, 300);
+          }
+        } else {
+          // If not in fullscreen, show the overlay immediately
+          segmentEnded.value = true;
+        }
+        
+        clearInterval(timeCheckInterval);
+      }
+    } catch (error) {
+      console.error('Error checking video time:', error);
+      clearInterval(timeCheckInterval);
+    }
+  }, 500); // Check every half second
+  
+  // Store the interval ID so we can clear it when the modal is closed
+  videoTimeCheckInterval.value = timeCheckInterval;
+};
+
+// Add this new ref for the interval
+const videoTimeCheckInterval = ref(null);
+
+// Add these new refs
+const segmentEnded = ref(false);
+const currentVideoStartTime = ref(null);
+
+// Add a function to replay the segment
+const replaySegment = () => {
+  if (youtubePlayer && currentVideoStartTime.value !== null) {
+    segmentEnded.value = false;
+    youtubePlayer.seekTo(currentVideoStartTime.value, true);
+    youtubePlayer.playVideo();
+    startTimeCheck(); // Restart the time checking
+  }
+};
+
+// Add a function to format time in MM:SS format
+const formatTime = (seconds) => {
+  if (seconds === null || isNaN(seconds)) return '--:--';
+  
+  // For display purposes, we want to show the original metadata times
+  const displaySeconds = seconds
+  
+  const minutes = Math.floor(displaySeconds / 60);
+  const remainingSeconds = Math.floor(displaySeconds % 60);
+  
+  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
+// Add a new ref for the question subject
+const currentQuestionSubject = ref('');
 </script>
 
 <style scoped>
