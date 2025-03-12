@@ -131,10 +131,7 @@
                             <div class="flex justify-between items-center mb-2">
                               <span class="font-bold text-base">Soru {{ question.number }}</span>
                               <div class="flex items-center gap-3">
-                                <button v-if="question.video_url || question.solution_meta" @click="openVideoSolution(question.id)" class="action-button hover:scale-110 transition-all duration-200 text-green-500 hover:text-green-400 p-1.5 rounded-full hover:bg-zinc-800/70 focus:outline-none focus:ring-1 focus:ring-green-500" title="Video Çözüm">
-                                  <component :is="TvMinimalPlayIcon" class="w-4 h-4 md:w-5 md:h-5" />
-                                </button>
-                                <button v-else class="cursor-not-allowed text-zinc-400 p-1.5 rounded-full focus:outline-none" title="Video Çözüm">
+                                <button v-if="question.solution" @click="openVideoSolution(question.id)" class="action-button hover:scale-110 transition-all duration-200 text-green-500 hover:text-green-400 p-1.5 rounded-full hover:bg-zinc-800/70 focus:outline-none focus:ring-1 focus:ring-green-500" title="Video Çözüm">
                                   <component :is="TvMinimalPlayIcon" class="w-4 h-4 md:w-5 md:h-5" />
                                 </button>
                                 <button @click="toggleBookmark(question.id)" :class="[
@@ -192,15 +189,6 @@
                               <component :is="TrashIcon" class="w-4 h-4" />
                               <span class="text-sm">Cevabı Temizle</span>
                             </button>
-
-                            <!-- Solution Video Button -->
-                            <div v-show="question.saved && showSolutionVideos && (question.video_url || question.solution_meta)" class="mt-6">
-                              <button @click="watchSolutionVideo(question.id)"
-                                class="w-full bg-[#141414] hover:bg-[#3F3F3F] text-white rounded py-2 px-3 flex items-center justify-center gap-2 transition-colors duration-200 border border-[#3F3F3F]">
-                                <component :is="PlayCircleIcon" class="w-4 h-4" />
-                                <span class="text-sm">Çözüm Videosu</span>
-                              </button>
-                            </div>
                           </div>
                         </div>
 
@@ -241,7 +229,7 @@
 
         <!-- Video Modal -->
         <div v-if="showVideoModal"
-          class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-0 md:p-4 z-50">
           <div class="bg-[#141414] rounded-lg overflow-hidden w-full max-w-4xl mx-4 shadow-2xl">
             <div class="p-3 sm:p-4 flex justify-between items-center border-b border-zinc-800">
               <h3 class="text-base sm:text-lg font-medium text-zinc-200">
@@ -262,7 +250,15 @@
               </div>
               
               <!-- YouTube Player Container -->
-              <div v-if="currentVideoId" id="youtube-player" class="w-full h-full absolute inset-0"></div>
+              <div v-if="currentVideoId" 
+                id="youtube-player" 
+                class="w-full h-full absolute inset-0" 
+                allowfullscreen="allowfullscreen" 
+                mozallowfullscreen="mozallowfullscreen" 
+                msallowfullscreen="msallowfullscreen" 
+                oallowfullscreen="oallowfullscreen" 
+                webkitallowfullscreen="webkitallowfullscreen"
+                @dblclick="toggleFullscreen"></div>
                 
               <!-- No video state -->
               <div v-if="!currentVideoId" class="w-full h-full flex flex-col items-center justify-center text-zinc-400 text-sm sm:text-base p-8">
@@ -278,16 +274,242 @@
                   <span>Tekrar İzle</span>
                 </button>
               </div>
+              
+              <!-- Keyboard shortcuts info (shown briefly) -->
+              <div v-if="showKeyboardInfo" class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs p-3 rounded-md z-30 transition-opacity duration-300">
+                <p class="font-medium mb-1">Klavye Kısayolları:</p>
+                <ul class="space-y-0.5">
+                  <li>Boşluk: Oynat/Duraklat</li>
+                  <li>← →: 5 saniye ileri/geri</li>
+                  <li>F: Tam ekran</li>
+                  <li>M: Sesi kapat/aç</li>
+                </ul>
+              </div>
             </div>
             
             <!-- Video controls and segment info -->
             <div v-if="currentVideoId && currentVideoEndTime" class="p-3 sm:p-4 border-t border-zinc-800">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
-                <div class="text-sm text-zinc-400">
-                  <span v-if="currentVideoStartTime !== null && currentVideoEndTime !== null" class="flex items-center gap-1.5">
-                    <component :is="ClockIcon" class="w-4 h-4" />
-                    Çözüm süresi: {{ formatTime(currentVideoStartTime) }} - {{ formatTime(currentVideoEndTime) }}
-                  </span>
+              <div class="flex flex-col gap-4">
+                <!-- Mobile Layout (Progress bar on top, controls below) -->
+                <div class="flex flex-col md:hidden gap-4">
+                  <!-- Progress Bar -->
+                  <div class="flex items-center gap-2">
+                    <!-- Start Time -->
+                    <div class="text-xs text-zinc-400 w-12 text-right">
+                      {{ formatTime(currentVideoTime) }}
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="flex-1 relative h-8 group cursor-pointer" 
+                      @click="handleProgressBarClick" 
+                      @touchstart="handleProgressBarTouch"
+                      @touchmove="handleProgressBarTouchMove"
+                      @touchend="handleProgressBarTouchEnd"
+                      @mousemove="handleProgressBarHover"
+                      @mouseleave="hoverPosition = null">
+                      <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 bg-zinc-800 rounded overflow-hidden group-hover:h-3 transition-all">
+                        <!-- Total Segment Duration -->
+                        <div class="absolute inset-0 bg-zinc-700"></div>
+                        <!-- Current Progress -->
+                        <div class="absolute inset-y-0 left-0 bg-[#E50914] transition-all duration-100"
+                          :style="{ width: `${videoProgress}%` }">
+                        </div>
+                        <!-- Hover Preview -->
+                        <div v-if="hoverPosition !== null" 
+                          class="absolute inset-y-0 bg-[#E50914] transition-all duration-75"
+                          :style="{ left: `${hoverPosition}%`, width: '2px' }">
+                        </div>
+                        <!-- Hover Time Preview -->
+                        <div v-if="hoverPosition !== null" 
+                          class="absolute bottom-full mb-2 px-2 py-1 text-xs bg-black/90 text-white rounded transform -translate-x-1/2 pointer-events-none"
+                          :style="{ left: `${hoverPosition}%` }">
+                          {{ formatTime((hoverPosition / 100) * segmentDuration) }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- End Time -->
+                    <div class="text-xs text-zinc-400 w-12">
+                      {{ formatTime(segmentDuration) }}
+                    </div>
+                  </div>
+
+                  <!-- Control Buttons (Mobile) -->
+                  <div class="flex items-center justify-center gap-6">
+                    <!-- Play/Pause -->
+                    <button @click="togglePlayPause" 
+                      class="p-1.5 rounded-full hover:bg-zinc-800/70 transition-colors text-white">
+                      <component :is="isPlaying ? PauseIcon : PlayIcon" class="w-4 h-4" />
+                    </button>
+
+                    <!-- Volume Control with expanding container -->
+                    <div class="flex items-center group">
+                      <button @click="toggleMute" 
+                        class="p-1.5 rounded-full hover:bg-zinc-800/70 transition-colors text-white">
+                        <component :is="volumeIcon" class="w-4 h-4" />
+                      </button>
+                      
+                      <!-- Volume Slider (pushes right controls) -->
+                      <div class="w-0 group-hover:w-24 overflow-hidden transition-all duration-200 h-8 flex items-center justify-center touch-action-none">
+                        <div class="w-full px-2 flex items-center justify-center">
+                          <input 
+                            type="range" 
+                            min="0" 
+                            max="100" 
+                            v-model="volume" 
+                            @input="updateVolume"
+                            @touchstart.stop.prevent
+                            @touchmove.stop.prevent="handleVolumeTouch"
+                            class="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#E50914]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Playback Speed -->
+                    <div class="relative speed-dropdown">
+                      <button @click="showSpeedOptions = !showSpeedOptions" 
+                        class="p-1.5 rounded-full hover:bg-zinc-800/70 transition-colors text-white text-xs font-medium speed-dropdown">
+                        {{ currentPlaybackSpeed }}x
+                      </button>
+                      
+                      <!-- Speed Options Dropdown -->
+                      <div v-if="showSpeedOptions" 
+                        class="absolute bottom-full mb-2 bg-zinc-900 rounded shadow-lg z-10 w-16 py-1 speed-dropdown">
+                        <button v-for="speed in playbackSpeeds" :key="speed"
+                          @click="changePlaybackSpeed(speed)"
+                          :class="[
+                            'w-full px-2 py-1 text-xs text-left hover:bg-zinc-800 transition-colors speed-dropdown',
+                            currentPlaybackSpeed === speed ? 'text-[#E50914] font-medium' : 'text-white'
+                          ]">
+                          {{ speed }}x
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Replay -->
+                    <button @click="replaySegment"
+                      class="p-1.5 rounded-full hover:bg-zinc-800/70 transition-colors text-white">
+                      <component :is="RefreshCwIcon" class="w-4 h-4" />
+                    </button>
+
+                    <!-- Fullscreen -->
+                    <button @click="toggleFullscreen"
+                      class="p-1.5 rounded-full hover:bg-zinc-800/70 transition-colors text-white">
+                      <component :is="FullscreenIcon" class="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Desktop Layout (All controls in one row) -->
+                <div class="hidden md:flex items-center gap-4">
+                  <!-- Left Controls -->
+                  <div class="flex items-center gap-3">
+                    <!-- Play/Pause -->
+                    <button @click="togglePlayPause" 
+                      class="p-1.5 rounded-full hover:bg-zinc-800/70 transition-colors text-white">
+                      <component :is="isPlaying ? PauseIcon : PlayIcon" class="w-4 h-4" />
+                    </button>
+
+                    <!-- Volume Control with expanding container -->
+                    <div class="flex items-center group">
+                      <button @click="toggleMute" 
+                        class="p-1.5 rounded-full hover:bg-zinc-800/70 transition-colors text-white">
+                        <component :is="volumeIcon" class="w-4 h-4" />
+                      </button>
+                      
+                      <!-- Volume Slider (pushes right controls) -->
+                      <div class="w-0 group-hover:w-24 overflow-hidden transition-all duration-200 h-8 flex items-center justify-center touch-action-none">
+                        <div class="w-full px-2 flex items-center justify-center">
+                          <input 
+                            type="range" 
+                            min="0" 
+                            max="100" 
+                            v-model="volume" 
+                            @input="updateVolume"
+                            @touchstart.stop.prevent
+                            @touchmove.stop.prevent="handleVolumeTouch"
+                            class="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#E50914]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Progress Bar (Desktop) -->
+                  <div class="flex items-center gap-2 flex-1">
+                    <!-- Start Time -->
+                    <div class="text-xs text-zinc-400 w-12 text-right">
+                      {{ formatTime(currentVideoTime) }}
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="flex-1 relative h-6 group cursor-pointer" 
+                      @click="handleProgressBarClick" 
+                      @mousemove="handleProgressBarHover"
+                      @mouseleave="hoverPosition = null">
+                      <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 bg-zinc-800 rounded overflow-hidden group-hover:h-1.5 transition-all">
+                        <!-- Total Segment Duration -->
+                        <div class="absolute inset-0 bg-zinc-700"></div>
+                        <!-- Current Progress -->
+                        <div class="absolute inset-y-0 left-0 bg-[#E50914] transition-all duration-100"
+                          :style="{ width: `${videoProgress}%` }">
+                        </div>
+                        <!-- Hover Preview -->
+                        <div v-if="hoverPosition !== null" 
+                          class="absolute inset-y-0 bg-[#E50914] transition-all duration-75"
+                          :style="{ left: `${hoverPosition}%`, width: '2px' }">
+                        </div>
+                        <!-- Hover Time Preview -->
+                        <div v-if="hoverPosition !== null" 
+                          class="absolute bottom-full mb-2 px-2 py-1 text-xs bg-black/90 text-white rounded transform -translate-x-1/2 pointer-events-none"
+                          :style="{ left: `${hoverPosition}%` }">
+                          {{ formatTime((hoverPosition / 100) * segmentDuration) }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- End Time -->
+                    <div class="text-xs text-zinc-400 w-12">
+                      {{ formatTime(segmentDuration) }}
+                    </div>
+                  </div>
+
+                  <!-- Right Controls -->
+                  <div class="flex items-center gap-3">
+                    <!-- Playback Speed -->
+                    <div class="relative speed-dropdown">
+                      <button @click="showSpeedOptions = !showSpeedOptions" 
+                        class="p-1.5 rounded hover:bg-zinc-800/70 transition-colors text-white text-xs font-medium speed-dropdown">
+                        {{ currentPlaybackSpeed }}x
+                      </button>
+                      
+                      <!-- Speed Options Dropdown -->
+                      <div v-if="showSpeedOptions" 
+                        class="absolute bottom-full mb-2 bg-zinc-900 rounded shadow-lg z-10 w-16 py-1 speed-dropdown">
+                        <button v-for="speed in playbackSpeeds" :key="speed"
+                          @click="changePlaybackSpeed(speed)"
+                          :class="[
+                            'w-full px-2 py-1 text-xs text-left hover:bg-zinc-800 transition-colors speed-dropdown',
+                            currentPlaybackSpeed === speed ? 'text-[#E50914] font-medium' : 'text-white'
+                          ]">
+                          {{ speed }}x
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Replay -->
+                    <button @click="replaySegment"
+                      class="p-1.5 rounded-full hover:bg-zinc-800/70 transition-colors text-white">
+                      <component :is="RefreshCwIcon" class="w-4 h-4" />
+                    </button>
+
+                    <!-- Fullscreen -->
+                    <button @click="toggleFullscreen"
+                      class="p-1.5 rounded-full hover:bg-zinc-800/70 transition-colors text-white">
+                      <component :is="FullscreenIcon" class="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -489,7 +711,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useAnalysisStore } from '@/composables/useAnalysisStore';
-import { BookmarkPlusIcon, BookmarkMinusIcon, TvMinimalPlayIcon, PlayCircleIcon, RefreshCwIcon, XIcon, ClockIcon, TrashIcon } from 'lucide-vue-next';
+import { BookmarkPlusIcon, BookmarkMinusIcon, TvMinimalPlayIcon, RefreshCwIcon, XIcon, TrashIcon, PlayIcon, PauseIcon, FullscreenIcon, Volume2Icon, VolumeXIcon, Volume1Icon } from 'lucide-vue-next';
 import AppHeader from "@/components/AppHeader.vue";
 import QuestionSkeleton from "@/components/QuestionSkeleton.vue";
 import Swal from 'sweetalert2';
@@ -497,7 +719,6 @@ import Swal from 'sweetalert2';
 const analysisStore = useAnalysisStore();
 const imageBaseUrl = process.env.VUE_APP_IMAGE_BASE_URL || '';
 const showQuestionImages = ref(process.env.VUE_APP_SHOW_QUESTION_IMAGES === 'true');
-const showSolutionVideos = ref(process.env.VUE_APP_SHOW_SOLUTION_VIDEOS === 'true');
 
 const questions = ref([]);
 const loading = computed(() => analysisStore.isOpticDataLoading.value);
@@ -612,7 +833,7 @@ const loadQuestions = () => {
             correct_answer: question.correct_answer.toString(),
             subject: question.subject,
             image: question.image,
-            video_url: question.solution || null,
+            solution: question.solution || null,
             solution_meta: question.solution_meta || null,
             page: parseInt(pageNumber),
             title: course.title,
@@ -818,7 +1039,12 @@ const createYouTubePlayer = (videoId, startTime) => {
       modestbranding: 1,
       rel: 0,
       fs: 1,
-      start: startTime
+      playsinline: 0,
+      start: startTime,
+      controls: 0,
+      disablekb: 1,
+      iv_load_policy: 3,
+      showinfo: 0,
     },
     events: {
       'onReady': onPlayerReady,
@@ -831,6 +1057,14 @@ const createYouTubePlayer = (videoId, startTime) => {
 const onPlayerReady = () => {
   isVideoLoading.value = false;
   
+  // Set initial volume
+  if (youtubePlayer) {
+    youtubePlayer.setVolume(volume.value);
+    
+    // Set initial playback speed
+    youtubePlayer.setPlaybackRate(currentPlaybackSpeed.value);
+  }
+  
   // Start checking video time if we have an end time
   if (currentVideoEndTime.value) {
     startTimeCheck();
@@ -838,10 +1072,15 @@ const onPlayerReady = () => {
 };
 
 const onPlayerStateChange = (event) => {
-  // Check if the player is in fullscreen when the segment ends
   if (event.data === window.YT.PlayerState.PLAYING) {
-    // Reset the segment ended state when video starts playing
+    isPlaying.value = true;
     segmentEnded.value = false;
+    startTimeCheck();
+  } else if (event.data === window.YT.PlayerState.PAUSED) {
+    isPlaying.value = false;
+  } else if (event.data === window.YT.PlayerState.ENDED) {
+    isPlaying.value = false;
+    segmentEnded.value = true;
   }
 };
 
@@ -863,7 +1102,7 @@ const watchSolutionVideo = (questionId) => {
     currentQuestionSubject.value = question.title || '';
     
     // Get video URL from the solution field
-    let videoUrl = question.video_url;
+    let videoUrl = question.solution;
     
     // Extract YouTube video ID and timestamp
     let videoId = '';
@@ -951,8 +1190,8 @@ const openVideoSolution = (questionId) => {
   
   if (!question) return;
   
-  // Check if the question has a video_url or solution_meta
-  if (question.solution_meta || question.video_url) {
+  // Check if the question has a solution
+  if (question.solution) {
     // If video data exists, use the existing watchSolutionVideo function
     watchSolutionVideo(questionId);
   } else {
@@ -967,9 +1206,6 @@ const openVideoSolution = (questionId) => {
       color: '#fff',
       iconColor: '#E50914'
     });
-    
-    // Log for debugging
-    console.log('Video solution requested for question ID:', questionId, 'but no solution available yet');
   }
 };
 
@@ -983,14 +1219,15 @@ const closeVideoModal = () => {
   currentVideoEndTime.value = null;
   currentVideoStartTime.value = null;
   segmentEnded.value = false;
+  isPlaying.value = false;
+  currentVideoTime.value = 0;
+  videoProgress.value = 0;
   
-  // Clear the time check interval if it exists
   if (videoTimeCheckInterval.value) {
     clearInterval(videoTimeCheckInterval.value);
     videoTimeCheckInterval.value = null;
   }
   
-  // Destroy YouTube player when modal is closed
   if (youtubePlayer) {
     youtubePlayer.destroy();
     youtubePlayer = null;
@@ -1015,6 +1252,11 @@ const handleAnswerChange = (questionId, answer) => {
   }
 };
 
+const subjectOrder = computed(() => {
+  if (!analysisStore.opticData.value?.courses) return [];
+  return analysisStore.opticData.value.courses.map(course => course.title);
+});
+
 const mergeAndSortAnswers = (currentAnswers) => {
   const mergedAnswers = { ...allSavedAnswers.value };
 
@@ -1037,9 +1279,7 @@ const mergeAndSortAnswers = (currentAnswers) => {
 
   const sortedAnswers = {};
 
-  const subjectOrder = [...new Set(questions.value.map(q => q.title))];
-
-  subjectOrder.forEach(subject => {
+  subjectOrder.value.forEach(subject => {
     if (mergedAnswers[subject]) {
       sortedAnswers[subject] = {};
 
@@ -1075,6 +1315,65 @@ const updateScrollPosition = () => {
   scrollY.value = window.scrollY;
 };
 
+// Add playback speed options
+const playbackSpeeds = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+const currentPlaybackSpeed = ref(1);
+const showSpeedOptions = ref(false);
+const showKeyboardInfo = ref(false);
+
+// Add keyboard event handler for video controls
+const handleVideoKeydown = (event) => {
+  if (!showVideoModal.value || !youtubePlayer) return;
+  
+  // Prevent default behavior for these keys when video modal is open
+  if (['Space', 'ArrowLeft', 'ArrowRight', 'KeyF', 'KeyM'].includes(event.code)) {
+    event.preventDefault();
+  }
+  
+  switch (event.code) {
+    case 'Space': // Play/Pause with Space
+      togglePlayPause();
+      break;
+    case 'ArrowLeft': // Rewind 5 seconds with Left Arrow
+      if (youtubePlayer && currentVideoStartTime.value !== null) {
+        const currentTime = youtubePlayer.getCurrentTime();
+        const newTime = Math.max(currentVideoStartTime.value, currentTime - 5);
+        youtubePlayer.seekTo(newTime, true);
+      }
+      break;
+    case 'ArrowRight': // Forward 5 seconds with Right Arrow
+      if (youtubePlayer && currentVideoEndTime.value !== null) {
+        const currentTime = youtubePlayer.getCurrentTime();
+        const newTime = Math.min(currentVideoEndTime.value, currentTime + 5);
+        youtubePlayer.seekTo(newTime, true);
+      }
+      break;
+    case 'KeyF': // Fullscreen with F key
+      toggleFullscreen();
+      break;
+    case 'KeyM': // Mute/Unmute with M key
+      toggleMute();
+      break;
+  }
+  
+  // Show keyboard shortcuts info briefly when a key is pressed
+  if (['Space', 'ArrowLeft', 'ArrowRight', 'KeyF', 'KeyM'].includes(event.code)) {
+    showKeyboardInfo.value = true;
+    setTimeout(() => {
+      showKeyboardInfo.value = false;
+    }, 2000);
+  }
+};
+
+// Change playback speed
+const changePlaybackSpeed = (speed) => {
+  if (!youtubePlayer) return;
+  
+  currentPlaybackSpeed.value = speed;
+  youtubePlayer.setPlaybackRate(speed);
+  showSpeedOptions.value = false;
+};
+
 onMounted(() => {
   loadQuestions();
   loadAnswers();
@@ -1085,9 +1384,29 @@ onMounted(() => {
   }
 
   window.addEventListener('keydown', handleKeyPress);
+  window.addEventListener('keydown', handleVideoKeydown);
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && showVideoModal.value) {
       closeVideoModal();
+    }
+  });
+  
+  // Add click outside handler for speed options dropdown
+  window.addEventListener('click', (e) => {
+    if (showSpeedOptions.value) {
+      // Check if the click was outside the speed options dropdown
+      const speedButtons = document.querySelectorAll('.speed-dropdown');
+      let clickedInside = false;
+      
+      speedButtons.forEach(button => {
+        if (button.contains(e.target)) {
+          clickedInside = true;
+        }
+      });
+      
+      if (!clickedInside) {
+        showSpeedOptions.value = false;
+      }
     }
   });
 
@@ -1102,9 +1421,28 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyPress);
+  window.removeEventListener('keydown', handleVideoKeydown);
   window.removeEventListener('keydown', (e) => {
     if (e.key === 'Escape' && showVideoModal.value) {
       closeVideoModal();
+    }
+  });
+  
+  // Remove click outside handler
+  window.removeEventListener('click', (e) => {
+    if (showSpeedOptions.value) {
+      const speedButtons = document.querySelectorAll('.speed-dropdown');
+      let clickedInside = false;
+      
+      speedButtons.forEach(button => {
+        if (button.contains(e.target)) {
+          clickedInside = true;
+        }
+      });
+      
+      if (!clickedInside) {
+        showSpeedOptions.value = false;
+      }
     }
   });
 
@@ -1143,11 +1481,6 @@ const groupedQuestions = computed(() => {
 const savedAnswersData = ref({
   code: '',
   answers: []
-});
-
-const subjectOrder = computed(() => {
-  if (!analysisStore.opticData.value?.courses) return [];
-  return analysisStore.opticData.value.courses.map(course => course.title);
 });
 
 const savePageAnswers = (subject, page) => {
@@ -1345,8 +1678,6 @@ const currentVideoEndTime = ref(null);
 const startTimeCheck = () => {
   if (!youtubePlayer || !currentVideoEndTime.value) return;
   
-  segmentEnded.value = false;
-  
   const timeCheckInterval = setInterval(() => {
     if (!youtubePlayer || !showVideoModal.value) {
       clearInterval(timeCheckInterval);
@@ -1355,57 +1686,28 @@ const startTimeCheck = () => {
     
     try {
       const currentTime = youtubePlayer.getCurrentTime();
+      // Normalize the current time relative to segment start
+      currentVideoTime.value = currentTime - currentVideoStartTime.value;
       
-      // If we've reached or passed the end time, pause the video
+      // Calculate progress percentage
+      if (currentVideoStartTime.value !== null && currentVideoEndTime.value !== null) {
+        const progress = ((currentTime - currentVideoStartTime.value) / (currentVideoEndTime.value - currentVideoStartTime.value)) * 100;
+        videoProgress.value = Math.min(Math.max(progress, 0), 100);
+      }
+      
+      // If we've reached or passed the end time
       if (currentTime >= currentVideoEndTime.value) {
-        // Check if we're in fullscreen mode
-        const isFullscreen = document.fullscreenElement || 
-                            document.webkitFullscreenElement || 
-                            document.mozFullScreenElement || 
-                            document.msFullscreenElement;
-        
-        // Pause the video
         youtubePlayer.pauseVideo();
-        
-        // If in fullscreen, exit fullscreen first
-        if (isFullscreen) {
-          if (document.exitFullscreen) {
-            document.exitFullscreen().then(() => {
-              // Show the segment ended overlay after exiting fullscreen
-              setTimeout(() => {
-                segmentEnded.value = true;
-              }, 300); // Small delay to ensure fullscreen exit completes
-            });
-          } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-            setTimeout(() => {
-              segmentEnded.value = true;
-            }, 300);
-          } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-            setTimeout(() => {
-              segmentEnded.value = true;
-            }, 300);
-          } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-            setTimeout(() => {
-              segmentEnded.value = true;
-            }, 300);
-          }
-        } else {
-          // If not in fullscreen, show the overlay immediately
-          segmentEnded.value = true;
-        }
-        
+        isPlaying.value = false;
+        segmentEnded.value = true;
         clearInterval(timeCheckInterval);
       }
     } catch (error) {
       console.error('Error checking video time:', error);
       clearInterval(timeCheckInterval);
     }
-  }, 500); // Check every half second
+  }, 100);
   
-  // Store the interval ID so we can clear it when the modal is closed
   videoTimeCheckInterval.value = timeCheckInterval;
 };
 
@@ -1441,6 +1743,234 @@ const formatTime = (seconds) => {
 
 // Add a new ref for the question subject
 const currentQuestionSubject = ref('');
+
+// Add new refs for video control
+const currentVideoTime = ref(0);
+const isPlaying = ref(false);
+const videoProgress = ref(0);
+const volume = ref(100); // Default volume (100%)
+const previousVolume = ref(100); // To store volume before muting
+const segmentDuration = computed(() => {
+  if (currentVideoEndTime.value && currentVideoStartTime.value) {
+    return currentVideoEndTime.value - currentVideoStartTime.value;
+  }
+  return 0;
+});
+
+// Computed property for volume icon based on volume level
+const volumeIcon = computed(() => {
+  if (volume.value === 0) {
+    return VolumeXIcon;
+  } else if (volume.value < 50) {
+    return Volume1Icon;
+  } else {
+    return Volume2Icon;
+  }
+});
+
+// Add new methods for video control
+const togglePlayPause = () => {
+  if (!youtubePlayer) return;
+  
+  if (isPlaying.value) {
+    youtubePlayer.pauseVideo();
+  } else {
+    youtubePlayer.playVideo();
+  }
+  
+  isPlaying.value = !isPlaying.value;
+};
+
+// Add volume control methods
+const updateVolume = () => {
+  if (!youtubePlayer) return;
+  
+  // Set the volume on the YouTube player (0-100)
+  youtubePlayer.setVolume(volume.value);
+  
+  // If we're adjusting volume to non-zero, update previousVolume
+  if (volume.value > 0) {
+    previousVolume.value = volume.value;
+  }
+};
+
+const toggleMute = () => {
+  if (!youtubePlayer) return;
+  
+  if (volume.value > 0) {
+    // Store current volume and mute
+    previousVolume.value = volume.value;
+    volume.value = 0;
+  } else {
+    // Restore previous volume
+    volume.value = previousVolume.value;
+  }
+  
+  // Apply the volume change
+  updateVolume();
+};
+
+// Add new methods for video control
+const toggleFullscreen = () => {
+  if (!youtubePlayer) return;
+  
+  try {
+    // First try using YouTube's own fullscreen method
+    if (youtubePlayer.getIframe) {
+      const iframe = youtubePlayer.getIframe();
+      if (iframe) {
+        // Try to call the iframe's requestFullscreen
+        if (iframe.requestFullscreen) {
+          iframe.requestFullscreen();
+        } else if (iframe.webkitRequestFullscreen) {
+          iframe.webkitRequestFullscreen();
+        } else if (iframe.mozRequestFullScreen) {
+          iframe.mozRequestFullScreen();
+        } else if (iframe.msRequestFullscreen) {
+          iframe.msRequestFullscreen();
+        } else {
+          // If native fullscreen is not available, use YouTube's fullscreen API
+          youtubePlayer.playVideo(); // Mobile browsers often require a user interaction first
+          setTimeout(() => {
+            // Some mobile browsers require a slight delay
+            const playerState = youtubePlayer.getPlayerState();
+            if (playerState !== -1) { // If video is loaded
+              // Toggle fullscreen using YouTube API
+              const quality = youtubePlayer.getPlaybackQuality();
+              youtubePlayer.setPlaybackQuality(quality); // This can trigger fullscreen on some mobile browsers
+              youtubePlayer.playVideo();
+            }
+          }, 100);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error toggling fullscreen:', error);
+  }
+};
+
+// Add new refs for progress bar interaction
+const hoverPosition = ref(null);
+const isDragging = ref(false);
+
+// Update progress bar interaction methods
+const handleProgressBarClick = (event) => {
+  if (!youtubePlayer || !currentVideoEndTime.value || !currentVideoStartTime.value) return;
+  
+  // Don't handle click if we were dragging
+  if (isDragging.value) {
+    isDragging.value = false;
+    return;
+  }
+  
+  const progressBar = event.currentTarget;
+  const rect = progressBar.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const percentage = (x / rect.width) * 100;
+  
+  seekToPercentage(percentage);
+};
+
+const handleProgressBarTouch = (event) => {
+  if (!youtubePlayer || !currentVideoEndTime.value || !currentVideoStartTime.value) return;
+  
+  // Prevent scrolling while touching the progress bar
+  event.preventDefault();
+  isDragging.value = true;
+  
+  const progressBar = event.currentTarget;
+  const rect = progressBar.getBoundingClientRect();
+  const touch = event.touches[0];
+  const x = touch.clientX - rect.left;
+  const percentage = (x / rect.width) * 100;
+  
+  // Update hover position for visual feedback
+  hoverPosition.value = percentage;
+};
+
+const handleProgressBarTouchMove = (event) => {
+  if (!isDragging.value) return;
+  event.preventDefault();
+  
+  const progressBar = event.currentTarget;
+  const rect = progressBar.getBoundingClientRect();
+  const touch = event.touches[0];
+  const x = Math.max(0, Math.min(touch.clientX - rect.left, rect.width));
+  const percentage = (x / rect.width) * 100;
+  
+  // Update hover position for visual feedback
+  hoverPosition.value = percentage;
+};
+
+const handleProgressBarTouchEnd = (event) => {
+  if (!isDragging.value) return;
+  event.preventDefault();
+  
+  const progressBar = event.currentTarget;
+  const rect = progressBar.getBoundingClientRect();
+  const touch = event.changedTouches[0];
+  const x = Math.max(0, Math.min(touch.clientX - rect.left, rect.width));
+  const percentage = (x / rect.width) * 100;
+  
+  seekToPercentage(percentage);
+  isDragging.value = false;
+  hoverPosition.value = null;
+};
+
+const handleProgressBarHover = (event) => {
+  if (isDragging.value) return;
+  
+  const progressBar = event.currentTarget;
+  const rect = progressBar.getBoundingClientRect();
+  const x = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
+  hoverPosition.value = (x / rect.width) * 100;
+};
+
+// Update seekToPercentage to be more responsive
+const seekToPercentage = (percentage) => {
+  // Ensure percentage is between 0 and 100
+  const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
+  
+  // Calculate the target time within the segment
+  const segmentDurationValue = currentVideoEndTime.value - currentVideoStartTime.value;
+  const targetTimeInSegment = (clampedPercentage / 100) * segmentDurationValue;
+  
+  // Add the segment start time to get the actual video time
+  const targetTime = currentVideoStartTime.value + targetTimeInSegment;
+  
+  // Seek to the target time
+  youtubePlayer.seekTo(targetTime, true);
+  
+  // Update the progress immediately for better UX
+  videoProgress.value = clampedPercentage;
+  currentVideoTime.value = targetTimeInSegment;
+  
+  // If the video was ended, reset the ended state and restart time checking
+  if (segmentEnded.value) {
+    segmentEnded.value = false;
+    startTimeCheck();
+  }
+  
+  // If the video was paused, play it
+  if (!isPlaying.value) {
+    youtubePlayer.playVideo();
+    isPlaying.value = true;
+  }
+};
+
+const handleVolumeTouch = (event) => {
+  event.preventDefault();
+  
+  const slider = event.currentTarget;
+  const rect = slider.getBoundingClientRect();
+  const touch = event.touches[0];
+  const x = Math.max(0, Math.min(touch.clientX - rect.left, rect.width));
+  const newVolume = Math.round((x / rect.width) * 100);
+  
+  // Update volume
+  volume.value = newVolume;
+  updateVolume();
+};
 </script>
 
 <style scoped>
@@ -1457,6 +1987,45 @@ const currentQuestionSubject = ref('');
 
 .border-transition {
   transition: border-color 0.3s ease-in-out;
+}
+
+/* Volume slider styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 4px;
+  background: #3F3F3F;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #E50914;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #E50914;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.2);
 }
 
 select option:disabled {
