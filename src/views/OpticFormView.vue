@@ -719,6 +719,7 @@ import Swal from 'sweetalert2';
 const analysisStore = useAnalysisStore();
 const imageBaseUrl = process.env.VUE_APP_IMAGE_BASE_URL || '';
 const showQuestionImages = ref(process.env.VUE_APP_SHOW_QUESTION_IMAGES === 'true');
+const allowUnsubmittedVideos = ref(process.env.VUE_APP_ALLOW_UNSUBMITTED_VIDEOS === 'true');
 
 const questions = ref([]);
 const loading = computed(() => analysisStore.isOpticDataLoading.value);
@@ -1192,7 +1193,23 @@ const openVideoSolution = (questionId) => {
   
   // Check if the question has a solution
   if (question.solution) {
-    // If video data exists, use the existing watchSolutionVideo function
+    // Check if video can be shown based on submission status
+    if (!allowUnsubmittedVideos.value && !isPageSaved(question.page)) {
+      // Show notification that video is only available after submission
+      Swal.fire({
+        title: 'Video Çözüm',
+        text: 'Video çözümünü görebilmek için önce soruyu cevaplayıp kaydetmeniz gerekmektedir.',
+        icon: 'info',
+        confirmButtonText: 'Tamam',
+        confirmButtonColor: '#E50914',
+        background: '#242424',
+        color: '#fff',
+        iconColor: '#E50914'
+      });
+      return;
+    }
+    
+    // If video data exists and conditions are met, show the video
     watchSolutionVideo(questionId);
   } else {
     // If no video data exists yet, show a notification
