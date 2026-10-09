@@ -1603,7 +1603,7 @@ const savePageAnswers = (subject, page) => {
 
       console.log('Data to be sent to API:', dataToSend);
 
-      const apiUrl = `${process.env.VUE_APP_API_BASE_URL}/koksis/submit-optic-form`;
+      const apiUrl = `${window.location.origin}/api/koksis/submit-optic-form`;
 
       fetch(apiUrl, {
         method: 'POST',

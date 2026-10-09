@@ -40,7 +40,7 @@ export function useAnalysisStore() {
   const fetchAnalysisData = async (code) => {
     isOpticDataLoading.value = true
     try {
-      const apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+      const apiBaseUrl = `${window.location.origin}/api`
       const response = await fetch(`${apiBaseUrl}/koksis/${code}`)
       if (!response.ok) {
         throw new Error('Veri yüklenirken bir hata oluştu')
