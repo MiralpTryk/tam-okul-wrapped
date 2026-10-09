@@ -148,11 +148,11 @@
                             <!-- Question Image -->
                             <div v-if="showQuestionImages" class="mb-4 relative">
                               <div class="aspect-w-4 aspect-h-3 relative bg-zinc-800 rounded-md overflow-hidden">
-                                <img
-                                  :src="showQuestionImages ? simulateImageError(imageBaseUrl + '/' + question.image) : ''"
+                                <img v-if="!failedImages.has(question.id)"
+                                  :src="`${imageBaseUrl}/${question.image}`"
                                   :alt="`Soru ${question.number} görseli`"
-                                  class="w-full h-full object-cover absolute inset-0" @error="handleImageError" />
-                                <div v-if="imageLoadError"
+                                  class="w-full h-full object-cover absolute inset-0" @error="handleImageError(question.id)" />
+                                <div v-else
                                   class="absolute inset-0 flex items-center justify-center bg-zinc-800 text-zinc-400 text-sm">
                                   Resim yüklenemedi
                                 </div>
@@ -726,7 +726,7 @@ const loading = computed(() => analysisStore.isOpticDataLoading.value);
 const error = ref(null);
 const activeTab = ref('all');
 const currentPage = ref(1);
-const imageLoadError = ref(false);
+const failedImages = ref(new Set());
 const showVideoModal = ref(false);
 const currentVideoUrl = ref('');
 const currentVideoId = ref('');
@@ -984,15 +984,8 @@ const isPageSaved = (page) => {
   return savedPages.value.has(parseInt(page));
 };
 
-const handleImageError = (event) => {
-  console.error('Image load error:', event.target.src);
-  event.target.style.display = 'none';
-  const errorElement = event.target.nextElementSibling;
-  if (errorElement) {
-    errorElement.style.display = 'flex';
-  } else {
-    console.error('Error element not found');
-  }
+const handleImageError = (questionId) => {
+  failedImages.value.add(questionId);
 };
 
 let youtubePlayer = null;
@@ -1256,10 +1249,6 @@ const closeWelcomeModal = () => {
   if (dontShowWelcomeAgain.value) {
     localStorage.setItem('welcomeModalShown', 'true');
   }
-};
-
-const simulateImageError = (imageUrl) => {
-  return Math.random() > 0.5 ? imageUrl : 'invalid-url';
 };
 
 const handleAnswerChange = (questionId, answer) => {

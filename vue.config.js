@@ -5,6 +5,14 @@ module.exports = defineConfig({
   transpileDependencies: true,
   publicPath: "./",
   productionSourceMap: false,
+  devServer: {
+    proxy: {
+      "/api": {
+        target: process.env.API_PROXY_TARGET || "https://tamokul.com",
+        changeOrigin: true
+      }
+    }
+  },
   configureWebpack: {
     plugins: [
       new webpack.DefinePlugin({
