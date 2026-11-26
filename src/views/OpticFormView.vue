@@ -179,8 +179,8 @@
                             </div>
 
                             <!-- Answer Options -->
-                            <div class="grid grid-cols-5 gap-4 md:gap-6">
-                              <div v-for="(option, index) in ['A', 'B', 'C', 'D', 'E']" :key="option"
+                            <div :class="['grid gap-4 md:gap-6', questionOptions(question).length === 4 ? 'grid-cols-4' : 'grid-cols-5']">
+                              <div v-for="(option, index) in questionOptions(question)" :key="option"
                                 class="relative flex items-center justify-center">
                                 <input type="radio" :name="`question-${question.id}`"
                                   :id="`question-${question.id}-${option}`" :value="index.toString()"
@@ -204,6 +204,9 @@
                                 </label>
                               </div>
                             </div>
+                            <p v-if="hasOutOfRangeAnswer(question)" class="mt-3 text-xs text-yellow-500">
+                              Bu soruda {{ choiceCount }} şık var. Kayıtlı cevabınız ({{ OPTION_LETTERS[question.answer] }}) korunuyor; değiştirmek için başka bir şık seçin ya da temizleyin.
+                            </p>
                             <!-- Clear Answer Button -->
                             <button v-if="question.answer !== null"
                               @click="setAnswer(question, null)"
@@ -770,6 +773,18 @@ const questions = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const readOnly = ref(false);
+
+const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E'];
+// API'den gelen optic.choice_count: 4 → A-D (ortaokul), 5 → A-E. Alan yoksa ya da geçersizse 5.
+const normalizeChoiceCount = (value) => (Number(value) === 4 ? 4 : 5);
+const choiceCount = ref(5);
+const optionLetters = computed(() => OPTION_LETTERS.slice(0, choiceCount.value));
+// Kayıtlı cevap formdaki şık sayısının dışındaysa (ör. A-D formunda E) atılmaz, o soruda gösterilir
+const hasOutOfRangeAnswer = (question) =>
+  question.answer !== null && Number(question.answer) >= choiceCount.value;
+const questionOptions = (question) => (hasOutOfRangeAnswer(question)
+  ? OPTION_LETTERS.slice(0, Number(question.answer) + 1)
+  : optionLetters.value);
 // Doğru cevapları gösterilen sayfalar: "ders|sayfa"
 const revealedPages = ref(opticAnswers.loadRevealed());
 const courseOrder = ref([]);
@@ -908,6 +923,7 @@ const loadQuestions = async () => {
     });
 
     readOnly.value = opticData.read_only === true;
+    choiceCount.value = normalizeChoiceCount(opticData.choice_count);
     courseOrder.value = opticData.courses.map(course => course.title);
     questions.value = allQuestions;
   } catch (err) {
@@ -953,7 +969,7 @@ const retryAnswer = (question) => {
 const selectAnswer = (questionId, option) => {
   const question = questions.value.find(q => q.id === questionId);
   if (question) {
-    handleOptionClick(question, ['A', 'B', 'C', 'D', 'E'].indexOf(option).toString());
+    handleOptionClick(question, OPTION_LETTERS.indexOf(option).toString());
   }
 };
 
@@ -995,7 +1011,7 @@ const addTemporaryBorder = (element) => {
 
 const handleKeyPress = (e) => {
   if (readOnly.value || showVideoModal.value) return;
-  if (['a', 'b', 'c', 'd', 'e'].includes(e.key.toLowerCase())) {
+  if (optionLetters.value.includes(e.key.toUpperCase())) {
     const option = e.key.toUpperCase();
     const unansweredQuestion = currentPageQuestions.value.find(q => q.answer === null);
     if (unansweredQuestion) {
