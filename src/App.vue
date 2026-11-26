@@ -1,13 +1,16 @@
 <template>
-  <router-view></router-view>
+  <!-- Optik formda yalnızca koddaki değişiklik bileşeni yeniden kurar; veri ve kayıt durumu koda bağlı -->
+  <router-view :key="route.name === 'optic-form' ? route.params.code : undefined"></router-view>
 </template>
 
 <script setup>
 import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 import { onMounted } from 'vue';
 import axios from 'axios';
 
 const store = useStore();
+const route = useRoute();
 
 function getCookie(name) {
   const value = `; ${document.cookie}`;

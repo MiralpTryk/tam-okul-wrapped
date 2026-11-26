@@ -565,7 +565,7 @@
               <div class="bg-[#E50914]/10 text-[#E50914] p-2 rounded space-y-1 text-xs">
                 <p class="font-semibold">İpuçları:</p>
                 <ul class="list-disc list-inside space-y-0.5">
-                  <li>A, B, C, D, E tuşlarıyla hızlıca cevap verebilirsiniz</li>
+                  <li>{{ optionLetters.join(', ') }} tuşlarıyla hızlıca cevap verebilirsiniz</li>
                   <li>
                     <BookmarkPlusIcon class="w-4 h-4 inline-block text-green-500" /> işareti ile soruları favorilere
                     ekleyebilirsiniz
