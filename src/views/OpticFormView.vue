@@ -58,25 +58,23 @@
                 <template v-for="(pages, title) in groupedPages" :key="title">
                   <option disabled class="font-semibold bg-[#1F1F1F] text-[#E50914]">{{ title }}</option>
                   <option v-for="page in pages" :key="page" :value="page"
-                    :class="['pl-4', { 'text-[#E50914]': isPageSaved(page) }]">
-                    Sayfa {{ page }} {{ isPageSaved(page) ? '✓' : '' }}
+                    :class="['pl-4', { 'text-[#E50914]': isPageRevealed(title, page) }]">
+                    Sayfa {{ page }} {{ isPageRevealed(title, page) ? '✓' : '' }}
                   </option>
                 </template>
               </select>
               <button @click="handleSubmit"
                 class="px-4 sm:px-6 py-2 rounded text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2 w-full sm:w-1/4 whitespace-nowrap bg-[#E50914] text-white shadow-lg shadow-[#E50914]/20 hover:bg-[#E50914]/90">
-                <template v-if="isFormCompleted">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Cevaplar Gözden Geçirildi
-                </template>
-                <template v-else>
-                  Cevap Anahtarı
-                </template>
+                Cevap Anahtarı
               </button>
             </div>
+          </div>
+
+          <!-- Read-only Notice -->
+          <div v-if="readOnly"
+            class="mb-6 flex items-start gap-2 rounded-md border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-400">
+            <component :is="InfoIcon" class="w-4 h-4 mt-0.5 shrink-0" />
+            <span>Bu kitap geçen eğitim yılına ait; cevaplarınız kaydedilmez.</span>
           </div>
 
           <!-- Questions Grid -->
@@ -129,7 +127,28 @@
                           <div v-for="question in pageQuestions" :key="question.id" :data-question-id="question.id"
                             class="bg-[#141414]/70 backdrop-blur-sm rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#3F3F3F]">
                             <div class="flex justify-between items-center mb-2">
-                              <span class="font-bold text-base">Soru {{ question.number }}</span>
+                              <div class="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
+                                <span class="font-bold text-base whitespace-nowrap">Soru {{ question.number }}</span>
+                                <!-- Sync Status -->
+                                <span v-if="syncStatus[question.id] === 'saving'" class="flex items-center"
+                                  title="Kaydediliyor">
+                                  <span class="animate-spin rounded-full h-3.5 w-3.5 border-2 border-zinc-400 border-t-transparent"></span>
+                                </span>
+                                <span v-else-if="syncStatus[question.id] === 'saved'"
+                                  class="flex items-center gap-1 text-xs text-green-500 whitespace-nowrap">
+                                  <component :is="CheckIcon" class="w-3.5 h-3.5" />
+                                  Kaydedildi
+                                </span>
+                                <span v-else-if="syncStatus[question.id] === 'error'"
+                                  class="flex items-center gap-1 text-xs text-[#E50914] whitespace-nowrap">
+                                  <component :is="CircleAlertIcon" class="w-3.5 h-3.5" />
+                                  Kaydedilemedi
+                                  <button @click="retryAnswer(question)"
+                                    class="ml-1 underline underline-offset-2 hover:text-white transition-colors">
+                                    Tekrar dene
+                                  </button>
+                                </span>
+                              </div>
                               <div class="flex items-center gap-3">
                                 <button v-if="question.solution" @click="openVideoSolution(question.id)" class="action-button hover:scale-110 transition-all duration-200 text-green-500 hover:text-green-400 p-1.5 rounded-full hover:bg-zinc-800/70 focus:outline-none focus:ring-1 focus:ring-green-500" title="Video Çözüm">
                                   <component :is="TvMinimalPlayIcon" class="w-4 h-4 md:w-5 md:h-5" />
@@ -160,32 +179,39 @@
                             </div>
 
                             <!-- Answer Options -->
-                            <div class="grid grid-cols-5 gap-4 md:gap-6">
-                              <div v-for="(option, index) in ['A', 'B', 'C', 'D', 'E']" :key="option"
+                            <div :class="['grid gap-4 md:gap-6', questionOptions(question).length === 4 ? 'grid-cols-4' : 'grid-cols-5']">
+                              <div v-for="(option, index) in questionOptions(question)" :key="option"
                                 class="relative flex items-center justify-center">
                                 <input type="radio" :name="`question-${question.id}`"
                                   :id="`question-${question.id}-${option}`" :value="index.toString()"
-                                  v-model="question.answer" class="absolute opacity-0 w-full h-full cursor-pointer"
-                                  @change="handleAnswerChange(question.id, index.toString())"
-                                  :disabled="isPageSaved(question.page)">
+                                  :checked="question.answer === index.toString()"
+                                  class="absolute opacity-0 w-full h-full cursor-pointer"
+                                  @click="handleOptionClick(question, index.toString())"
+                                  :disabled="readOnly">
                                 <label :for="`question-${question.id}-${option}`" :class="[
-                                  'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border cursor-pointer p-4',
+                                  'w-12 h-12 md:w-10 md:h-10 text-sm md:text-sm rounded-full flex items-center justify-center transition-all duration-200 relative z-0 border p-4',
+                                  readOnly ? 'cursor-not-allowed' : 'cursor-pointer',
                                   {
-                                    'border-[#E50914] bg-red-600 text-white': question.answer === index.toString() && !isPageSaved(question.page),
-                                    'border-[#3F3F3F] hover:border-[#E50914] text-zinc-200': question.answer !== index.toString() && !isPageSaved(question.page),
-                                    'border-zinc-700 text-zinc-500 cursor-not-allowed': isPageSaved(question.page) && question.answer !== index.toString() && index.toString() !== question.correct_answer,
-                                    'border-green-600 bg-green-600 text-white': isPageSaved(question.page) && index.toString() === question.correct_answer,
-                                    'border-[#E50914] bg-red-600/50 text-white': isPageSaved(question.page) && question.answer === index.toString() && index.toString() !== question.correct_answer
+                                    'border-[#E50914] bg-red-600 text-white': question.answer === index.toString() && !isPageRevealed(question.title, question.page),
+                                    'border-[#3F3F3F] text-zinc-200': question.answer !== index.toString() && !isPageRevealed(question.title, question.page),
+                                    'hover:border-[#E50914]': !readOnly && question.answer !== index.toString() && !isPageRevealed(question.title, question.page),
+                                    'border-zinc-700 text-zinc-500': isPageRevealed(question.title, question.page) && question.answer !== index.toString() && index.toString() !== question.correct_answer,
+                                    'border-green-600 bg-green-600 text-white': isPageRevealed(question.title, question.page) && index.toString() === question.correct_answer,
+                                    'border-[#E50914] bg-red-600/50 text-white': isPageRevealed(question.title, question.page) && question.answer === index.toString() && index.toString() !== question.correct_answer
                                   }
                                 ]">
                                   {{ option }}
                                 </label>
                               </div>
                             </div>
+                            <p v-if="hasOutOfRangeAnswer(question)" class="mt-3 text-xs text-yellow-500">
+                              Bu soruda {{ choiceCount }} şık var. Kayıtlı cevabınız ({{ OPTION_LETTERS[question.answer] }}) korunuyor; değiştirmek için başka bir şık seçin ya da temizleyin.
+                            </p>
                             <!-- Clear Answer Button -->
-                            <button v-if="question.answer !== null && !isPageSaved(question.page)"
-                              @click="handleAnswerChange(question.id, null)"
-                              class="mt-4 flex items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded-md py-1.5 px-3 hover:border-zinc-700 w-full">
+                            <button v-if="question.answer !== null"
+                              @click="setAnswer(question, null)"
+                              :disabled="readOnly"
+                              class="mt-4 flex items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors border border-zinc-800 rounded-md py-1.5 px-3 hover:border-zinc-700 w-full disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400 disabled:hover:border-zinc-800">
                               <component :is="TrashIcon" class="w-4 h-4" />
                               <span class="text-sm">Cevabı Temizle</span>
                             </button>
@@ -194,17 +220,17 @@
 
                         <!-- Save button moved to bottom -->
                         <div class="flex justify-end mt-8">
-                          <button @click="savePageAnswers(subject, page)" :disabled="isPageSaved(page)" :class="[
+                          <button @click="savePageAnswers(subject, page)" :class="[
                             'px-4 py-2 text-sm font-medium rounded transition-colors shadow-lg flex items-center gap-2',
-                            isPageSaved(page)
-                              ? 'bg-green-600 text-white cursor-not-allowed opacity-75'
+                            isPageRevealed(subject, page)
+                              ? 'bg-green-600 text-white hover:bg-green-600/90'
                               : 'bg-[#E50914] text-white hover:bg-[#E50914]/90 shadow-[#E50914]/20'
                           ]">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
                               stroke="currentColor" stroke-width="2">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span>{{ isPageSaved(page) ? 'Kaydedildi' : 'Kaydet' }}</span>
+                            <span>{{ isPageRevealed(subject, page) ? 'Kaydedildi' : 'Kaydet' }}</span>
                           </button>
                         </div>
                       </div>
@@ -525,19 +551,14 @@
               <div class="space-y-2">
                 <p class="flex items-start gap-2">
                   <span class="text-[#E50914] font-bold">1.</span>
-                  <span>Her sayfadaki soruları cevaplayıp "Kaydet" butonuna basın. İstediğiniz soruları boş
-                    bırakabilirsiniz.</span>
+                  <span>Her işaretiniz anında kaydedilir; cevabınızı istediğiniz zaman değiştirebilir ya da aynı
+                    şıkka tekrar tıklayarak silebilirsiniz.</span>
                 </p>
 
                 <p class="flex items-start gap-2">
                   <span class="text-[#E50914] font-bold">2.</span>
-                  <span>Tüm sayfaları tamamladıktan sonra "Sınavı Bitir" butonuna basın. İşaretlenmemiş sorular boş
-                    sayılacaktır.</span>
-                </p>
-
-                <p class="flex items-start gap-2">
-                  <span class="text-[#E50914] font-bold">3.</span>
-                  <span>Sınavı bitirdikten sonra cevaplarınızı değiştiremezsiniz.</span>
+                  <span>Bir sayfayı bitirdiğinizde "Kaydet" butonuna basarak o sayfanın doğru cevaplarını
+                    görebilirsiniz. İstediğiniz soruları boş bırakabilirsiniz.</span>
                 </p>
               </div>
 
@@ -608,7 +629,8 @@
                   <template v-if="Object.keys(allSavedAnswers).length === 0">
                     <div class="text-center py-8 space-y-6">
                       <p class="text-sm sm:text-base text-gray-200 leading-relaxed">
-                        Henüz hiç cevap kaydetmediniz. Cevaplarınızı kaydetmek için her sayfanın sonunda bulunan
+                        Henüz doğru cevaplarını gördüğünüz bir sayfa yok. Bir sayfanın doğru cevaplarını görmek için
+                        sayfanın sonunda bulunan
                         <span class="inline-flex items-center gap-1 px-2 py-1 bg-[#E50914] text-white text-sm rounded">
                           <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2">
@@ -617,9 +639,6 @@
                           <span>Kaydet</span>
                         </span>
                         butonuna basın.
-                      </p>
-                      <p class="text-xs text-yellow-500">
-                        <strong>Not:</strong> Kaydedilen cevaplar daha sonra değiştirilemez.
                       </p>
                     </div>
                   </template>
@@ -710,20 +729,65 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import { useRoute } from 'vue-router';
 import { useAnalysisStore } from '@/composables/useAnalysisStore';
-import { BookmarkPlusIcon, BookmarkMinusIcon, TvMinimalPlayIcon, RefreshCwIcon, XIcon, TrashIcon, PlayIcon, PauseIcon, FullscreenIcon, Volume2Icon, VolumeXIcon, Volume1Icon } from 'lucide-vue-next';
+import { useOpticAnswers } from '@/composables/useOpticAnswers';
+import { BookmarkPlusIcon, BookmarkMinusIcon, TvMinimalPlayIcon, RefreshCwIcon, XIcon, TrashIcon, PlayIcon, PauseIcon, FullscreenIcon, Volume2Icon, VolumeXIcon, Volume1Icon, InfoIcon, CheckIcon, CircleAlertIcon } from 'lucide-vue-next';
 import AppHeader from "@/components/AppHeader.vue";
 import QuestionSkeleton from "@/components/QuestionSkeleton.vue";
 import Swal from 'sweetalert2';
 
+const route = useRoute();
 const analysisStore = useAnalysisStore();
+const code = route.params.code;
+
+const escapeHtml = (value) => String(value)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
+const showSaveErrorToast = () => {
+  Swal.fire({
+    text: 'Cevap kaydedilemedi, lütfen tekrar deneyin.',
+    icon: 'error',
+    toast: true,
+    position: 'top',
+    showConfirmButton: false,
+    timer: 5000,
+    timerProgressBar: true,
+    background: '#242424',
+    color: '#fff',
+    iconColor: '#E50914'
+  });
+};
+
+const opticAnswers = useOpticAnswers(code, { onError: showSaveErrorToast });
+const syncStatus = opticAnswers.status;
 const imageBaseUrl = process.env.VUE_APP_IMAGE_BASE_URL || '';
 const showQuestionImages = ref(process.env.VUE_APP_SHOW_QUESTION_IMAGES === 'true');
 const allowUnsubmittedVideos = ref(process.env.VUE_APP_ALLOW_UNSUBMITTED_VIDEOS === 'true');
 
 const questions = ref([]);
-const loading = computed(() => analysisStore.isOpticDataLoading.value);
+const loading = ref(true);
 const error = ref(null);
+const readOnly = ref(false);
+
+const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E'];
+// API'den gelen optic.choice_count: 4 → A-D (ortaokul), 5 → A-E. Alan yoksa ya da geçersizse 5.
+const normalizeChoiceCount = (value) => (Number(value) === 4 ? 4 : 5);
+const choiceCount = ref(5);
+const optionLetters = computed(() => OPTION_LETTERS.slice(0, choiceCount.value));
+// Kayıtlı cevap formdaki şık sayısının dışındaysa (ör. A-D formunda E) atılmaz, o soruda gösterilir
+const hasOutOfRangeAnswer = (question) =>
+  question.answer !== null && Number(question.answer) >= choiceCount.value;
+const questionOptions = (question) => (hasOutOfRangeAnswer(question)
+  ? OPTION_LETTERS.slice(0, Number(question.answer) + 1)
+  : optionLetters.value);
+// Doğru cevapları gösterilen sayfalar: "ders|sayfa"
+const revealedPages = ref(opticAnswers.loadRevealed());
+const courseOrder = ref([]);
 const activeTab = ref('all');
 const currentPage = ref(1);
 const failedImages = ref(new Set());
@@ -734,12 +798,7 @@ const isVideoLoading = ref(false);
 const currentQuestionTitle = ref('');
 const showWelcomeModal = ref(true);
 const dontShowWelcomeAgain = ref(false);
-const allSavedAnswers = ref({});
 const showSubmitModal = ref(false);
-
-const savedPages = ref(new Set());
-
-const isFormCompleted = ref(false);
 
 const QUESTIONS_PER_PAGE = 20;
 const visibleQuestionsCount = ref(QUESTIONS_PER_PAGE);
@@ -799,22 +858,16 @@ const availablePages = computed(() => {
   return Object.values(groupedPages.value).flat();
 });
 
-const loadQuestions = () => {
+const loadQuestions = async () => {
   error.value = null;
+  loading.value = true;
 
   try {
-    if (analysisStore.isOpticDataLoading.value) {
-      return;
-    }
+    // read_only ve cevaplar önbellekten değil, her açılışta sunucudan alınır
+    const response = await analysisStore.fetchAnalysisData(code);
+    const opticData = response?.data?.optic;
 
-    const opticData = analysisStore.opticData.value;
-
-    if (!opticData) {
-      error.value = 'Veriler henüz yüklenmedi. Lütfen anasayfadan tekrar deneyin.';
-      return;
-    }
-
-    if (!opticData.courses) {
+    if (!opticData || !Array.isArray(opticData.courses)) {
       error.value = 'Geçersiz veri yapısı';
       return;
     }
@@ -839,8 +892,7 @@ const loadQuestions = () => {
             page: parseInt(pageNumber),
             title: course.title,
             answer: null,
-            bookmarked: false,
-            saved: false
+            bookmarked: false
           });
         });
       });
@@ -856,21 +908,31 @@ const loadQuestions = () => {
       return a.page - b.page;
     });
 
-    questions.value = allQuestions.map(newQ => {
-      const existingQ = questions.value.find(q => q.id === newQ.id);
-      return existingQ ? { ...newQ, answer: existingQ.answer, bookmarked: existingQ.bookmarked, saved: existingQ.saved } : newQ;
+    const questionsById = new Map(allQuestions.map(q => [String(q.id), q]));
+    const answers = opticAnswers.init({
+      courses: opticData.courses,
+      answers: opticData.answers,
+      readOnly: opticData.read_only
+    }, questionsById);
+    const favorites = opticAnswers.loadFavorites();
+
+    allQuestions.forEach(q => {
+      const answer = answers.get(String(q.id));
+      q.answer = answer === undefined || answer === null ? null : String(answer);
+      q.bookmarked = favorites.has(String(q.id));
     });
+
+    readOnly.value = opticData.read_only === true;
+    choiceCount.value = normalizeChoiceCount(opticData.choice_count);
+    courseOrder.value = opticData.courses.map(course => course.title);
+    questions.value = allQuestions;
   } catch (err) {
     console.error('Error loading questions:', err);
     error.value = err.message || 'Sorular yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+  } finally {
+    loading.value = false;
   }
 };
-
-watch(() => analysisStore.opticData.value, (newData) => {
-  if (newData && !questions.value.length) {
-    loadQuestions();
-  }
-}, { immediate: true });
 
 watch(availablePages, (newPages) => {
   if (newPages.length > 0 && !newPages.includes(currentPage.value)) {
@@ -884,15 +946,30 @@ const currentPageQuestions = computed(() => {
 });
 
 const totalQuestions = computed(() => questions.value.length);
-const answeredOrSavedCount = computed(() => questions.value.filter(q => q.answer !== null || q.saved).length);
+const answeredOrSavedCount = computed(() => questions.value.filter(q => q.answer !== null).length);
 const progress = computed(() => (answeredOrSavedCount.value / totalQuestions.value) * 100);
 const hasBookmarkedQuestions = computed(() => questions.value.some(q => q.bookmarked));
 
+// answer: "0".."4" ya da silmek için null
+const setAnswer = (question, answer) => {
+  if (readOnly.value || question.answer === answer) return;
+  question.answer = answer;
+  opticAnswers.submit(question, answer === null ? null : Number(answer));
+};
+
+// Seçili şıkka tekrar tıklamak cevabı siler
+const handleOptionClick = (question, optionIndex) => {
+  setAnswer(question, question.answer === optionIndex ? null : optionIndex);
+};
+
+const retryAnswer = (question) => {
+  opticAnswers.retry(question);
+};
+
 const selectAnswer = (questionId, option) => {
   const question = questions.value.find(q => q.id === questionId);
-  if (question && !question.saved && !isPageSaved(question.page)) {
-    const optionIndex = ['A', 'B', 'C', 'D', 'E'].indexOf(option).toString();
-    question.answer = question.answer === optionIndex ? null : optionIndex;
+  if (question) {
+    handleOptionClick(question, OPTION_LETTERS.indexOf(option).toString());
   }
 };
 
@@ -900,43 +977,7 @@ const toggleBookmark = (questionId) => {
   const question = questions.value.find(q => q.id === questionId);
   if (question) {
     question.bookmarked = !question.bookmarked;
-    saveAnswers();
-  }
-};
-
-const saveAnswers = () => {
-  localStorage.setItem('optikFormAnswers', JSON.stringify(questions.value));
-};
-
-const loadAnswers = () => {
-  const savedAnswers = localStorage.getItem('optikFormAnswers');
-  if (savedAnswers) {
-    const parsedAnswers = JSON.parse(savedAnswers);
-    questions.value = questions.value.map(q => {
-      const savedQuestion = parsedAnswers.find(sq => sq.id === q.id);
-      return savedQuestion ? { ...q, answer: savedQuestion.answer, bookmarked: savedQuestion.bookmarked, saved: savedQuestion.saved } : q;
-    });
-
-    const savedQuestions = questions.value.filter(q => q.saved);
-    const reconstructedAnswers = { answers: {} };
-
-    savedQuestions.forEach(q => {
-      if (!reconstructedAnswers.answers[q.title]) {
-        reconstructedAnswers.answers[q.title] = {};
-      }
-      if (!reconstructedAnswers.answers[q.title][q.page]) {
-        reconstructedAnswers.answers[q.title][q.page] = {};
-      }
-      reconstructedAnswers.answers[q.title][q.page][q.id] = {
-        id: q.id,
-        correct: parseInt(q.correct_answer),
-        answer: q.answer !== null ? parseInt(q.answer) : null
-      };
-
-      savedPages.value.add(q.page);
-    });
-
-    allSavedAnswers.value = mergeAndSortAnswers(reconstructedAnswers);
+    opticAnswers.saveFavorites(questions.value.filter(q => q.bookmarked).map(q => String(q.id)));
   }
 };
 
@@ -969,9 +1010,10 @@ const addTemporaryBorder = (element) => {
 };
 
 const handleKeyPress = (e) => {
-  if (['a', 'b', 'c', 'd', 'e'].includes(e.key.toLowerCase())) {
+  if (readOnly.value || showVideoModal.value) return;
+  if (optionLetters.value.includes(e.key.toUpperCase())) {
     const option = e.key.toUpperCase();
-    const unansweredQuestion = currentPageQuestions.value.find(q => q.answer === null && !q.saved);
+    const unansweredQuestion = currentPageQuestions.value.find(q => q.answer === null);
     if (unansweredQuestion) {
       selectAnswer(unansweredQuestion.id, option);
       scrollToQuestion(unansweredQuestion.id);
@@ -980,8 +1022,10 @@ const handleKeyPress = (e) => {
 };
 
 
-const isPageSaved = (page) => {
-  return savedPages.value.has(parseInt(page));
+const pageKey = (title, page) => `${title}|${parseInt(page)}`;
+
+const isPageRevealed = (title, page) => {
+  return revealedPages.value.has(pageKey(title, page));
 };
 
 const handleImageError = (questionId) => {
@@ -1187,7 +1231,7 @@ const openVideoSolution = (questionId) => {
   // Check if the question has a solution
   if (question.solution) {
     // Check if video can be shown based on submission status
-    if (!allowUnsubmittedVideos.value && !isPageSaved(question.page)) {
+    if (!allowUnsubmittedVideos.value && !isPageRevealed(question.title, question.page)) {
       // Show notification that video is only available after submission
       Swal.fire({
         title: 'Video Çözüm',
@@ -1251,55 +1295,30 @@ const closeWelcomeModal = () => {
   }
 };
 
-const handleAnswerChange = (questionId, answer) => {
-  const question = questions.value.find(q => q.id === questionId);
-  if (question && !isPageSaved(question.page) && !isFormCompleted.value) {
-    question.answer = answer;
-  }
-};
-
-const subjectOrder = computed(() => {
-  if (!analysisStore.opticData.value?.courses) return [];
-  return analysisStore.opticData.value.courses.map(course => course.title);
-});
-
-const mergeAndSortAnswers = (currentAnswers) => {
-  const mergedAnswers = { ...allSavedAnswers.value };
-
-  if (!currentAnswers || !currentAnswers.answers) {
-    return mergedAnswers;
-  }
-
-  Object.entries(currentAnswers.answers).forEach(([subject, pages]) => {
-    if (!mergedAnswers[subject]) {
-      mergedAnswers[subject] = {};
-    }
-
-    Object.entries(pages).forEach(([page, answers]) => {
-      if (!mergedAnswers[subject][page]) {
-        mergedAnswers[subject][page] = {};
-      }
-      Object.assign(mergedAnswers[subject][page], answers);
-    });
-  });
-
-  const sortedAnswers = {};
-
-  subjectOrder.value.forEach(subject => {
-    if (mergedAnswers[subject]) {
-      sortedAnswers[subject] = {};
-
-      const pages = Object.keys(mergedAnswers[subject]).map(Number);
-      pages.sort((a, b) => a - b);
-
-      pages.forEach(page => {
-        sortedAnswers[subject][page] = mergedAnswers[subject][page];
+// Cevap anahtarı: doğru cevapları gösterilen sayfalardaki sorular, ders ve sayfa sırasıyla
+const allSavedAnswers = computed(() => {
+  const result = {};
+  courseOrder.value.forEach(title => {
+    const pages = {};
+    questions.value
+      .filter(q => q.title === title && isPageRevealed(q.title, q.page))
+      .sort((a, b) => a.page - b.page)
+      .forEach(q => {
+        if (!pages[q.page]) {
+          pages[q.page] = {};
+        }
+        pages[q.page][q.id] = {
+          id: q.id,
+          correct: parseInt(q.correct_answer),
+          answer: q.answer !== null ? parseInt(q.answer) : null
+        };
       });
+    if (Object.keys(pages).length) {
+      result[title] = pages;
     }
   });
-
-  return sortedAnswers;
-};
+  return result;
+});
 
 const handleSubmit = () => {
   showSubmitModal.value = true;
@@ -1382,12 +1401,6 @@ const changePlaybackSpeed = (speed) => {
 
 onMounted(() => {
   loadQuestions();
-  loadAnswers();
-
-  const completed = localStorage.getItem('optikFormCompleted');
-  if (completed === 'true') {
-    isFormCompleted.value = true;
-  }
 
   window.addEventListener('keydown', handleKeyPress);
   window.addEventListener('keydown', handleVideoKeydown);
@@ -1454,9 +1467,9 @@ onUnmounted(() => {
 
   window.removeEventListener('scroll', handleScroll);
   window.removeEventListener('scroll', updateScrollPosition);
-});
 
-watch(questions, saveAnswers, { deep: true });
+  opticAnswers.dispose();
+});
 
 watch(availablePages, (newPages) => {
   if (newPages.length > 0 && !newPages.includes(currentPage.value)) {
@@ -1484,23 +1497,10 @@ const groupedQuestions = computed(() => {
   return grouped;
 });
 
-const savedAnswersData = ref({
-  code: '',
-  answers: []
-});
-
+// Cevaplar zaten anında kaydedilir; "Kaydet" bekleyenleri gönderir ve sayfanın doğru cevaplarını gösterir
 const savePageAnswers = (subject, page) => {
-  if (isPageSaved(page) || isFormCompleted.value) {
-    Swal.fire({
-      title: 'Hata!',
-      text: 'Bu sayfa zaten kaydedilmiş veya form tamamlanmış.',
-      icon: 'error',
-      confirmButtonText: 'Tamam',
-      confirmButtonColor: '#E50914',
-      background: '#141414',
-      color: '#fff',
-      iconColor: '#E50914'
-    });
+  if (isPageRevealed(subject, page)) {
+    opticAnswers.flushPending();
     return;
   }
 
@@ -1508,8 +1508,7 @@ const savePageAnswers = (subject, page) => {
     title: 'Emin misiniz?',
     html: `
       <div class="text-left space-y-2">
-        <p>Sayfa ${page} cevaplarınızı kaydetmek üzeresiniz.</p>
-        <p class="text-yellow-500"><strong>Dikkat:</strong> Kaydedilen cevaplar daha sonra değiştirilemez!</p>
+        <p>Sayfa ${escapeHtml(page)} için doğru cevaplar gösterilecek.</p>
       </div>
     `,
     icon: 'warning',
@@ -1522,160 +1521,16 @@ const savePageAnswers = (subject, page) => {
     color: '#fff',
     iconColor: '#E50914'
   }).then((result) => {
-    if (result.isConfirmed) {
-      if (isPageSaved(page) || isFormCompleted.value) {
-        return;
-      }
+    if (!result.isConfirmed) return;
 
-      const pageQuestions = questions.value.filter(q => q.title === subject && q.page === parseInt(page));
+    opticAnswers.flushPending();
 
-      const hash = window.location.hash;
-      const code = hash.split('/').pop() || '';
-
-      savedAnswersData.value.code = code;
-
-      let existingSubjectIndex = savedAnswersData.value.answers.findIndex(ans => ans[subject]);
-
-      if (existingSubjectIndex === -1) {
-        const targetIndex = subjectOrder.value.indexOf(subject);
-        let insertIndex = 0;
-
-        while (insertIndex < savedAnswersData.value.answers.length) {
-          const currentSubject = Object.keys(savedAnswersData.value.answers[insertIndex])[0];
-          if (subjectOrder.value.indexOf(currentSubject) > targetIndex) {
-            break;
-          }
-          insertIndex++;
-        }
-
-        const newAnswerData = {
-          [subject]: {
-            [page]: {}
-          }
-        };
-
-        pageQuestions.forEach(question => {
-          newAnswerData[subject][page][question.id] = {
-            id: question.id,
-            correct: parseInt(question.correct_answer),
-            answer: question.answer !== null ? parseInt(question.answer) : null
-          };
-
-          question.saved = true;
-        });
-
-        savedAnswersData.value.answers.splice(insertIndex, 0, newAnswerData);
-      } else {
-        const newPageData = {};
-        pageQuestions.forEach(question => {
-          newPageData[question.id] = {
-            id: question.id,
-            correct: parseInt(question.correct_answer),
-            answer: question.answer !== null ? parseInt(question.answer) : null
-          };
-
-          question.saved = true;
-        });
-        savedAnswersData.value.answers[existingSubjectIndex][subject][page] = newPageData;
-      }
-
-      savedPages.value.add(parseInt(page));
-
-      saveAnswers();
-
-      const answersArray = savedAnswersData.value.answers;
-      const cleanAnswers = JSON.parse(JSON.stringify(answersArray));
-      const dataToSend = {
-        code: savedAnswersData.value.code,
-        answers: JSON.stringify(cleanAnswers)
-      };
-
-      console.log('Data to be sent to API:', dataToSend);
-
-      const apiUrl = `${window.location.origin}/api/koksis/submit-optic-form`;
-
-      fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dataToSend)
-      })
-        .then(response => response.json())
-        .then(data => {
-          console.log('API Response:', data);
-
-          Swal.fire({
-            title: 'Başarılı!',
-            text: 'Cevaplarınız kaydedildi.',
-            icon: 'success',
-            confirmButtonText: 'Tamam',
-            confirmButtonColor: '#E50914',
-            background: '#242424',
-            color: '#fff',
-            iconColor: '#E50914',
-            showConfirmButton: false,
-            timer: 5000,
-            timerProgressBar: true,
-            toast: true,
-            position: 'top',
-            didOpen: (toast) => {
-              toast.addEventListener('mouseenter', Swal.stopTimer)
-              toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
-          });
-        })
-        .catch(error => {
-          console.error('API Error:', error);
-
-          Swal.fire({
-            title: 'Hata!',
-            text: 'Cevaplarınız kaydedilirken bir hata oluştu.',
-            icon: 'error',
-            confirmButtonText: 'Tamam',
-            confirmButtonColor: '#E50914',
-            background: '#242424',
-            color: '#fff',
-            iconColor: '#E50914'
-          });
-        });
-    }
+    const next = new Set(revealedPages.value);
+    next.add(pageKey(subject, page));
+    revealedPages.value = next;
+    opticAnswers.saveRevealed(next);
   });
 };
-
-watch(isFormCompleted, (newValue) => {
-  if (newValue) {
-    localStorage.setItem('optikFormCompleted', 'true');
-    questions.value.forEach(q => {
-      q.saved = true;
-    });
-  }
-});
-
-onMounted(() => {
-
-  const completed = localStorage.getItem('optikFormCompleted');
-  if (completed === 'true') {
-    isFormCompleted.value = true;
-    questions.value.forEach(q => {
-      q.saved = true;
-    });
-  }
-
-  const savedPagesFromStorage = localStorage.getItem('savedPages');
-  if (savedPagesFromStorage) {
-    const parsedPages = JSON.parse(savedPagesFromStorage);
-    savedPages.value = new Set(parsedPages);
-  }
-});
-
-const saveSavedPages = () => {
-  localStorage.setItem('savedPages', JSON.stringify([...savedPages.value]));
-};
-
-watch(savedPages, () => {
-  saveSavedPages();
-}, { deep: true });
 
 // Add this new ref for tracking the end time
 const currentVideoEndTime = ref(null);
